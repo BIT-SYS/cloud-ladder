@@ -1,13 +1,5 @@
-# 30-day-compiler
-Day 1: Compiler Introduction
-Day 0: Language Introduction
-Day 2: Language Definition
-Day 2: ANTLR Introduction
-Day 2: Preprocessing
-Day 3: Scanner & Parser
-Day 4: Scanner & Parser
-Day 5: Semantic Analysis
-Day 6: IR Generation
-Day 7: Instruction Selection
-Day 8: Register Allocation
-Day 9: 
+# Building a Compiler in 30 Days
+This Project tries to build a compiler in 30 days using open source tools.
+Schedule and contents can be found on the Wiki page.
+
+The input language is a new language designed for children. 
