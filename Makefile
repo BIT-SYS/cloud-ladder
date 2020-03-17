@@ -1,5 +1,6 @@
 # test bench
 
+TARGET = build/src/CLParser.tokens
 
 # run_grun(name, root, file_name, parameter)
 define run_grun
@@ -7,19 +8,19 @@ define run_grun
 endef
 
 
-build-test:
+$(TARGET): src/CLParser.g4 src/CLLexer.g4
 	mkdir -p build
-	antlr4 -o build -lib ./src ./src/CLParser.g4
+	antlr4 -o build -lib ./src $<
 	javac build/src/*.java
 
-test: build-test
+test: $(TARGET)
 	cd build/src && for file in `ls ../../examples/*.cl`;  \
-	  do $(call run_grun, CLParser, program, $$file); \
+	  do  echo test $$file && $(call run_grun, CLParser, program, $$file); \
 	  done \
 
-test-gui: build-test
+test-gui: $(TARGET)
 	cd build/src && for file in `ls ../../examples/*.cl`;  \
-	  do $(call run_grun, CLParser, program, $$file, -gui); \
+	  do echo test $$file && $(call run_grun, CLParser, program, $$file, -gui); \
 	  done \
 
 clean:
