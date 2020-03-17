@@ -1,10 +1,12 @@
-parser grammar CLParser;
+grammar CLParser;
+import CLLexer;
 
-options {
-	tokenVocab = CLLexer;
-}
+// options {
+// 	tokenVocab = CLLexer;
+// }
 
 // TYPE
+program: statement+;
 
 basicType:
 	BOOLEAN
@@ -64,7 +66,7 @@ expression:
 	| expression '[' expression ']'
 	| procedureCall
 	| prefix = ('+' | '-') expression
-	| prefix = ('!') expression
+	// | prefix = ('!') expression
 	| expression bop = ('*' | '/' | '%') expression
 	| expression bop = ('+' | '-') expression
 	| expression bop = ('<=' | '>=' | '>' | '<') expression
