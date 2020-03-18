@@ -1,10 +1,12 @@
-parser grammar CLParser;
+grammar CLParser;
+import CLLexer;
 
-options {
-	tokenVocab = CLLexer;
-}
+// options {
+// 	tokenVocab = CLLexer;
+// }
 
 // TYPE
+program: statement+;
 
 basicType:
 	BOOLEAN
@@ -43,14 +45,15 @@ block: '{' statement* '}';
 statement:
 	blockLabel = block // 这是什么？
 	| IF expression block (ELIF block)* (ELSE block)? //block还是controlStructureBody？
-	| FOR typeType IDENTIFIER IN expression block //TODO
+	| FOR typeType? IDENTIFIER IN expression block //TODO
 	| WHILE expression block
 	// | RETURN expression? ';' // 需要吗？
 	| BREAK NL
 	| CONTINUE NL
 	| procedureDeclaration
-	| typeType IDENTIFIER '=' expression NL
+	| typeType IDENTIFIER '=' expression ';'? NL
 	| IDENTIFIER '=' expression NL
+        | expression ';'? NL
 	| NL;
 
 // EXPRESSION
@@ -64,12 +67,15 @@ expression:
 	| expression '[' expression ']'
 	| procedureCall
 	| prefix = ('+' | '-') expression
-	| prefix = ('!') expression
+	// | prefix = ('!') expression
 	| expression bop = ('*' | '/' | '%') expression
 	| expression bop = ('+' | '-') expression
+        | expression bop = '^' expression
 	| expression bop = ('<=' | '>=' | '>' | '<') expression
 	| expression bop = ('==' | '!=') expression
-	| expression bop = ('and' | 'or') expression;
+	| expression bop = ('and' | 'or') expression
+        | expression hop = '|' parameterList '|' expression
+        ;
 
 expressionList: expression (',' expression)*;
 
