@@ -40,7 +40,7 @@ floatLiteral: FLOAT_LITERAL | HEX_FLOAT_LITERAL;
 
 // STATEMENT / BLOCK
 
-block: '{' statement* '}';
+block: '{' NL* statement* NL* '}';
 
 statement:
 	IF expression block (ELIF block)* (ELSE block)? //block还是controlStructureBody？
@@ -50,8 +50,8 @@ statement:
 	| BREAK NL
 	| CONTINUE NL
 	| procedureDeclaration
-	| variableDeclaration
-	| assignment
+	| variableDeclaration NL
+	| assignment NL
         | expression ';'? NL
 	| NL;
 
