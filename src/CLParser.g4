@@ -43,18 +43,21 @@ floatLiteral: FLOAT_LITERAL | HEX_FLOAT_LITERAL;
 block: '{' statement* '}';
 
 statement:
-	blockLabel = block // 这是什么？
-	| IF expression block (ELIF block)* (ELSE block)? //block还是controlStructureBody？
+	IF expression block (ELIF block)* (ELSE block)? //block还是controlStructureBody？
 	| FOR typeType? IDENTIFIER IN expression block //TODO
 	| WHILE expression block
 	// | RETURN expression? ';' // 需要吗？
 	| BREAK NL
 	| CONTINUE NL
 	| procedureDeclaration
-	| typeType IDENTIFIER '=' expression ';'? NL
-	| IDENTIFIER '=' expression NL
+	| variableDeclaration
+	| assignment
         | expression ';'? NL
 	| NL;
+
+assignment: IDENTIFIER '=' expression;
+
+variableDeclaration: typeType IDENTIFIER '=' expression;
 
 // EXPRESSION
 
