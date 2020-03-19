@@ -53,7 +53,7 @@ statement:
 	| variableDeclaration NL
 	| assignment NL
         | expression ';'? NL
-	| NL;
+	| NL+;
 
 assignment: IDENTIFIER '=' expression;
 
@@ -67,6 +67,7 @@ primary: '(' expression ')' | literal | IDENTIFIER;
 expression:
 	primary
 	| expression bop = '.' ( IDENTIFIER | procedureCall)
+    | rangeExpression
 	| expression '[' expression ']'
 	| procedureCall
 	| prefix = ('+' | '-') expression
@@ -81,6 +82,8 @@ expression:
         ;
 
 expressionList: expression (',' expression)*;
+
+rangeExpression: '[' expression dots=('..'|'...') expression ']';
 
 // PROCEDURE
 
