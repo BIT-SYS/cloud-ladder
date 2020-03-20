@@ -34,7 +34,7 @@ HEX_LITERAL:
 OCT_LITERAL: '0' '_'* [0-7] ([0-7_]* [0-7])? [lL]?;
 BINARY_LITERAL: '0' [bB] [01] ([01_]* [01])? [lL]?;
 
-FLOAT_LITERAL: (Digits '.' Digits? | '.' Digits) ExponentPart? [fFdD]?
+FLOAT_LITERAL: (Digits '.' Digits | '.' Digits) ExponentPart? [fFdD]?
 	| Digits (ExponentPart [fFdD]? | [fFdD]);
 
 HEX_FLOAT_LITERAL:

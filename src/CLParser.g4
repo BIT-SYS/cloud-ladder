@@ -51,9 +51,9 @@ statement:
 	| BREAK NL
 	| CONTINUE NL
 	| procedureDeclaration
-	| typeType IDENTIFIER '=' expression ';'? NL
+	| typeType IDENTIFIER '=' expression NL
 	| IDENTIFIER '=' expression NL
-        | expression ';'? NL
+        | expression NL
 	| NL;
 
 // EXPRESSION
@@ -64,7 +64,10 @@ primary: '(' expression ')' | literal | IDENTIFIER;
 expression:
 	primary
 	| expression bop = '.' ( IDENTIFIER | procedureCall)
-	| expression '[' expression ']'
+        // list initialization with `..`
+        | listInitializer
+        // list initialization
+        // | '[' (expression ',')* expression? ']'
 	| procedureCall
 	| prefix = ('+' | '-') expression
 	// | prefix = ('!') expression
@@ -74,14 +77,24 @@ expression:
 	| expression bop = ('<=' | '>=' | '>' | '<') expression
 	| expression bop = ('==' | '!=') expression
 	| expression bop = ('and' | 'or') expression
-        | expression hop = '|' parameterList '|' expression
+        | expression hop = lambda
+        ;
+
+listInitializer: 
+        '[' (expression ',')* expression ']'
+        |'['expression '..' expression  ']'
         ;
 
 expressionList: expression (',' expression)*;
 
 // PROCEDURE
 
-procedureCall: IDENTIFIER '(' expressionList? ')';
+lambdaParameter: typeType? IDENTIFIER ;
+lambdaParameterList: lambdaParameter (',' lambdaParameter)*;
+lambda: '|' lambdaParameterList '|' expression;
+
+
+procedureCall: IDENTIFIER '(' (expressionList | lambda)? ')';
 
 procedureDeclaration:
 	PROC IDENTIFIER '(' parameterList ')' ARROW typeType procedureBody;
