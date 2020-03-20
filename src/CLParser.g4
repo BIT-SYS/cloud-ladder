@@ -52,7 +52,7 @@ statement:
 	| procedureDeclaration
 	| variableDeclaration NL
 	| assignment NL
-        | expression ';'? NL
+        | expression NL
 	| NL+;
 
 assignment: IDENTIFIER '=' expression;
@@ -67,8 +67,10 @@ primary: '(' expression ')' | literal | IDENTIFIER;
 expression:
 	primary
 	| expression bop = '.' ( IDENTIFIER | procedureCall)
-    | rangeExpression
-	| expression '[' expression ']'
+        // list initialization with `..`
+        | listInitializer
+        // list initialization
+        // | '[' (expression ',')* expression? ']'
 	| procedureCall
 	| prefix = ('+' | '-') expression
 	// | prefix = ('!') expression
@@ -78,16 +80,24 @@ expression:
 	| expression bop = ('<=' | '>=' | '>' | '<') expression
 	| expression bop = ('==' | '!=') expression
 	| expression bop = ('and' | 'or') expression
-        | expression hop = '|' parameterList '|' expression
+        | lambda
+        ;
+
+listInitializer: 
+        '[' (expression ',')* expression ']'
+        |'['expression ('..'|'..=') expression  ']'
         ;
 
 expressionList: expression (',' expression)*;
 
-rangeExpression: '[' expression dots=('..'|'...') expression ']';
-
 // PROCEDURE
 
-procedureCall: IDENTIFIER '(' expressionList? ')';
+lambdaParameter: typeType? IDENTIFIER ;
+lambdaParameterList: lambdaParameter (',' lambdaParameter)*;
+lambda: '|' lambdaParameterList '|' expression;
+
+
+procedureCall: IDENTIFIER '(' (expressionList | lambda)? ')';
 
 procedureDeclaration:
 	PROC IDENTIFIER '(' parameterList ')' ARROW typeType procedureBody;
