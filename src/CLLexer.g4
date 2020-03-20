@@ -38,7 +38,7 @@ FLOAT_LITERAL: (Digits '.' Digits | '.' Digits) ExponentPart? [fFdD]?
 	| Digits (ExponentPart [fFdD]? | [fFdD]);
 
 HEX_FLOAT_LITERAL:
-	'0' [xX] (HexDigits '.'? | HexDigits? '.' HexDigits) [pP] [+-]? Digits [fFdD]?;
+	'0' [xX] HexDigits? '.' HexDigits [pP] [+-]? Digits [fFdD]?;
 
 BOOL_LITERAL: 'true' | 'false';
 

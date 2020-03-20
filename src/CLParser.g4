@@ -77,12 +77,12 @@ expression:
 	| expression bop = ('<=' | '>=' | '>' | '<') expression
 	| expression bop = ('==' | '!=') expression
 	| expression bop = ('and' | 'or') expression
-        | expression hop = lambda
+        | lambda
         ;
 
 listInitializer: 
         '[' (expression ',')* expression ']'
-        |'['expression '..' expression  ']'
+        |'['expression ('..'|'..=') expression  ']'
         ;
 
 expressionList: expression (',' expression)*;
