@@ -66,7 +66,7 @@ primary: '(' expression ')' | literal | IDENTIFIER;
 // TODO 初始化列表/哈希表
 expression:
 	primary
-	| expression bop = '.' ( IDENTIFIER | procedureCall)
+	| expression NL? bop = '.' ( IDENTIFIER | procedureCall)
         // list initialization with `..`
         | listInitializer
         // list initialization
