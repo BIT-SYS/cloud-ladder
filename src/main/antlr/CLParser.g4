@@ -66,8 +66,8 @@ emptyLines: NL+;
 primary: '(' expression ')' | literal | IDENTIFIER;
 
 // TODO 初始化列表/哈希表
-expression returns [String type]
-	: primary
+expression:
+	primary
 	| expression NL? bop = '.' ( IDENTIFIER | procedureCall)
         // list initialization with `..`
         | listInitializer
