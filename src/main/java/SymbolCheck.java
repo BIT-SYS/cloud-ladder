@@ -90,7 +90,29 @@ public class SymbolCheck {
             popScope();
         }
 
-        //todo for Number i in ...
+        //todo 给 for 换名字，F 应该起了别名，就不用 enter/exitStatement 了
+        @Override
+        public void enterStatement(CLParserParser.StatementContext ctx) {
+            if (null != ctx.FOR() && null != ctx.typeType()) {
+                // for 创建了新变量
+                LocalScope forScope = new LocalScope(currentScope);
+                pushScope(ctx, forScope);
+
+                String name = ctx.IDENTIFIER().getText();
+                Symbol.Type type = getType(ctx.typeType().getText());
+                VariableSymbol variableSymbol = new VariableSymbol(name, type);
+                currentScope.define(variableSymbol);
+            }
+        }
+
+        @Override
+        public void exitStatement(CLParserParser.StatementContext ctx) {
+            if (null != ctx.FOR() && null != ctx.typeType()) {
+                System.out.println("-----exit for:");
+                System.out.println(currentScope);
+                popScope();
+            }
+        }
 
         @Override
         public void exitVariableDeclaration(CLParserParser.VariableDeclarationContext ctx) {
@@ -106,6 +128,26 @@ public class SymbolCheck {
             Symbol.Type type = getType(ctx.typeType().getText());
             VariableSymbol variableSymbol = new VariableSymbol(name, type);
             currentScope.define(variableSymbol);
+        }
+
+        // 👇 验证变量、函数是否存在
+
+        @Override
+        public void exitPrimary(CLParserParser.PrimaryContext ctx) {
+            if (null != ctx.IDENTIFIER()) {
+                String identifier = ctx.IDENTIFIER().getText();
+                if (null == currentScope.resolve(identifier)) {
+                    System.err.println("<variable " + identifier + "> not found in " + currentScope.getScopeName());
+                }
+            }
+        }
+
+        @Override
+        public void exitProcedureCall(CLParserParser.ProcedureCallContext ctx) {
+            String identifier = ctx.IDENTIFIER().getText();
+            if (null == currentScope.resolve(identifier)) {
+                System.err.println("<procedure " + identifier + "> not found in " + currentScope.getScopeName());
+            }
         }
 
         //todo lambda parameter
