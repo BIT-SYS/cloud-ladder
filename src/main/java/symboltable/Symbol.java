@@ -22,5 +22,5 @@ public class Symbol {
         return getName();
     }
 
-    public enum Type {INVALID, Number, Image, String}
+    public enum Type {INVALID, Number, Image, String, Audio, Video, Boolean}
 }

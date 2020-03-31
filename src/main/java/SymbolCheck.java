@@ -8,12 +8,14 @@ import java.io.InputStream;
 public class SymbolCheck {
 
     public static void main(String[] args) throws Exception {
-        String inputFile = null;
-        if ( args.length>0 ) inputFile = args[0];
-        InputStream is = System.in;
-        if ( inputFile!=null ) {
-            is = new FileInputStream(inputFile);
-        }
+//        String inputFile = null;
+////        if ( args.length>0 ) inputFile = args[0];
+////        InputStream is = System.in;
+////        if ( inputFile!=null ) {
+////            is = new FileInputStream(inputFile);
+////        }
+
+        InputStream is = new FileInputStream("examples/leap-year.cl");
 
         ANTLRInputStream input = new ANTLRInputStream(is);
         CLParserLexer lexer = new CLParserLexer(input);
@@ -21,8 +23,6 @@ public class SymbolCheck {
         CLParserParser parser = new CLParserParser(tokens);
         parser.setBuildParseTree(true);
         ParseTree tree = parser.program();
-        // show tree in text form
-        System.out.println(tree.toStringTree(parser));
 
         ParseTreeWalker walker = new ParseTreeWalker();
         SymbolChecker symbolChecker = new SymbolChecker();
@@ -36,15 +36,25 @@ public class SymbolCheck {
         Scope currentScope; // define symbols in this scope
         LoopWatcher loopWatcher = new LoopWatcher();
 
+        private void pushScope(RuleContext ctx, Scope localScope) {
+            scopes.put(ctx, localScope);
+            currentScope = localScope;
+        }
+
+        private void popScope() {
+            currentScope = currentScope.getEnclosingScope();
+        }
+
         @Override
         public void enterProgram(CLParserParser.ProgramContext ctx) {
             globals = new GlobalScope(null);
             currentScope = globals;
+            System.out.println(">>>>> enter program");
         }
 
         @Override
         public void exitProgram(CLParserParser.ProgramContext ctx) {
-            System.out.println("-----final:");
+            System.out.println("<<<<< exit program:");
             System.out.println(globals);
         }
 
@@ -54,6 +64,8 @@ public class SymbolCheck {
             String typeType = ctx.typeType().getText();
             Symbol.Type type = getType(typeType);
 
+            System.out.println(">>>>> enter procedure " + name + ":\n" + ctx.getText());
+
             ProcedureSymbol procedureSymbol = new ProcedureSymbol(name, type, currentScope);
             currentScope.define(procedureSymbol);
             pushScope(ctx, procedureSymbol);
@@ -62,30 +74,21 @@ public class SymbolCheck {
 
         @Override
         public void exitProcedureDeclaration(CLParserParser.ProcedureDeclarationContext ctx) {
-            System.out.println("-----procedure " + ctx.IDENTIFIER() + ":");
+            System.out.println("<<<<< exit procedure " + ctx.IDENTIFIER() + ":");
             System.out.println(currentScope);
             popScope();
         }
 
-        private void popScope() {
-            currentScope = currentScope.getEnclosingScope();
-        }
-
         @Override
         public void enterBlock(CLParserParser.BlockContext ctx) {
-            System.out.println("enter:" + ctx.getText());
+            System.out.println(">>>>> enter block:\n" + ctx.getText());
             LocalScope localScope = new LocalScope(currentScope);
             pushScope(ctx, localScope);
         }
 
-        private void pushScope(RuleContext ctx, Scope localScope) {
-            scopes.put(ctx, localScope);
-            currentScope = localScope;
-        }
-
         @Override
         public void exitBlock(CLParserParser.BlockContext ctx) {
-            System.out.println("-----some block:");
+            System.out.println("<<<<< exit block:");
             System.out.println(ctx.getText());
             System.out.println(currentScope);
             popScope();
@@ -112,7 +115,7 @@ public class SymbolCheck {
         @Override
         public void exitStatement(CLParserParser.StatementContext ctx) {
             if (null != ctx.FOR() && null != ctx.typeType()) {
-                System.out.println("-----exit for:");
+                System.out.println("<<<<< exit for:");
                 System.out.println(currentScope);
                 popScope();
             }
@@ -172,8 +175,14 @@ public class SymbolCheck {
                     return Symbol.Type.Number;
                 case "Image":
                     return Symbol.Type.Image;
+                case "Audio":
+                    return Symbol.Type.Audio;
+                case "Video":
+                    return Symbol.Type.Video;
                 case "String":
                     return Symbol.Type.String;
+                case "Boolean":
+                    return Symbol.Type.Boolean;
             }
             return Symbol.Type.INVALID;
         }

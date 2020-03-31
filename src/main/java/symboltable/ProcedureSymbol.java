@@ -40,6 +40,6 @@ public class ProcedureSymbol extends Symbol implements Scope {
     }
 
     public String toString() {
-        return "function" + super.toString() + ":" + arguments.values();
+        return "procedure " + super.toString() + ":" + arguments.values();
     }
 }
