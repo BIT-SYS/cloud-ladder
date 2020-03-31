@@ -34,6 +34,7 @@ public class SymbolCheck {
         ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
         GlobalScope globals;
         Scope currentScope; // define symbols in this scope
+        LoopWatcher loopWatcher = new LoopWatcher();
 
         @Override
         public void enterProgram(CLParserParser.ProgramContext ctx) {
@@ -103,6 +104,9 @@ public class SymbolCheck {
                 VariableSymbol variableSymbol = new VariableSymbol(name, type);
                 currentScope.define(variableSymbol);
             }
+            if (null != ctx.FOR() || null != ctx.WHILE()) {
+                loopWatcher.pushLoop();
+            }
         }
 
         @Override
@@ -111,6 +115,15 @@ public class SymbolCheck {
                 System.out.println("-----exit for:");
                 System.out.println(currentScope);
                 popScope();
+            }
+            if (null != ctx.BREAK()) {
+                loopWatcher.addBreak();
+            }
+            if (null != ctx.CONTINUE()) {
+                loopWatcher.addContinue();
+            }
+            if (null != ctx.FOR() || null != ctx.WHILE()) {
+                loopWatcher.popLoop();
             }
         }
 
@@ -163,6 +176,30 @@ public class SymbolCheck {
                     return Symbol.Type.String;
             }
             return Symbol.Type.INVALID;
+        }
+    }
+
+    public static class LoopWatcher {
+        int loopCounter = 0;
+
+        public void pushLoop() {
+            loopCounter ++;
+        }
+
+        public void popLoop() {
+            loopCounter --;
+        }
+
+        public void addBreak() {
+            if (loopCounter < 1) {
+                System.err.println("<break> not in a loop");
+            }
+        }
+
+        public void addContinue() {
+            if (loopCounter < 1) {
+                System.err.println("<continue> not in a loop");
+            }
         }
     }
 }
