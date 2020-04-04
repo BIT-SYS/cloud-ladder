@@ -24,11 +24,12 @@ typeType: basicType; //可能会有自定义类型
 // LITERAL
 
 literal:
-	integerLiteral
-	| floatLiteral // 其实这俩不用分
-	| CHAR_LITERAL
-	| STRING_LITERAL
-	| BOOL_LITERAL;
+	integerLiteral  # int
+	| floatLiteral  # float // 其实这俩不用分
+	| CHAR_LITERAL  # char
+	| STRING_LITERAL # string
+	| BOOL_LITERAL # bool
+        ;
 
 integerLiteral:
 	DECIMAL_LITERAL
@@ -43,63 +44,59 @@ floatLiteral: FLOAT_LITERAL | HEX_FLOAT_LITERAL;
 block: '{' NL* statement* NL* '}';
 
 statement:
-	IF expression NL? block (ELIF expression NL? block)* (ELSE NL? block)? //block还是controlStructureBody？
-	| FOR typeType? IDENTIFIER IN expression NL? block //TODO
-	| WHILE expression NL? block
+	IF expression NL? block (ELIF expression NL? block)* (ELSE NL? block)? # ifBlock //block还是controlStructureBody？
+	| FOR typeType? IDENTIFIER IN expression NL? block # forBlock //TODO
+	| WHILE expression NL? block # whileBlock
 	// | RETURN expression? ';' // 需要吗？
-	| BREAK NL
-	| CONTINUE NL
-	| procedureDeclaration NL
-	| variableDeclaration NL
-	| assignment NL
-        | expression NL
-	| emptyLines;
+	| BREAK NL # Break
+	| CONTINUE NL # Continue
+	| procedureDeclaration NL # procedureDecl
+	| typeType IDENTIFIER '=' expression NL  # variableDecl
+	| assignment NL # assign
+        | expression NL # expr
+	| emptyLines # empty
+        ;
 
 assignment: IDENTIFIER '=' expression;
-
-variableDeclaration: typeType IDENTIFIER '=' expression;
 
 emptyLines: NL+;
 
 // EXPRESSION
 
-primary: '(' expression ')' | literal | IDENTIFIER;
-
 // TODO 初始化列表/哈希表
 expression:
-	primary
-	| expression NL? bop = '.' ( IDENTIFIER | procedureCall)
-        // list initialization with `..`
-        | listInitializer
-        // list initialization
-        // | '[' (expression ',')* expression? ']'
-	| procedureCall
-	| prefix = ('+' | '-') expression
-	// | prefix = ('!') expression
-	| expression bop = ('*' | '/' | '%') expression
-	| expression bop = ('+' | '-') expression
-        | expression bop = '^' expression
-	| expression bop = ('<=' | '>=' | '>' | '<') expression
-	| expression bop = ('==' | '!=') expression
-	| expression bop = ('and' | 'or') expression
-        | lambda
+        '(' expression ')'                                        # parens
+        | literal                                                 # Lit
+        | IDENTIFIER                                              # id
+	| expression NL? bop = '.' ( IDENTIFIER | procedureCall)  # member
+        | listInitializer                                         # listInit
+	| procedureCall                                           # procedure
+	| prefix = ('+' | '-' | 'not') expression                 # prefix
+	| expression bop = ('*' | '/' | '%') expression           # MulDivMod
+	| expression bop = ('+' | '-') expression                 # AddSub
+        | expression bop = '^' expression                         # Exp
+	| expression bop = ('<=' | '>=' | '>' | '<') expression   # Compare
+	| expression bop = ('==' | '!=') expression               # PartialEqual
+	| expression bop = ('and' | 'or'| 'xor') expression       # Logic
+        | lambda                                                  # lam
+        | expression'[' index=expression ']'                      # index
         ;
 
 listInitializer: 
-        '[' (expression ',')* expression ']'
-        |'['expression ('..'|'..=') expression  ']'
+        '[' (expression ',')* expression ']'            # valuesListInitializer
+        |'['expression op=('..'|'..=') expression  ']'  # rangeListInitializer
         ;
 
 expressionList: expression (',' expression)*;
 
 // PROCEDURE
 
-lambdaParameter: typeType? IDENTIFIER ;
+lambdaParameter: typeType IDENTIFIER ;
 lambdaParameterList: lambdaParameter (',' lambdaParameter)*;
-lambda: '|' lambdaParameterList '|' expression;
+lambda: '|' lambdaParameterList '|' '->' typeType block;
 
 
-procedureCall: IDENTIFIER '(' (expressionList | lambda)? ')';
+procedureCall: IDENTIFIER '(' expressionList ? ')';
 
 procedureDeclaration:
 	PROC IDENTIFIER '(' parameterList ')' ARROW typeType procedureBody;
