@@ -12,7 +12,7 @@ while true {
         case = case + 1
     }
 
-    day = (5544*p+14421*e+1288*i-d+21252)%21252
+    Number day = (5544*p+14421*e+1288*i-d+21252)%21252
     if 0 == day {
         day = 21252
     }
