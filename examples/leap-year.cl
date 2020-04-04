@@ -1,5 +1,5 @@
 proc is_leap_year(Number year) -> Boolean {
-  (year % 4 == 0) ^ (year % 100 == 0) ^ (year % 400 == 0)   
+  (year % 4 == 0) xor (year % 100 == 0) xor (year % 400 == 0)   
 }
 
 Number till_now = input().toNumber()
@@ -13,5 +13,5 @@ for year in [1..till_now] {
 // same as above, but in a functional way
 [1..till_now]
     .filter(is_leap_year)
-    .map(|year| year.toString())
-    .forEach(|y| print(y + " is leap year!\n"))
+    .map(|Number year| -> String {year.toString()})
+    .forEach(|Number y| -> String {print(y + " is leap year!\n")})
