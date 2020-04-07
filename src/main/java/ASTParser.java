@@ -259,7 +259,7 @@ class ProcedureDefinition implements Node {
   public ParameterList parameters;
   public String returnType;
   // function name
-  public String id;
+  public Identifier id;
   public Block body;
 
   @Override
@@ -290,9 +290,9 @@ interface ExpressionNode extends Node {
 
 }
 
-class CallExpresion implements ExpressionNode {
-  // identifier or MemberExpresion
-  public Node callee;
+class CallExpression implements ExpressionNode {
+  // identifier or MemberExpression
+  public Identifier callee;
   public List<ExpressionNode> arguments;
 
   @Override
@@ -304,7 +304,7 @@ class CallExpresion implements ExpressionNode {
   }
 }
 
-class MemberExpresion implements ExpressionNode {
+class MemberExpression implements ExpressionNode {
   public ExpressionNode object;
   public ExpressionNode property;
 
@@ -483,7 +483,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   public Node visitProcedureDeclaration(CLParserParser.ProcedureDeclarationContext ctx) {
 
     ProcedureDefinition pd = new ProcedureDefinition();
-    pd.id = ctx.IDENTIFIER().getText();
+    pd.id =new Identifier(ctx.IDENTIFIER().getText());
     pd.returnType = ctx.typeType().getText();
     pd.parameters = new ParameterList(ctx.parameterList().parameter().stream()
             .map(this::visit).map(s -> (Parameter) s).collect(Collectors.toCollection((ArrayList::new))));
@@ -519,13 +519,13 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitMember(CLParserParser.MemberContext ctx) {
-    MemberExpresion me = new MemberExpresion();
+    MemberExpression me = new MemberExpression();
     me.object = (ExpressionNode) visit(ctx.expression());
     if (ctx.IDENTIFIER() != null) {
       // member is Identifier
       me.property = new Identifier(ctx.IDENTIFIER().getText());
     } else {
-      // member is Call
+      // member is Cal
       me.property = (ExpressionNode) visit(ctx.procedureCall());
     }
     return me;
@@ -533,7 +533,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitProcedureCall(CLParserParser.ProcedureCallContext ctx) {
-    CallExpresion ce = new CallExpresion();
+    CallExpression ce = new CallExpression();
     ce.callee = new Identifier(ctx.IDENTIFIER().getText());
     if (ctx.expressionList() != null)
       ce.arguments = ctx.expressionList().expression().stream().map(this::visit).map(e -> (ExpressionNode) e).collect(Collectors.toCollection(ArrayList::new));
