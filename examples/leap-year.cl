@@ -4,7 +4,7 @@ proc is_leap_year(Number year) -> Boolean {
 
 Number till_now = input().toNumber()
 
-for year in [1..till_now] {
+for Number year in [1..till_now] {
   if is_leap_year(year) {
     print(year.toString() + " is leap year!\n")
   }

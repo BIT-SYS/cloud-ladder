@@ -48,8 +48,8 @@ public class ASTBaseListener {
 	public void enterExpressionNode(ExpressionNode node ) {}
 	public void exitExpressionNode(ExpressionNode node) {}
 
-	public void enterCallExpresion(CallExpression node ) {}
-	public void exitCallExpresion(CallExpression node) {}
+	public void enterCallExpression(CallExpression node ) {}
+	public void exitCallExpression(CallExpression node) {}
 
 	public void enterMemberExpression(MemberExpression node ) {}
 	public void exitMemberExpression(MemberExpression node) {}

@@ -207,6 +207,7 @@ class ElifBlock extends Block {
 class ForBlock extends Block {
   public Identifier for_id;
   public ExpressionNode for_expr;
+  public String iter_type;
 
   ForBlock(Block bl) {
     this.statement = bl.statement;
@@ -476,6 +477,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     ForBlock fb = new ForBlock((Block) visit(ctx.block()));
     fb.for_id = new Identifier(ctx.IDENTIFIER().getText());
     fb.for_expr = (ExpressionNode) visit(ctx.expression());
+    fb.iter_type = ctx.typeType().getText();
     return fb;
   }
 
@@ -612,8 +614,8 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
             }
     );
 
-    Gson g = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    System.out.println(g.toJson(p));
+//    Gson g = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+//    System.out.println(g.toJson(p));
     ASTWalker astWalker = new ASTWalker();
     ASTListenerTester astBaseListener = new ASTListenerTester();
     astWalker.walk(astBaseListener, p);
