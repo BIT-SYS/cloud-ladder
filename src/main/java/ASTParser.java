@@ -148,7 +148,20 @@ class LambdaExpression implements ExpressionNode {
   }
 }
 
-// TODO 修改语法
+class Break implements Node {
+  @Override
+  public List<Node> getChildren() {
+    return new ArrayList<>();
+  }
+}
+
+class Continue implements  Node {
+  @Override
+  public List<Node> getChildren() {
+    return new ArrayList<>();
+  }
+}
+
 // so what's the difference between Block and Program
 class Block implements Node {
 
@@ -201,6 +214,19 @@ class ElifBlock extends Block {
       }
     };
 
+  }
+}
+class WhileBlock extends Block {
+ public ExpressionNode condition;
+ WhileBlock(Block bl) {this.statement = bl.statement;}
+
+  @Override
+  public List<Node> getChildren() {
+    List<Node> l = super.getChildren();
+    return new ArrayList<Node>() {{
+      add(condition);
+      addAll(l);
+    }};
   }
 }
 
@@ -473,6 +499,15 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   }
 
   @Override
+  public Node visitWhileBlock(CLParserParser.WhileBlockContext ctx) {
+    WhileBlock wb = new WhileBlock((Block) visit(ctx.block()));
+    wb.condition = (ExpressionNode) visit(ctx.expression());
+    return wb;
+  }
+
+
+
+  @Override
   public Node visitForBlock(CLParserParser.ForBlockContext ctx) {
     ForBlock fb = new ForBlock((Block) visit(ctx.block()));
     fb.for_id = new Identifier(ctx.IDENTIFIER().getText());
@@ -591,6 +626,16 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 //    System.out.println("print partial");
 //    System.out.println(ctx.bop.getText());
     return new BinaryExpression(left, right, ctx.bop.getText());
+  }
+
+  @Override
+  public Node visitBreak(CLParserParser.BreakContext ctx) {
+    return new Break();
+  }
+
+  @Override
+  public Node visitContinue(CLParserParser.ContinueContext ctx) {
+    return new Continue();
   }
 
   @Override
