@@ -148,7 +148,20 @@ class LambdaExpression implements ExpressionNode {
   }
 }
 
-// TODO 修改语法
+class Break implements Node {
+  @Override
+  public List<Node> getChildren() {
+    return new ArrayList<>();
+  }
+}
+
+class Continue implements  Node {
+  @Override
+  public List<Node> getChildren() {
+    return new ArrayList<>();
+  }
+}
+
 // so what's the difference between Block and Program
 class Block implements Node {
 
@@ -203,10 +216,24 @@ class ElifBlock extends Block {
 
   }
 }
+class WhileBlock extends Block {
+ public ExpressionNode condition;
+ WhileBlock(Block bl) {this.statement = bl.statement;}
+
+  @Override
+  public List<Node> getChildren() {
+    List<Node> l = super.getChildren();
+    return new ArrayList<Node>() {{
+      add(condition);
+      addAll(l);
+    }};
+  }
+}
 
 class ForBlock extends Block {
   public Identifier for_id;
   public ExpressionNode for_expr;
+  public String iter_type;
 
   ForBlock(Block bl) {
     this.statement = bl.statement;
@@ -472,10 +499,20 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   }
 
   @Override
+  public Node visitWhileBlock(CLParserParser.WhileBlockContext ctx) {
+    WhileBlock wb = new WhileBlock((Block) visit(ctx.block()));
+    wb.condition = (ExpressionNode) visit(ctx.expression());
+    return wb;
+  }
+
+
+
+  @Override
   public Node visitForBlock(CLParserParser.ForBlockContext ctx) {
     ForBlock fb = new ForBlock((Block) visit(ctx.block()));
     fb.for_id = new Identifier(ctx.IDENTIFIER().getText());
     fb.for_expr = (ExpressionNode) visit(ctx.expression());
+    fb.iter_type = ctx.typeType().getText();
     return fb;
   }
 
@@ -592,6 +629,16 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   }
 
   @Override
+  public Node visitBreak(CLParserParser.BreakContext ctx) {
+    return new Break();
+  }
+
+  @Override
+  public Node visitContinue(CLParserParser.ContinueContext ctx) {
+    return new Continue();
+  }
+
+  @Override
   public Node visitLogic(CLParserParser.LogicContext ctx) {
     Node left = visit(ctx.expression(0));
     Node right = visit(ctx.expression(1));
@@ -612,8 +659,8 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
             }
     );
 
-    Gson g = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    System.out.println(g.toJson(p));
+//    Gson g = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+//    System.out.println(g.toJson(p));
     ASTWalker astWalker = new ASTWalker();
     ASTListenerTester astBaseListener = new ASTListenerTester();
     astWalker.walk(astBaseListener, p);
