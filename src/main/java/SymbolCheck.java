@@ -1,202 +1,229 @@
-import org.antlr.v4.runtime.tree.*;
-import org.antlr.v4.runtime.*;
 import symboltable.*;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.util.IdentityHashMap;
 
-public class SymbolCheck {
+public class SymbolCheck extends ASTBaseListener {
 
-    public static void main(String[] args) throws Exception {
-//        String inputFile = null;
-////        if ( args.length>0 ) inputFile = args[0];
-////        InputStream is = System.in;
-////        if ( inputFile!=null ) {
-////            is = new FileInputStream(inputFile);
-////        }
+    IdentityHashMap<Node, Scope> scopes = new IdentityHashMap<>();
 
-        InputStream is = new FileInputStream("examples/leap-year.cl");
+    GlobalScope globals;
+    Scope currentScope; // define symbols in this scope
+    LoopWatcher loopWatcher = new LoopWatcher();
 
-        ANTLRInputStream input = new ANTLRInputStream(is);
-        CLParserLexer lexer = new CLParserLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        CLParserParser parser = new CLParserParser(tokens);
-        parser.setBuildParseTree(true);
-        ParseTree tree = parser.program();
-
-        ParseTreeWalker walker = new ParseTreeWalker();
-        SymbolChecker symbolChecker = new SymbolChecker();
-        walker.walk(symbolChecker, tree);
+    private void pushScope(Node ctx, Scope localScope) {
+        scopes.put(ctx, localScope);
+        currentScope = localScope;
     }
 
-    public static class SymbolChecker extends CLParserBaseListener {
+    private void popScope() {
+        currentScope = currentScope.getEnclosingScope();
+    }
 
-        ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
-        GlobalScope globals;
-        Scope currentScope; // define symbols in this scope
-        LoopWatcher loopWatcher = new LoopWatcher();
+    @Override
+    public void enterProgram(Program ctx) {
+        globals = new GlobalScope(null);
+        currentScope = globals;
+        System.out.println(">>>>> enter program");
+    }
 
-        private void pushScope(RuleContext ctx, Scope localScope) {
-            scopes.put(ctx, localScope);
-            currentScope = localScope;
+    @Override
+    public void exitProgram(Program ctx) {
+        System.out.println("<<<<< exit program:");
+        System.out.println(globals);
+    }
+
+    @Override
+    public void enterProcedureDefinition(ProcedureDefinition ctx) {
+        String name = ctx.id.name;
+        String typeType = ctx.returnType;
+        Symbol.Type type = getType(typeType);
+
+        System.out.println(">>>>> enter procedure " + name);
+
+        ProcedureSymbol procedureSymbol = new ProcedureSymbol(name, type, currentScope);
+        currentScope.define(procedureSymbol);
+        pushScope(ctx, procedureSymbol);
+    }
+    //todo lambda name, retType??
+
+    @Override
+    public void exitProcedureDefinition(ProcedureDefinition ctx) {
+        System.out.println("<<<<< exit procedure " + ctx.id + ":");
+        System.out.println(currentScope);
+        popScope();
+    }
+
+// todo 匿名函数
+//
+//    @Override
+//    public void enterBlock(Block ctx) {
+//        System.out.println(">>>>> enter block:");
+//        LocalScope localScope = new LocalScope(currentScope);
+//        pushScope(ctx, localScope);
+//    }
+//
+//    @Override
+//    public void exitBlock(Block ctx) {
+//        System.out.println("<<<<< exit block:");
+//        System.out.println(currentScope);
+//        popScope();
+//    }
+
+    private void enterBlockKai(Block ctx) {
+        LocalScope localScope = new LocalScope(currentScope);
+        pushScope(ctx, localScope);
+    }
+
+    private void exitBlockKai() {
+        System.out.println(currentScope);
+        popScope();
+    }
+
+    @Override
+    public void enterForBlock(ForBlock ctx) {
+        System.out.println(">>>>> enter for:");
+        //现在必新建作用域+变量了
+        enterBlockKai(ctx);
+
+        String name = ctx.for_id.name;
+        Symbol.Type type = getType(ctx.iter_type);
+        VariableSymbol variableSymbol = new VariableSymbol(name, type);
+        currentScope.define(variableSymbol);
+
+        loopWatcher.pushLoop();
+    }
+
+    @Override
+    public void exitForBlock(ForBlock ctx) {
+        System.out.println("<<<<< exit for:");
+        exitBlockKai();
+        loopWatcher.popLoop();
+    }
+
+    @Override
+    public void enterWhileBlock(WhileBlock ctx) {
+        System.out.println(">>>>> enter while:");
+        enterBlockKai(ctx);
+        loopWatcher.pushLoop();
+    }
+
+    @Override
+    public void exitWhileBlock(WhileBlock ctx) {
+        System.out.println("<<<<< exit while:");
+        exitBlockKai();
+        loopWatcher.popLoop();
+    }
+
+    @Override
+    public void enterIfBlock(IfBlock ctx) {
+        System.out.println(">>>>> enter block(if):");
+        enterBlockKai(ctx);
+    }
+
+    @Override
+    public void exitIfBlock(IfBlock ctx) {
+        System.out.println("<<<<< exit block(if):");
+        exitBlockKai();
+    }
+
+    @Override
+    public void enterElifBlock(ElifBlock ctx) {
+        System.out.println(">>>>> enter block(elif):");
+        enterBlockKai(ctx);
+    }
+
+    @Override
+    public void exitElifBlock(ElifBlock ctx) {
+        System.out.println("<<<<< exit block(elif):");
+        exitBlockKai();
+    }
+
+    @Override
+    public void enterElseBlock(ElseBlock ctx) {
+        System.out.println(">>>>> enter block(else):");
+        enterBlockKai(ctx);
+    }
+
+    @Override
+    public void exitElseBlock(ElseBlock ctx) {
+        System.out.println("<<<<< exit block(else):");
+        exitBlockKai();
+    }
+
+    @Override
+    public void exitBreak(Break ctx) {
+        loopWatcher.addBreak();
+    }
+
+    @Override
+    public void exitContinue(Continue ctx) {
+        loopWatcher.addContinue();
+    }
+
+    @Override
+    public void enterVariableDeclaration(VariableDeclaration ctx) {
+        String name = ctx.id.name;
+        Symbol.Type type = getType(ctx.type);
+        VariableSymbol variableSymbol = new VariableSymbol(name, type);
+        currentScope.define(variableSymbol);
+    }
+
+    @Override
+    public void exitParameter(Parameter ctx) {
+        String name = ctx.id.name;
+        Symbol.Type type = getType(ctx.type);
+        VariableSymbol variableSymbol = new VariableSymbol(name, type);
+        currentScope.define(variableSymbol);
+    }
+
+    // 👇 验证变量、函数是否存在
+
+    @Override
+    public void exitIdentifier(Identifier ctx) {
+        String identifier = ctx.name;
+        if (null == currentScope.resolve(identifier)) {
+            System.err.println("<variable " + identifier + "> not found in " + currentScope.getScopeName());
         }
+    }
 
-        private void popScope() {
-            currentScope = currentScope.getEnclosingScope();
+    @Override
+    public void enterCallExpression(CallExpression ctx) {
+        String identifier = ctx.callee.name;
+        if (null == currentScope.resolve(identifier)) {
+            System.err.println("<function " + identifier + "> not found in " + currentScope.getScopeName());
         }
+    }
 
-        @Override
-        public void enterProgram(CLParserParser.ProgramContext ctx) {
-            globals = new GlobalScope(null);
-            currentScope = globals;
-            System.out.println(">>>>> enter program");
+    //todo lambda parameter
+
+    private Symbol.Type getType(String typeType) {
+        //todo List<xxx>那些
+        switch (typeType) {
+            case "Number":
+                return Symbol.Type.Number;
+            case "Image":
+                return Symbol.Type.Image;
+            case "Audio":
+                return Symbol.Type.Audio;
+            case "Video":
+                return Symbol.Type.Video;
+            case "String":
+                return Symbol.Type.String;
+            case "Boolean":
+                return Symbol.Type.Boolean;
         }
-
-        @Override
-        public void exitProgram(CLParserParser.ProgramContext ctx) {
-            System.out.println("<<<<< exit program:");
-            System.out.println(globals);
-        }
-
-        @Override
-        public void enterProcedureDeclaration(CLParserParser.ProcedureDeclarationContext ctx) {
-            String name = ctx.IDENTIFIER().getText();
-            String typeType = ctx.typeType().getText();
-            Symbol.Type type = getType(typeType);
-
-            System.out.println(">>>>> enter procedure " + name + ":\n" + ctx.getText());
-
-            ProcedureSymbol procedureSymbol = new ProcedureSymbol(name, type, currentScope);
-            currentScope.define(procedureSymbol);
-            pushScope(ctx, procedureSymbol);
-        }
-        //todo lambda name, retType??
-
-        @Override
-        public void exitProcedureDeclaration(CLParserParser.ProcedureDeclarationContext ctx) {
-            System.out.println("<<<<< exit procedure " + ctx.IDENTIFIER() + ":");
-            System.out.println(currentScope);
-            popScope();
-        }
-
-        @Override
-        public void enterBlock(CLParserParser.BlockContext ctx) {
-            System.out.println(">>>>> enter block:\n" + ctx.getText());
-            LocalScope localScope = new LocalScope(currentScope);
-            pushScope(ctx, localScope);
-        }
-
-        @Override
-        public void exitBlock(CLParserParser.BlockContext ctx) {
-            System.out.println("<<<<< exit block:");
-            System.out.println(ctx.getText());
-            System.out.println(currentScope);
-            popScope();
-        }
-
-        //todo 给 for 换名字，F 应该起了别名，就不用 enter/exitStatement 了
-        @Override
-        public void enterStatement(CLParserParser.StatementContext ctx) {
-            if (null != ctx.FOR() && null != ctx.typeType()) {
-                // for 创建了新变量
-                LocalScope forScope = new LocalScope(currentScope);
-                pushScope(ctx, forScope);
-
-                String name = ctx.IDENTIFIER().getText();
-                Symbol.Type type = getType(ctx.typeType().getText());
-                VariableSymbol variableSymbol = new VariableSymbol(name, type);
-                currentScope.define(variableSymbol);
-            }
-            if (null != ctx.FOR() || null != ctx.WHILE()) {
-                loopWatcher.pushLoop();
-            }
-        }
-
-        @Override
-        public void exitStatement(CLParserParser.StatementContext ctx) {
-            if (null != ctx.FOR() && null != ctx.typeType()) {
-                System.out.println("<<<<< exit for:");
-                System.out.println(currentScope);
-                popScope();
-            }
-            if (null != ctx.BREAK()) {
-                loopWatcher.addBreak();
-            }
-            if (null != ctx.CONTINUE()) {
-                loopWatcher.addContinue();
-            }
-            if (null != ctx.FOR() || null != ctx.WHILE()) {
-                loopWatcher.popLoop();
-            }
-        }
-
-        @Override
-        public void exitVariableDeclaration(CLParserParser.VariableDeclarationContext ctx) {
-            String name = ctx.IDENTIFIER().getText();
-            Symbol.Type type = getType(ctx.typeType().getText());
-            VariableSymbol variableSymbol = new VariableSymbol(name, type);
-            currentScope.define(variableSymbol);
-        }
-
-        @Override
-        public void exitParameter(CLParserParser.ParameterContext ctx) {
-            String name = ctx.IDENTIFIER().getText();
-            Symbol.Type type = getType(ctx.typeType().getText());
-            VariableSymbol variableSymbol = new VariableSymbol(name, type);
-            currentScope.define(variableSymbol);
-        }
-
-        // 👇 验证变量、函数是否存在
-
-        @Override
-        public void exitPrimary(CLParserParser.PrimaryContext ctx) {
-            if (null != ctx.IDENTIFIER()) {
-                String identifier = ctx.IDENTIFIER().getText();
-                if (null == currentScope.resolve(identifier)) {
-                    System.err.println("<variable " + identifier + "> not found in " + currentScope.getScopeName());
-                }
-            }
-        }
-
-        @Override
-        public void exitProcedureCall(CLParserParser.ProcedureCallContext ctx) {
-            String identifier = ctx.IDENTIFIER().getText();
-            if (null == currentScope.resolve(identifier)) {
-                System.err.println("<procedure " + identifier + "> not found in " + currentScope.getScopeName());
-            }
-        }
-
-        //todo lambda parameter
-
-        private Symbol.Type getType(String typeType) {
-            //todo List<xxx>那些
-            switch (typeType) {
-                case "Number":
-                    return Symbol.Type.Number;
-                case "Image":
-                    return Symbol.Type.Image;
-                case "Audio":
-                    return Symbol.Type.Audio;
-                case "Video":
-                    return Symbol.Type.Video;
-                case "String":
-                    return Symbol.Type.String;
-                case "Boolean":
-                    return Symbol.Type.Boolean;
-            }
-            return Symbol.Type.INVALID;
-        }
+        return Symbol.Type.INVALID;
     }
 
     public static class LoopWatcher {
         int loopCounter = 0;
 
         public void pushLoop() {
-            loopCounter ++;
+            loopCounter++;
         }
 
         public void popLoop() {
-            loopCounter --;
+            loopCounter--;
         }
 
         public void addBreak() {

@@ -185,7 +185,7 @@ class Block extends ScopePointer implements Node {
 }
 
 class IfElseBlock implements Node {
-  public List<Block> ifelses;
+  public List<Block> ifelses = new ArrayList<>();
 
   @Override
   public List<Node> getChildren() {
