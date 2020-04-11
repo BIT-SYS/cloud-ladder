@@ -27,11 +27,17 @@ public class ASTBaseListener {
 	public void enterBlock(Block node) {}
 	public void exitBlock(Block node) {}
 
+	public void enterIfElseBlock(IfElseBlock node) {}
+	public void exitIfElseBlock(IfElseBlock node) {}
+
 	public void enterIfBlock(IfBlock node) {}
 	public void exitIfBlock(IfBlock node) {}
 
 	public void enterElifBlock(ElifBlock node) {}
 	public void exitElifBlock(ElifBlock node) {}
+
+	public void enterElseBlock(ElseBlock node) {}
+	public void exitElseBlock(ElseBlock node) {}
 
 	public void enterWhileBlock(WhileBlock node) {}
 	public void exitWhileBlock(WhileBlock node) {}
