@@ -326,7 +326,7 @@ interface ExpressionNode extends Node {
 
 class CallExpression extends ScopePointer  implements ExpressionNode {
   // identifier or MemberExpression
-  public Identifier callee;
+  public FunctionIdentifier callee;
   public List<ExpressionNode> arguments;
 
   @Override
@@ -361,6 +361,20 @@ class Identifier extends ScopePointer  implements ExpressionNode {
   }
 
   Identifier(String name) {
+    this.name = name;
+  }
+
+  @Override
+  public List<Node> getChildren() {
+    return new ArrayList<>();
+  }
+}
+
+class FunctionIdentifier extends ScopePointer implements ExpressionNode {
+
+  public String name;
+  FunctionIdentifier(CLParserParser.IdContext ctx) { name = ctx.getText();}
+  FunctionIdentifier(String name) {
     this.name = name;
   }
 
@@ -578,7 +592,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   @Override
   public Node visitProcedureCall(CLParserParser.ProcedureCallContext ctx) {
     CallExpression ce = new CallExpression();
-    ce.callee = new Identifier(ctx.IDENTIFIER().getText());
+    ce.callee = new FunctionIdentifier(ctx.IDENTIFIER().getText());
     if (ctx.expressionList() != null)
       ce.arguments = ctx.expressionList().expression().stream().map(this::visit).map(e -> (ExpressionNode) e).collect(Collectors.toCollection(ArrayList::new));
     else
