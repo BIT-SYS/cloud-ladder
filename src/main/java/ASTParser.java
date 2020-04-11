@@ -97,7 +97,7 @@ class Program extends ScopePointer implements Node {
   }
 }
 
-class RangeListInitializer  extends ScopePointer implements ExpressionNode {
+class RangeListInitializer extends ScopePointer implements ExpressionNode {
   public ExpressionNode start;
   public ExpressionNode end;
   public boolean exclusiveEnd;
@@ -111,7 +111,7 @@ class RangeListInitializer  extends ScopePointer implements ExpressionNode {
   }
 }
 
-class Assign  extends ScopePointer implements ExpressionNode {
+class Assign extends ScopePointer implements ExpressionNode {
   public Identifier lvalue;
   public ExpressionNode rvalue;
 
@@ -129,7 +129,7 @@ class Assign  extends ScopePointer implements ExpressionNode {
   }
 }
 
-class ValuesListInitializer  extends ScopePointer implements ExpressionNode {
+class ValuesListInitializer extends ScopePointer implements ExpressionNode {
   public List<ExpressionNode> values;
 
   @Override
@@ -138,7 +138,7 @@ class ValuesListInitializer  extends ScopePointer implements ExpressionNode {
   }
 }
 
-class LambdaExpression extends ScopePointer  implements ExpressionNode {
+class LambdaExpression extends ScopePointer implements ExpressionNode {
 
   public ParameterList parameters;
   public String retType;
@@ -155,14 +155,14 @@ class LambdaExpression extends ScopePointer  implements ExpressionNode {
   }
 }
 
-class Break extends ScopePointer  implements Node  {
+class Break implements Node {
   @Override
   public List<Node> getChildren() {
     return new ArrayList<>();
   }
 }
 
-class Continue implements  Node {
+class Continue implements Node {
   @Override
   public List<Node> getChildren() {
     return new ArrayList<>();
@@ -170,7 +170,7 @@ class Continue implements  Node {
 }
 
 // so what's the difference between Block and Program
-class Block extends ScopePointer  implements Node {
+class Block extends ScopePointer implements Node {
 
   public List<Node> statement;
 
@@ -223,9 +223,13 @@ class ElifBlock extends Block {
 
   }
 }
+
 class WhileBlock extends Block {
- public ExpressionNode condition;
- WhileBlock(Block bl) {this.statement = bl.statement;}
+  public ExpressionNode condition;
+
+  WhileBlock(Block bl) {
+    this.statement = bl.statement;
+  }
 
   @Override
   public List<Node> getChildren() {
@@ -257,7 +261,7 @@ class ForBlock extends Block {
   }
 }
 
-class Parameter extends ScopePointer  implements Node {
+class Parameter implements Node {
   public String type;
   public Identifier id;
 
@@ -269,7 +273,7 @@ class Parameter extends ScopePointer  implements Node {
   }
 }
 
-class ParameterList extends ScopePointer   implements Node {
+class ParameterList implements Node {
   public List<Parameter> parameters;
 
   ParameterList(List<Parameter> ps) {
@@ -289,7 +293,7 @@ class IndexExpression extends BinaryExpression {
   }
 }
 
-class ProcedureDefinition extends ScopePointer  implements Node {
+class ProcedureDefinition extends ScopePointer implements Node {
   public ParameterList parameters;
   public String returnType;
   // function name
@@ -306,7 +310,7 @@ class ProcedureDefinition extends ScopePointer  implements Node {
 }
 
 
-class VariableDeclaration extends ScopePointer  implements Node {
+class VariableDeclaration extends ScopePointer implements Node {
   public String type;
   public Identifier id;
   public Node expr;
@@ -324,7 +328,7 @@ interface ExpressionNode extends Node {
 
 }
 
-class CallExpression extends ScopePointer  implements ExpressionNode {
+class CallExpression extends ScopePointer implements ExpressionNode {
   // identifier or MemberExpression
   public FunctionIdentifier callee;
   public List<ExpressionNode> arguments;
@@ -338,7 +342,7 @@ class CallExpression extends ScopePointer  implements ExpressionNode {
   }
 }
 
-class MemberExpression extends ScopePointer  implements ExpressionNode {
+class MemberExpression extends ScopePointer implements ExpressionNode {
   public ExpressionNode object;
   public ExpressionNode property;
 
@@ -353,7 +357,7 @@ class MemberExpression extends ScopePointer  implements ExpressionNode {
   }
 }
 
-class Identifier extends ScopePointer  implements ExpressionNode {
+class Identifier extends ScopePointer implements ExpressionNode {
   public String name;
 
   Identifier(CLParserParser.IdContext ctx) {
@@ -373,7 +377,11 @@ class Identifier extends ScopePointer  implements ExpressionNode {
 class FunctionIdentifier extends ScopePointer implements ExpressionNode {
 
   public String name;
-  FunctionIdentifier(CLParserParser.IdContext ctx) { name = ctx.getText();}
+
+  FunctionIdentifier(CLParserParser.IdContext ctx) {
+    name = ctx.getText();
+  }
+
   FunctionIdentifier(String name) {
     this.name = name;
   }
@@ -384,7 +392,7 @@ class FunctionIdentifier extends ScopePointer implements ExpressionNode {
   }
 }
 
-class Literal extends ScopePointer  implements ExpressionNode {
+class Literal extends ScopePointer implements ExpressionNode {
 
   public String raw;
 
@@ -402,7 +410,7 @@ class Literal extends ScopePointer  implements ExpressionNode {
   }
 }
 
-class BinaryExpression extends ScopePointer  implements ExpressionNode {
+class BinaryExpression extends ScopePointer implements ExpressionNode {
   public Node left;
 
   public String op;
@@ -527,7 +535,6 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   }
 
 
-
   @Override
   public Node visitForBlock(CLParserParser.ForBlockContext ctx) {
     ForBlock fb = new ForBlock((Block) visit(ctx.block()));
@@ -541,7 +548,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   public Node visitProcedureDeclaration(CLParserParser.ProcedureDeclarationContext ctx) {
 
     ProcedureDefinition pd = new ProcedureDefinition();
-    pd.id =new Identifier(ctx.IDENTIFIER().getText());
+    pd.id = new Identifier(ctx.IDENTIFIER().getText());
     pd.returnType = ctx.typeType().getText();
     pd.parameters = new ParameterList(ctx.parameterList().parameter().stream()
             .map(this::visit).map(s -> (Parameter) s).collect(Collectors.toCollection((ArrayList::new))));
