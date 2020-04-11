@@ -188,6 +188,7 @@ public class SymbolCheck extends ASTBaseListener {
 
     @Override
     public void enterVariableDeclaration(VariableDeclaration ctx) {
+        // 和exitParameter同样的原因改成进入时就定义
         String name = ctx.id.name;
         Symbol.Type type = getType(ctx.type);
         VariableSymbol variableSymbol = new VariableSymbol(name, type);
@@ -195,12 +196,9 @@ public class SymbolCheck extends ASTBaseListener {
     }
 
     @Override
-    public void enterParameter(Parameter node) {
-        super.enterParameter(node);
-    }
-
-    @Override
-    public void exitParameter(Parameter ctx) {
+    public void enterParameter(Parameter ctx) {
+        // 定义参数，原本是exit时做的。
+        // 但现在没有primary，还没exitParameter就会触发exitIdentifier
         String name = ctx.id.name;
         Symbol.Type type = getType(ctx.type);
         VariableSymbol variableSymbol = new VariableSymbol(name, type);
