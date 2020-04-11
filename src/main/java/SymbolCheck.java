@@ -1,9 +1,8 @@
 import symboltable.*;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.IdentityHashMap;
 import java.util.Random;
+import java.util.UUID;
 
 public class SymbolCheck extends ASTBaseListener {
 
@@ -60,9 +59,7 @@ public class SymbolCheck extends ASTBaseListener {
     @Override
     public void enterLambdaExpression(LambdaExpression ctx) {
         String retType = ctx.retType;
-        byte[] chaos = new byte[8];
-        random.nextBytes(chaos);
-        String name = "^\\-" + new String(chaos, StandardCharsets.US_ASCII) + "-" +retType;
+        String name = "^\\-" + UUID.randomUUID().toString().replace("-", "") + "-" + retType;
         Symbol.Type type = getType(retType);
 
         System.out.println(">>>>> enter lambda " + name);
