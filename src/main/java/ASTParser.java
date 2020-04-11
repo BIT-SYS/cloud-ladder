@@ -1,5 +1,7 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import symboltable.Scope;
+import symboltable.Symbol;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -7,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 
 class ASTWalker {
   public void walk(ASTBaseListener astListener, Node node) {
@@ -77,7 +78,13 @@ interface Node {
   List<Node> getChildren();
 }
 
-class Program implements Node {
+class ScopePointer {
+  public Scope scope;
+  public Symbol symbol;
+  public Symbol.Type evalType;
+}
+
+class Program extends ScopePointer implements Node {
   public List<Node> statement;
 
   Program() {
@@ -90,7 +97,7 @@ class Program implements Node {
   }
 }
 
-class RangeListInitializer implements ExpressionNode {
+class RangeListInitializer  extends ScopePointer implements ExpressionNode {
   public ExpressionNode start;
   public ExpressionNode end;
   public boolean exclusiveEnd;
@@ -104,7 +111,7 @@ class RangeListInitializer implements ExpressionNode {
   }
 }
 
-class Assign implements ExpressionNode {
+class Assign  extends ScopePointer implements ExpressionNode {
   public Identifier lvalue;
   public ExpressionNode rvalue;
 
@@ -122,7 +129,7 @@ class Assign implements ExpressionNode {
   }
 }
 
-class ValuesListInitializer implements ExpressionNode {
+class ValuesListInitializer  extends ScopePointer implements ExpressionNode {
   public List<ExpressionNode> values;
 
   @Override
@@ -131,7 +138,7 @@ class ValuesListInitializer implements ExpressionNode {
   }
 }
 
-class LambdaExpression implements ExpressionNode {
+class LambdaExpression extends ScopePointer  implements ExpressionNode {
 
   public ParameterList parameters;
   public String retType;
@@ -148,7 +155,7 @@ class LambdaExpression implements ExpressionNode {
   }
 }
 
-class Break implements Node {
+class Break extends ScopePointer  implements Node  {
   @Override
   public List<Node> getChildren() {
     return new ArrayList<>();
@@ -163,7 +170,7 @@ class Continue implements  Node {
 }
 
 // so what's the difference between Block and Program
-class Block implements Node {
+class Block extends ScopePointer  implements Node {
 
   public List<Node> statement;
 
@@ -250,7 +257,7 @@ class ForBlock extends Block {
   }
 }
 
-class Parameter implements Node {
+class Parameter extends ScopePointer  implements Node {
   public String type;
   public Identifier id;
 
@@ -262,7 +269,7 @@ class Parameter implements Node {
   }
 }
 
-class ParameterList implements Node {
+class ParameterList extends ScopePointer   implements Node {
   public List<Parameter> parameters;
 
   ParameterList(List<Parameter> ps) {
@@ -282,7 +289,7 @@ class IndexExpression extends BinaryExpression {
   }
 }
 
-class ProcedureDefinition implements Node {
+class ProcedureDefinition extends ScopePointer  implements Node {
   public ParameterList parameters;
   public String returnType;
   // function name
@@ -299,7 +306,7 @@ class ProcedureDefinition implements Node {
 }
 
 
-class VariableDeclaration implements Node {
+class VariableDeclaration extends ScopePointer  implements Node {
   public String type;
   public Identifier id;
   public Node expr;
@@ -317,7 +324,7 @@ interface ExpressionNode extends Node {
 
 }
 
-class CallExpression implements ExpressionNode {
+class CallExpression extends ScopePointer  implements ExpressionNode {
   // identifier or MemberExpression
   public Identifier callee;
   public List<ExpressionNode> arguments;
@@ -331,7 +338,7 @@ class CallExpression implements ExpressionNode {
   }
 }
 
-class MemberExpression implements ExpressionNode {
+class MemberExpression extends ScopePointer  implements ExpressionNode {
   public ExpressionNode object;
   public ExpressionNode property;
 
@@ -346,7 +353,7 @@ class MemberExpression implements ExpressionNode {
   }
 }
 
-class Identifier implements ExpressionNode {
+class Identifier extends ScopePointer  implements ExpressionNode {
   public String name;
 
   Identifier(CLParserParser.IdContext ctx) {
@@ -363,7 +370,7 @@ class Identifier implements ExpressionNode {
   }
 }
 
-class Literal implements ExpressionNode {
+class Literal extends ScopePointer  implements ExpressionNode {
 
   public String raw;
 
@@ -381,7 +388,7 @@ class Literal implements ExpressionNode {
   }
 }
 
-class BinaryExpression implements ExpressionNode {
+class BinaryExpression extends ScopePointer  implements ExpressionNode {
   public Node left;
 
   public String op;
