@@ -1,5 +1,8 @@
 public class ASTBaseListener {
 
+	public void enterScopePointer(ScopePointer node) {}
+	public void exitScopePointer(ScopePointer node) {}
+
 	public void enterProgram(Program node) {}
 	public void exitProgram(Program node) {}
 
@@ -59,6 +62,9 @@ public class ASTBaseListener {
 
 	public void enterIdentifier(Identifier node) {}
 	public void exitIdentifier(Identifier node) {}
+
+	public void enterFunctionIdentifier(FunctionIdentifier node) {}
+	public void exitFunctionIdentifier(FunctionIdentifier node) {}
 
 	public void enterLiteral(Literal node) {}
 	public void exitLiteral(Literal node) {}

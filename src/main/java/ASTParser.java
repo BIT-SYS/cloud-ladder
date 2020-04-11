@@ -1,5 +1,7 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import symboltable.Scope;
+import symboltable.Symbol;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -7,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 
 class ASTWalker {
   public void walk(ASTBaseListener astListener, Node node) {
@@ -77,7 +78,13 @@ interface Node {
   List<Node> getChildren();
 }
 
-class Program implements Node {
+class ScopePointer {
+  public Scope scope;
+  public Symbol symbol;
+  public Symbol.Type evalType;
+}
+
+class Program extends ScopePointer implements Node {
   public List<Node> statement;
 
   Program() {
@@ -90,7 +97,7 @@ class Program implements Node {
   }
 }
 
-class RangeListInitializer implements ExpressionNode {
+class RangeListInitializer extends ScopePointer implements ExpressionNode {
   public ExpressionNode start;
   public ExpressionNode end;
   public boolean exclusiveEnd;
@@ -104,7 +111,7 @@ class RangeListInitializer implements ExpressionNode {
   }
 }
 
-class Assign implements ExpressionNode {
+class Assign extends ScopePointer implements ExpressionNode {
   public Identifier lvalue;
   public ExpressionNode rvalue;
 
@@ -122,7 +129,7 @@ class Assign implements ExpressionNode {
   }
 }
 
-class ValuesListInitializer implements ExpressionNode {
+class ValuesListInitializer extends ScopePointer implements ExpressionNode {
   public List<ExpressionNode> values;
 
   @Override
@@ -131,7 +138,7 @@ class ValuesListInitializer implements ExpressionNode {
   }
 }
 
-class LambdaExpression implements ExpressionNode {
+class LambdaExpression extends ScopePointer implements ExpressionNode {
 
   public ParameterList parameters;
   public String retType;
@@ -155,7 +162,7 @@ class Break implements Node {
   }
 }
 
-class Continue implements  Node {
+class Continue implements Node {
   @Override
   public List<Node> getChildren() {
     return new ArrayList<>();
@@ -163,7 +170,7 @@ class Continue implements  Node {
 }
 
 // so what's the difference between Block and Program
-class Block implements Node {
+class Block extends ScopePointer implements Node {
 
   public List<Node> statement;
 
@@ -216,9 +223,13 @@ class ElifBlock extends Block {
 
   }
 }
+
 class WhileBlock extends Block {
- public ExpressionNode condition;
- WhileBlock(Block bl) {this.statement = bl.statement;}
+  public ExpressionNode condition;
+
+  WhileBlock(Block bl) {
+    this.statement = bl.statement;
+  }
 
   @Override
   public List<Node> getChildren() {
@@ -282,7 +293,7 @@ class IndexExpression extends BinaryExpression {
   }
 }
 
-class ProcedureDefinition implements Node {
+class ProcedureDefinition extends ScopePointer implements Node {
   public ParameterList parameters;
   public String returnType;
   // function name
@@ -299,7 +310,7 @@ class ProcedureDefinition implements Node {
 }
 
 
-class VariableDeclaration implements Node {
+class VariableDeclaration extends ScopePointer implements Node {
   public String type;
   public Identifier id;
   public Node expr;
@@ -317,9 +328,9 @@ interface ExpressionNode extends Node {
 
 }
 
-class CallExpression implements ExpressionNode {
+class CallExpression extends ScopePointer implements ExpressionNode {
   // identifier or MemberExpression
-  public Identifier callee;
+  public FunctionIdentifier callee;
   public List<ExpressionNode> arguments;
 
   @Override
@@ -331,7 +342,7 @@ class CallExpression implements ExpressionNode {
   }
 }
 
-class MemberExpression implements ExpressionNode {
+class MemberExpression extends ScopePointer implements ExpressionNode {
   public ExpressionNode object;
   public ExpressionNode property;
 
@@ -346,7 +357,7 @@ class MemberExpression implements ExpressionNode {
   }
 }
 
-class Identifier implements ExpressionNode {
+class Identifier extends ScopePointer implements ExpressionNode {
   public String name;
 
   Identifier(CLParserParser.IdContext ctx) {
@@ -363,7 +374,25 @@ class Identifier implements ExpressionNode {
   }
 }
 
-class Literal implements ExpressionNode {
+class FunctionIdentifier extends ScopePointer implements ExpressionNode {
+
+  public String name;
+
+  FunctionIdentifier(CLParserParser.IdContext ctx) {
+    name = ctx.getText();
+  }
+
+  FunctionIdentifier(String name) {
+    this.name = name;
+  }
+
+  @Override
+  public List<Node> getChildren() {
+    return new ArrayList<>();
+  }
+}
+
+class Literal extends ScopePointer implements ExpressionNode {
 
   public String raw;
 
@@ -381,7 +410,7 @@ class Literal implements ExpressionNode {
   }
 }
 
-class BinaryExpression implements ExpressionNode {
+class BinaryExpression extends ScopePointer implements ExpressionNode {
   public Node left;
 
   public String op;
@@ -506,7 +535,6 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   }
 
 
-
   @Override
   public Node visitForBlock(CLParserParser.ForBlockContext ctx) {
     ForBlock fb = new ForBlock((Block) visit(ctx.block()));
@@ -520,7 +548,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   public Node visitProcedureDeclaration(CLParserParser.ProcedureDeclarationContext ctx) {
 
     ProcedureDefinition pd = new ProcedureDefinition();
-    pd.id =new Identifier(ctx.IDENTIFIER().getText());
+    pd.id = new Identifier(ctx.IDENTIFIER().getText());
     pd.returnType = ctx.typeType().getText();
     pd.parameters = new ParameterList(ctx.parameterList().parameter().stream()
             .map(this::visit).map(s -> (Parameter) s).collect(Collectors.toCollection((ArrayList::new))));
@@ -571,7 +599,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   @Override
   public Node visitProcedureCall(CLParserParser.ProcedureCallContext ctx) {
     CallExpression ce = new CallExpression();
-    ce.callee = new Identifier(ctx.IDENTIFIER().getText());
+    ce.callee = new FunctionIdentifier(ctx.IDENTIFIER().getText());
     if (ctx.expressionList() != null)
       ce.arguments = ctx.expressionList().expression().stream().map(this::visit).map(e -> (ExpressionNode) e).collect(Collectors.toCollection(ArrayList::new));
     else
