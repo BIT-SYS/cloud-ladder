@@ -1,5 +1,6 @@
 # help to generate ASTParserListener
-SRC_NAME=ASTParser.java
+SRC_NAME=../src/main/java/ASTParser.java
+DEST_DIR=../src/main/java
 ARG=""
 BEFORE_FUNC='\tpublic void '
 CLASS_NAME="ASTBaseListener"
@@ -10,4 +11,4 @@ cat $SRC_NAME \
   | grep -v "$REMOVE_MATCH" \
   | awk -v ARG="$ARG" -v BEFORE_FUNC="$BEFORE_FUNC" \
     -v CLASS_NAME="$CLASS_NAME" \
-  -f ./listener_gen.awk > ASTBaseListener.java
+  -f ./listener_gen.awk > $DEST_DIR/ASTBaseListener.java
