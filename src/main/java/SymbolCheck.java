@@ -116,25 +116,39 @@ public class SymbolCheck extends ASTBaseListener {
 
     @Override
     public void enterIfBlock(IfBlock ctx) {
+        System.out.println(">>>>> enter block(if):");
         enterBlockKai(ctx);
     }
 
     @Override
     public void exitIfBlock(IfBlock ctx) {
+        System.out.println("<<<<< exit block(if):");
         exitBlockKai();
     }
 
     @Override
     public void enterElifBlock(ElifBlock ctx) {
+        System.out.println(">>>>> enter block(elif):");
         enterBlockKai(ctx);
     }
 
     @Override
     public void exitElifBlock(ElifBlock ctx) {
+        System.out.println("<<<<< exit block(elif):");
         exitBlockKai();
     }
 
-    //todo eElseBlock
+    @Override
+    public void enterElseBlock(ElseBlock ctx) {
+        System.out.println(">>>>> enter block(else):");
+        enterBlockKai(ctx);
+    }
+
+    @Override
+    public void exitElseBlock(ElseBlock ctx) {
+        System.out.println("<<<<< exit block(else):");
+        exitBlockKai();
+    }
 
     @Override
     public void exitBreak(Break ctx) {
