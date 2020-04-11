@@ -189,7 +189,7 @@ class IfElseBlock implements Node {
 
   @Override
   public List<Node> getChildren() {
-    return ifelses.stream().map(b -> (Node) b).collect(Collectors.toList());
+    return new ArrayList<>(ifelses);
   }
 }
 
@@ -229,6 +229,13 @@ class ElifBlock extends Block {
     };
 
   }
+}
+
+class ElseBlock extends  Block {
+  ElseBlock(Block bl) {
+    this.statement = bl.statement;
+  }
+
 }
 
 class WhileBlock extends Block {
@@ -533,7 +540,8 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     ieb.ifelses.addAll(lib);
 
     if (number_of_else > 0) {
-      ieb.ifelses.add((Block) visit(ctx.block(ctx.block().size() - 1)));
+      ElseBlock eb = new ElseBlock((Block) visit(ctx.block(ctx.block().size() - 1)));
+      ieb.ifelses.add(eb);
     }
 
     return ib;
