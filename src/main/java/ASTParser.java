@@ -184,10 +184,18 @@ class Block extends ScopePointer implements Node {
   }
 }
 
+class IfElseBlock implements Node {
+  public List<Block> ifelses;
+
+  @Override
+  public List<Node> getChildren() {
+    return ifelses.stream().map(b -> (Node) b).collect(Collectors.toList());
+  }
+}
+
 class IfBlock extends Block {
   public ExpressionNode condition;
   // may be null
-  public Block alternative;
 
   IfBlock(Block bl) {
     this.statement = bl.statement;
@@ -199,7 +207,6 @@ class IfBlock extends Block {
     return new ArrayList<Node>() {{
       add(condition);
       addAll(l);
-      add(alternative);
     }};
   }
 }
@@ -510,8 +517,11 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitIfBlock(CLParserParser.IfBlockContext ctx) {
+    IfElseBlock ieb = new IfElseBlock();
     IfBlock ib = new IfBlock((Block) visit(ctx.block(0)));
     ib.condition = (ExpressionNode) visit(ctx.expression(0));
+    ieb.ifelses.add(ib);
+
     int number_of_elif = ctx.ELIF().size();
     int number_of_else = ctx.ELSE() == null ? 0 : 1;
 
@@ -520,8 +530,10 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     );
     IntStream.range(0, lib.size()).forEach(i -> lib.get(i).condition = (ExpressionNode) visit(ctx.expression(i + 1)));
 
+    ieb.ifelses.addAll(lib);
+
     if (number_of_else > 0) {
-      ib.alternative = (Block) visit(ctx.block(ctx.block().size() - 1));
+      ieb.ifelses.add((Block) visit(ctx.block(ctx.block().size() - 1)));
     }
 
     return ib;
