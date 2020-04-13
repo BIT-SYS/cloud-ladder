@@ -12,6 +12,7 @@ public class ASTParserTester {
   public void IterTestASTBuild() throws IOException {
     File file = new File("examples");
     File[] fs = file.listFiles();
+    assert fs != null;
     for (File f : fs) {
       if (f.isFile()) {
         tryToBuildAST(f.getAbsolutePath());

@@ -8,7 +8,7 @@ GrammarSourceDir = ../src/main/antlr
 define run_grun
   unset _JAVA_OPTIONS && \
   cd ../build/classes/java/main/ && for file in `ls ../../../../examples/*.cl`;  \
-  do echo test $$file && grun $(1) $(2) $$file $(3); \
+  do echo test $$file >&2 && grun $(1) $(2) $$file $(3); \
   done
 endef
 

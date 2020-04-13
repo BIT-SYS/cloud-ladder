@@ -16,14 +16,22 @@ generateGrammarSource {
 
 task testGrammar(type: Exec, dependsOn: classes) {
     workingDir './scripts'
-
-    commandLine 'make', 'test'
+    ignoreExitValue true
+    if (System.getenv("GITHUB_ACTIONS") != null) {
+        println "on ci, use sudo."
+        commandLine 'sudo', 'make', 'test'
+    } else {
+        println "local build"
+        commandLine 'make', 'test'
+    }
 
     standardOutput = new ByteArrayOutputStream()
     errorOutput = new ByteArrayOutputStream()
 
     doLast {
-        if (!errorOutput.toString().isEmpty()) {
+        String a;
+        boolean flag = errorOutput.toString().contains("\nline")
+        if (flag || execResult.getExitValue() != 0) {
 //            logger.error(errorOutput.toString())
             throw new GradleScriptException(errorOutput.toString(), new Exception())
         }
@@ -40,3 +48,11 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
 }
+
+if (hasProperty('buildScan')) {
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
+}
+
