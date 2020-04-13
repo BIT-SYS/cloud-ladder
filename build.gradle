@@ -23,18 +23,17 @@ task testGrammar(type: Exec, dependsOn: classes) {
     errorOutput = new ByteArrayOutputStream()
 
     doLast {
-
         if (!errorOutput.toString().isEmpty()) {
-            logger.error(errorOutput.toString())
-            throw new GradleException(name + " have some error!")
+//            logger.error(errorOutput.toString())
+            throw new GradleScriptException(errorOutput.toString(), new Exception())
         }
     }
 }
 
-
 dependencies {
-    testCompileOnly "junit:junit:4.12"
-    compileOnly "com.google.code.gson:gson:2.8.6"
+    testImplementation 'junit:junit:4.13'
+//    implementation 'org.hamcrest:hamcrest-core:1.3'
+    implementation "com.google.code.gson:gson:2.8.6"
     antlr "org.antlr:antlr4:4.8"
 }
 
