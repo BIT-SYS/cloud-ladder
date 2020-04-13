@@ -14,9 +14,26 @@ generateGrammarSource {
     arguments += ["-visitor", "-long-messages"]
 }
 
+task testGrammar(type: Exec, dependsOn: classes) {
+    workingDir './scripts'
+
+    commandLine 'make', 'test'
+
+    standardOutput = new ByteArrayOutputStream()
+    errorOutput = new ByteArrayOutputStream()
+
+    doLast {
+        if (!errorOutput.toString().isEmpty()) {
+//            logger.error(errorOutput.toString())
+            throw new GradleScriptException(errorOutput.toString(), new Exception())
+        }
+    }
+}
+
 dependencies {
-    testCompile "junit:junit:4.12"
-    compile "com.google.code.gson:gson:2.8.6"
+    testImplementation 'junit:junit:4.13'
+//    implementation 'org.hamcrest:hamcrest-core:1.3'
+    implementation "com.google.code.gson:gson:2.8.6"
     antlr "org.antlr:antlr4:4.8"
 }
 

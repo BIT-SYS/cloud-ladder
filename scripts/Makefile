@@ -2,34 +2,24 @@
 
 TARGET = build/src/CLParser.tokens
 FILE = expr.cl
+GrammarSourceDir = ../src/main/antlr
 
-# run_grun(name, root, file_name, flags)
+# run_grun(name, root, flags)
 define run_grun
-  grun $(1) $(2) $(4) $(3)
+  unset _JAVA_OPTIONS && \
+  cd ../build/classes/java/main/ && for file in `ls ../../../../examples/*.cl`;  \
+  do echo test $$file && grun $(1) $(2) $$file $(3); \
+  done
 endef
 
+unset_java_options:
 
-$(TARGET): src/CLParser.g4 src/CLLexer.g4
-	mkdir -p build build/classes
-	antlr4 -o build -visitor -lib ./src $<
-	javac build/src/*.java -d build/classes
+$(TARGET): $(GrammarSourceDir)/CLParser.g4 $(GrammarSourceDir)/CLLexer.g4
+	echo "Find grammar files."
 
-test: $(TARGET)
-	cd build/classes && for file in `ls ../../examples/*.cl`;  \
-	  do  echo test $$file && $(call run_grun, CLParser, program, $$file); \
-	  done \
+test: $(TARGET) unset_java_options
+	$(call run_grun, CLParser, program)
 
 test-gui: $(TARGET)
-	cd build/classes && for file in `ls ../../examples/*.cl`;  \
-	  do echo test $$file && $(call run_grun, CLParser, program, $$file, -gui); \
-	  done \
-
-build: $(TARGET)
-	javac src/*.java build/src/*.java -cp $$CLASSPATH:/home/fky/playground/gson-2.8.6.jar -d build/classes 
-
-run: build
-	java -cp build/classes:$$CLASSPATH:/home/fky/playground/gson-2.8.6.jar Test examples/$(FILE)
-
-clean:
-	rm build -r
+	$(call run_grun, CLParser, program, -gui)
 

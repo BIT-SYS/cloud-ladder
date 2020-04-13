@@ -2,16 +2,28 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.junit.Test;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 
 public class ASTParserTester {
-  public static void main(String[] args) throws Exception{
-    String inputFile = null;
-    if (args.length>0) inputFile = args[0];
+
+  @Test
+  public void IterTestASTBuild() throws IOException {
+    File file = new File("examples");
+    File[] fs = file.listFiles();
+    for (File f : fs) {
+      if (f.isFile()) {
+        tryToBuildAST(f.getAbsolutePath());
+      }
+    }
+  }
+
+  public void tryToBuildAST(String inputFile) throws IOException {
+
+    System.out.println("test file: " + inputFile);
     InputStream is = System.in;
-    if(inputFile!=null) is = new FileInputStream(inputFile);
+    if (inputFile != null) is = new FileInputStream(inputFile);
     ANTLRInputStream input = new ANTLRInputStream(is);
     CLParserLexer lexer = new CLParserLexer(input);
     CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -25,5 +37,9 @@ public class ASTParserTester {
     walker.walk(ast2IR, p);
     Gson g = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     System.out.println(g.toJson(ast2IR));
+  }
+
+  public static void main(String[] args) throws Exception {
+    System.out.println("in Main");
   }
 }
