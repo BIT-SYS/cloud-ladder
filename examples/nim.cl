@@ -1,4 +1,6 @@
 while true {
+    Number n = input().toNumber()
+
     if 0 == n {
         break
     }
