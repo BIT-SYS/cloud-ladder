@@ -231,7 +231,7 @@ class ElifBlock extends Block {
   }
 }
 
-class ElseBlock extends  Block {
+class ElseBlock extends Block {
   ElseBlock(Block bl) {
     this.statement = bl.statement;
   }
@@ -415,7 +415,7 @@ class Literal extends ScopePointer implements ExpressionNode {
   }
 
   Literal(CLParserParser.IntegerLiteralContext ctx) {
-    raw = ctx.DECIMAL_LITERAL().getText();
+    raw = ctx.getText();
   }
 
   @Override
@@ -560,7 +560,8 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     ForBlock fb = new ForBlock((Block) visit(ctx.block()));
     fb.for_id = new Identifier(ctx.IDENTIFIER().getText());
     fb.for_expr = (ExpressionNode) visit(ctx.expression());
-    fb.iter_type = ctx.typeType().getText();
+    if (ctx.typeType() != null)
+      fb.iter_type = ctx.typeType().getText();
     return fb;
   }
 
