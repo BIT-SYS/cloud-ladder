@@ -1,8 +1,9 @@
 import symboltable.*;
 
 import java.util.IdentityHashMap;
-import java.util.Random;
 import java.util.UUID;
+
+import static symboltable.Utils.getType;
 
 public class SymbolCheck extends ASTBaseListener {
 
@@ -11,8 +12,6 @@ public class SymbolCheck extends ASTBaseListener {
     GlobalScope globals;
     Scope currentScope; // define symbols in this scope
     LoopWatcher loopWatcher = new LoopWatcher();
-
-    Random random = new Random();
 
     private void pushScope(Node ctx, Scope localScope) {
         scopes.put(ctx, localScope);
@@ -28,6 +27,8 @@ public class SymbolCheck extends ASTBaseListener {
         globals = new GlobalScope(null);
         currentScope = globals;
         System.out.println(">>>>> enter program");
+
+        ctx.scope = globals;
     }
 
     @Override
@@ -40,13 +41,15 @@ public class SymbolCheck extends ASTBaseListener {
     public void enterProcedureDefinition(ProcedureDefinition ctx) {
         String name = ctx.id.name;
         String typeType = ctx.returnType;
-        Symbol.Type type = getType(typeType);
+        Type type = getType(typeType);
 
         System.out.println(">>>>> enter procedure " + name);
 
         ProcedureSymbol procedureSymbol = new ProcedureSymbol(name, type, currentScope);
         currentScope.define(procedureSymbol);
         pushScope(ctx, procedureSymbol);
+
+        ctx.scope = currentScope;
     }
 
     @Override
@@ -59,14 +62,16 @@ public class SymbolCheck extends ASTBaseListener {
     @Override
     public void enterLambdaExpression(LambdaExpression ctx) {
         String retType = ctx.retType;
-        String name = "^\\-" + UUID.randomUUID().toString().replace("-", "") + "-" + retType;
-        Symbol.Type type = getType(retType);
+        String name = "^\\" + UUID.randomUUID().toString().replace("-", "");
+        Type type = getType(retType);
 
         System.out.println(">>>>> enter lambda " + name);
 
         ProcedureSymbol procedureSymbol = new ProcedureSymbol(name, type, currentScope);
         currentScope.define(procedureSymbol);
         pushScope(ctx, procedureSymbol);
+
+        ctx.scope = currentScope;
     }
 
     @Override
@@ -83,6 +88,9 @@ public class SymbolCheck extends ASTBaseListener {
         System.out.println(">>>>> enter block(lambda):");
         LocalScope localScope = new LocalScope(currentScope);
         pushScope(ctx, localScope);
+
+        // 需要么？
+        ctx.scope = currentScope;
     }
 
     @Override
@@ -109,7 +117,7 @@ public class SymbolCheck extends ASTBaseListener {
         enterBlockKai(ctx);
 
         String name = ctx.for_id.name;
-        Symbol.Type type = getType(ctx.iter_type);
+        Type type = getType(ctx.iter_type);
         VariableSymbol variableSymbol = new VariableSymbol(name, type);
         currentScope.define(variableSymbol);
 
@@ -187,9 +195,11 @@ public class SymbolCheck extends ASTBaseListener {
     public void enterVariableDeclaration(VariableDeclaration ctx) {
         // 和exitParameter同样的原因改成进入时就定义
         String name = ctx.id.name;
-        Symbol.Type type = getType(ctx.type);
+        Type type = getType(ctx.type);
         VariableSymbol variableSymbol = new VariableSymbol(name, type);
         currentScope.define(variableSymbol);
+
+        ctx.scope = currentScope;
     }
 
     @Override
@@ -197,7 +207,7 @@ public class SymbolCheck extends ASTBaseListener {
         // 定义参数，原本是exit时做的。
         // 但现在没有primary，还没exitParameter就会触发exitIdentifier
         String name = ctx.id.name;
-        Symbol.Type type = getType(ctx.type);
+        Type type = getType(ctx.type);
         VariableSymbol variableSymbol = new VariableSymbol(name, type);
         currentScope.define(variableSymbol);
     }
@@ -207,37 +217,23 @@ public class SymbolCheck extends ASTBaseListener {
     @Override
     public void exitIdentifier(Identifier ctx) {
         String identifier = ctx.name;
-        if (null == currentScope.resolve(identifier)) {
+        Symbol symbol = currentScope.resolve(identifier);
+        if (null == symbol) {
             System.err.println("<variable " + identifier + "> not found in " + currentScope.getScopeName());
+        } else {
+            ctx.evalType = symbol.type;
         }
     }
 
     @Override
     public void enterCallExpression(CallExpression ctx) {
         String identifier = ctx.callee.name;
-        if (null == currentScope.resolve(identifier)) {
+        Symbol symbol = currentScope.resolve(identifier);
+        if (null == symbol) {
             System.err.println("<function " + identifier + "> not found in " + currentScope.getScopeName());
+        } else {
+            ctx.evalType = symbol.type;
         }
-    }
-
-
-    private Symbol.Type getType(String typeType) {
-        //todo List<xxx>那些
-        switch (typeType) {
-            case "Number":
-                return Symbol.Type.Number;
-            case "Image":
-                return Symbol.Type.Image;
-            case "Audio":
-                return Symbol.Type.Audio;
-            case "Video":
-                return Symbol.Type.Video;
-            case "String":
-                return Symbol.Type.String;
-            case "Boolean":
-                return Symbol.Type.Boolean;
-        }
-        return Symbol.Type.INVALID;
     }
 
     public static class LoopWatcher {

@@ -2,6 +2,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import symboltable.Scope;
 import symboltable.Symbol;
+import symboltable.Type;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -81,7 +82,7 @@ interface Node {
 class ScopePointer {
   public Scope scope;
   public Symbol symbol;
-  public Symbol.Type evalType;
+  public Type evalType;
 }
 
 class Program extends ScopePointer implements Node {
