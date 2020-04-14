@@ -36,6 +36,21 @@ jobs:
     - name: Test grammar with gradle
       run: ./gradlew testGrammar --scan
 
+  auto-gen-test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    #- name: Set up JDK 1.8
+      #uses: actions/setup-java@v1
+      #with:
+        #java-version: 1.8
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew  
+    - name: Test auto gen with gradle
+      run: ./gradlew testASTListner --scan
+
   unit-test:
 
     runs-on: ubuntu-latest

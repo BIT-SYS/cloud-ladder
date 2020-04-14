@@ -1,3 +1,4 @@
+import org.gradle.internal.os.OperatingSystem
 plugins {
     id 'java'
     id 'antlr'
@@ -14,15 +15,42 @@ generateGrammarSource {
     arguments += ["-visitor", "-long-messages"]
 }
 
+task generateASTListener(type: Exec) {
+    description 'auto-gen AST*.java file'
+    workingDir './scripts'
+    if (System.getenv("GITHUB_ACTIONS") != null)
+        commandLine 'sudo', 'bash', 'listener_gen.sh'
+    else if (OperatingSystem.current() != OperatingSystem.WINDOWS)
+        commandLine 'bash', 'listener_gen.sh'
+    else
+        // won't work on WINDOWS
+        commandLine 'cmd', '-h'
+}
+
+task testASTListener(type: Exec) {
+    description 'test if auto-gen AST*.java is up-to-date'
+    workingDir './scripts'
+    if (System.getenv("GITHUB_ACTIONS") != null)
+        commandLine 'sudo', 'bash', 'test_listener_gen.sh'
+    else if (OperatingSystem.current() != OperatingSystem.WINDOWS)
+        commandLine 'bash', 'test_listener_gen.sh'
+    else
+    // won't work on WINDOWS
+        commandLine 'cmd', '-h'
+}
+
 task testGrammar(type: Exec, dependsOn: classes) {
     workingDir './scripts'
     ignoreExitValue true
     if (System.getenv("GITHUB_ACTIONS") != null) {
         println "on ci, use sudo."
         commandLine 'sudo', 'make', 'test'
-    } else {
+    } else if (OperatingSystem.current() != OperatingSystem.WINDOWS){
         println "local build"
         commandLine 'make', 'test'
+    } else {
+        // won't work on WINDOWS
+        commandLine 'cmd', '-h'
     }
 
     standardOutput = new ByteArrayOutputStream()
@@ -56,3 +84,6 @@ if (hasProperty('buildScan')) {
     }
 }
 
+if (OperatingSystem.current() != OperatingSystem.WINDOWS) {
+    compileJava.dependsOn += generateASTListener
+}
