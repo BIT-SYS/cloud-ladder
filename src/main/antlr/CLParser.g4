@@ -45,7 +45,7 @@ block: '{' NL* statement* NL* '}';
 
 statement:
 	IF expression NL? block (ELIF expression NL? block)* (ELSE NL? block)? # ifBlock //block还是controlStructureBody？
-	| FOR typeType IDENTIFIER IN expression NL? block # forBlock //TODO
+	| FOR typeType? IDENTIFIER IN expression NL? block # forBlock //TODO
 	| WHILE expression NL? block # whileBlock
 	// | RETURN expression? ';' // 需要吗？
 	| BREAK NL # Break
@@ -53,7 +53,7 @@ statement:
 	| procedureDeclaration NL # procedureDecl
 	| typeType IDENTIFIER '=' expression NL  # variableDecl
 	| assignment NL # assign
-        | expression NL # expr
+        | expression NL? # expr
 	| emptyLines # empty
         ;
 
