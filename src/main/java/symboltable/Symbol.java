@@ -18,9 +18,7 @@ public class Symbol {
     }
 
     public String toString() {
-        if (type != Type.INVALID) return '<' + getName() + ":" + type + '>';
-        return getName();
+        return getName() + ": " + type;
     }
 
-    public enum Type {INVALID, Number, Image, String, Audio, Video, Boolean}
 }

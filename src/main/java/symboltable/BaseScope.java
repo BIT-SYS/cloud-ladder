@@ -37,6 +37,6 @@ public class BaseScope implements Scope {
     }
 
     public String toString() {
-        return symbols.keySet().toString();
+        return symbols.values().toString();
     }
 }
