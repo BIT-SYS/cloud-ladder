@@ -1,7 +1,9 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import symboltable.Scope;
+import symboltable.SimpleType;
 import symboltable.Symbol;
+import symboltable.Type;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -81,7 +83,7 @@ interface Node {
 class ScopePointer {
   public Scope scope;
   public Symbol symbol;
-  public Symbol.Type evalType;
+  public Type evalType;
 }
 
 class Program extends ScopePointer implements Node {
@@ -414,12 +416,9 @@ class Literal extends ExpressionNode {
 
   public String raw;
 
-  Literal() {
-
-  }
-
-  Literal(CLParserParser.IntegerLiteralContext ctx) {
-    raw = ctx.getText();
+  Literal(String raw, Type type) {
+    this.raw = raw;
+    evalType = type;
   }
 
   @Override
@@ -467,14 +466,17 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitIntegerLiteral(CLParserParser.IntegerLiteralContext ctx) {
-    return new Literal(ctx);
+    return new Literal(ctx.getText(), new SimpleType("Number"));
+  }
+
+  @Override
+  public Node visitFloatLiteral(CLParserParser.FloatLiteralContext ctx) {
+    return new Literal(ctx.getText(), new SimpleType("Number"));
   }
 
   @Override
   public Node visitString(CLParserParser.StringContext ctx) {
-    Literal l = new Literal();
-    l.raw = ctx.getText();
-    return l;
+    return new Literal(ctx.getText(), new SimpleType("String"));
   }
 
   @Override
