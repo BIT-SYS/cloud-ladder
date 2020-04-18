@@ -86,7 +86,7 @@ public class TypeCheck extends ASTBaseListener {
         String typeStr = ctx.left.evalType.toString();
         if (typeStr.startsWith("List<")) {
             // 只有List<>可以有[]访问下标
-            ctx.evalType = getType(typeStr.substring(typeStr.indexOf('<'), typeStr.length() - 1));
+            ctx.evalType = getType(typeStr.substring(typeStr.indexOf('<') + 1, typeStr.length() - 1));
         } else {
             Utils.err("Type Check: IndexExpression", "left is not a List Type");
         }
