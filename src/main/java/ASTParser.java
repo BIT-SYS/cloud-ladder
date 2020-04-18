@@ -99,7 +99,7 @@ class Program extends ScopePointer implements Node {
   }
 }
 
-class RangeListInitializer extends ScopePointer implements ExpressionNode {
+class RangeListInitializer extends ExpressionNode {
   public ExpressionNode start;
   public ExpressionNode end;
   public boolean exclusiveEnd;
@@ -113,7 +113,7 @@ class RangeListInitializer extends ScopePointer implements ExpressionNode {
   }
 }
 
-class Assign extends ScopePointer implements ExpressionNode {
+class Assign extends ExpressionNode {
   public Identifier lvalue;
   public ExpressionNode rvalue;
 
@@ -131,7 +131,7 @@ class Assign extends ScopePointer implements ExpressionNode {
   }
 }
 
-class ValuesListInitializer extends ScopePointer implements ExpressionNode {
+class ValuesListInitializer extends ExpressionNode {
   public List<ExpressionNode> values;
 
   @Override
@@ -140,7 +140,7 @@ class ValuesListInitializer extends ScopePointer implements ExpressionNode {
   }
 }
 
-class LambdaExpression extends ScopePointer implements ExpressionNode {
+class LambdaExpression extends ExpressionNode {
 
   public ParameterList parameters;
   public String retType;
@@ -340,11 +340,15 @@ class VariableDeclaration extends ScopePointer implements Node {
   }
 }
 
-interface ExpressionNode extends Node {
+class ExpressionNode extends ScopePointer implements Node {
 
+  @Override
+  public List<Node> getChildren() {
+    return new ArrayList<>();
+  }
 }
 
-class CallExpression extends ScopePointer implements ExpressionNode {
+class CallExpression extends ExpressionNode {
   // identifier or MemberExpression
   public FunctionIdentifier callee;
   public List<ExpressionNode> arguments;
@@ -358,7 +362,7 @@ class CallExpression extends ScopePointer implements ExpressionNode {
   }
 }
 
-class MemberExpression extends ScopePointer implements ExpressionNode {
+class MemberExpression extends ExpressionNode {
   public ExpressionNode object;
   public ExpressionNode property;
 
@@ -373,7 +377,7 @@ class MemberExpression extends ScopePointer implements ExpressionNode {
   }
 }
 
-class Identifier extends ScopePointer implements ExpressionNode {
+class Identifier extends ExpressionNode {
   public String name;
 
   Identifier(CLParserParser.IdContext ctx) {
@@ -390,7 +394,7 @@ class Identifier extends ScopePointer implements ExpressionNode {
   }
 }
 
-class FunctionIdentifier extends ScopePointer implements ExpressionNode {
+class FunctionIdentifier extends ExpressionNode {
 
   public String name;
 
@@ -408,7 +412,7 @@ class FunctionIdentifier extends ScopePointer implements ExpressionNode {
   }
 }
 
-class Literal extends ScopePointer implements ExpressionNode {
+class Literal extends ExpressionNode {
 
   public String raw;
 
@@ -423,7 +427,7 @@ class Literal extends ScopePointer implements ExpressionNode {
   }
 }
 
-class BinaryExpression extends ScopePointer implements ExpressionNode {
+class BinaryExpression extends ExpressionNode {
   public Node left;
 
   public String op;

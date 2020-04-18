@@ -60,6 +60,9 @@ public class ASTBaseListener {
 	public void enterVariableDeclaration(VariableDeclaration node) {}
 	public void exitVariableDeclaration(VariableDeclaration node) {}
 
+	public void enterExpressionNode(ExpressionNode node) {}
+	public void exitExpressionNode(ExpressionNode node) {}
+
 	public void enterCallExpression(CallExpression node) {}
 	public void exitCallExpression(CallExpression node) {}
 
