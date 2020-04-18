@@ -23,6 +23,12 @@ public class SymbolCheck extends ASTBaseListener {
     }
 
     @Override
+    public void exitLiteral(Literal node) {
+        System.out.println("exit " + node.evalType + " literal");
+        System.out.println(node.raw);
+    }
+
+    @Override
     public void enterProgram(Program ctx) {
         globals = new GlobalScope(null);
         currentScope = globals;
@@ -221,7 +227,7 @@ public class SymbolCheck extends ASTBaseListener {
         if (null == symbol) {
             System.err.println("<variable " + identifier + "> not found in " + currentScope.getScopeName());
         } else {
-            ctx.evalType = symbol.type;
+            ctx.symbol = symbol;
         }
     }
 
@@ -232,7 +238,7 @@ public class SymbolCheck extends ASTBaseListener {
         if (null == symbol) {
             System.err.println("<function " + identifier + "> not found in " + currentScope.getScopeName());
         } else {
-            ctx.evalType = symbol.type;
+            ctx.symbol = symbol;
         }
     }
 
