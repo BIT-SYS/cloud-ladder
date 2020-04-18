@@ -119,21 +119,25 @@ public class SymbolCheck extends ASTBaseListener {
     @Override
     public void enterForBlock(ForBlock ctx) {
         System.out.println(">>>>> enter for:");
-        //现在必新建作用域+变量了
-        enterBlockKai(ctx);
+        if (null != ctx.iter_type) {
+            enterBlockKai(ctx);
+            // 创建新变量
+            String name = ctx.for_id.name;
+            Type type = getType(ctx.iter_type);
+            VariableSymbol variableSymbol = new VariableSymbol(name, type);
+            currentScope.define(variableSymbol);
 
-        String name = ctx.for_id.name;
-        Type type = getType(ctx.iter_type);
-        VariableSymbol variableSymbol = new VariableSymbol(name, type);
-        currentScope.define(variableSymbol);
-
+        }
         loopWatcher.pushLoop();
     }
 
     @Override
     public void exitForBlock(ForBlock ctx) {
         System.out.println("<<<<< exit for:");
-        exitBlockKai();
+        if (null != ctx.iter_type) {
+            // 创建了新变量就要弹出作用域
+            exitBlockKai();
+        }
         loopWatcher.popLoop();
     }
 
