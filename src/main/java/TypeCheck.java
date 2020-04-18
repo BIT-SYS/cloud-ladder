@@ -1,3 +1,6 @@
+import symboltable.ProcedureSymbol;
+import symboltable.Symbol;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +23,7 @@ public class TypeCheck extends ASTBaseListener {
     public void exitValuesListInitializer(ValuesListInitializer ctx) {
         List<ExpressionNode> values_tmp = new ArrayList<>(ctx.values);
         ExpressionNode firstValue = ctx.values.get(0);
-        values_tmp.removeIf((ExpressionNode v) -> v.evalType != firstValue.evalType);
+        values_tmp.removeIf((ExpressionNode v) -> typeEquals(v.evalType, firstValue.evalType));
         if (0 != values_tmp.size()) {
             Utils.err("Type Check: ValuesListInitializer", "[a, b, c, ...] is not the same type!");
         }
@@ -42,7 +45,20 @@ public class TypeCheck extends ASTBaseListener {
 
     @Override
     public void exitMemberExpression(MemberExpression ctx) {
-        // 实际并没有 MemberExpression
+        // 原来 MemberExpression 竟然是包括方法调用……
+        // todo 检查
+        ExpressionNode callee = ctx.property;
+        assert callee.symbol instanceof ProcedureSymbol;
+        ProcedureSymbol procedure = (ProcedureSymbol) callee.symbol;
+        assert !procedure.arguments.isEmpty();
+        Symbol firstSymbol = procedure.arguments.get("self");
+        if (null == firstSymbol) {
+            Utils.err("Type Check: MemberExpression", "Procedure " + procedure.name + " is not a method");
+        }
+        if (!typeEquals(firstSymbol.type, ctx.object.evalType)) {
+            Utils.err("Type Check: MemberExpression", "Procedure " + procedure.name + " is not a method of " + ctx.object.evalType);
+        }
+        ctx.evalType = ctx.property.evalType;
     }
 
     @Override
@@ -61,7 +77,6 @@ public class TypeCheck extends ASTBaseListener {
     @Override
     public void exitBinaryExpression(BinaryExpression ctx) {
         if (!typeEquals(ctx.left.evalType, ctx.right.evalType)) {
-            //todo
             Utils.err("Type Check: BinaryExpression", "left & right is not the same type!");
         }
     }
