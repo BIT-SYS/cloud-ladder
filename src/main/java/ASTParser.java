@@ -304,7 +304,7 @@ class ParameterList implements Node {
 
 class IndexExpression extends BinaryExpression {
 
-  IndexExpression(Node left, Node right, String op) {
+  IndexExpression(ExpressionNode left, ExpressionNode right, String op) {
     super(left, right, op);
   }
 }
@@ -395,7 +395,7 @@ class Identifier extends ExpressionNode {
 }
 
 class FunctionIdentifier extends ExpressionNode {
-
+  // FunctionIdentifier 需要继承ExpressionNode么？是不是CallExpression继承就够了？
   public String name;
 
   FunctionIdentifier(CLParserParser.IdContext ctx) {
@@ -428,13 +428,13 @@ class Literal extends ExpressionNode {
 }
 
 class BinaryExpression extends ExpressionNode {
-  public Node left;
+  public ExpressionNode left;
 
   public String op;
-  public Node right;
+  public ExpressionNode right;
 
 
-  BinaryExpression(Node left, Node right, String op) {
+  BinaryExpression(ExpressionNode left, ExpressionNode right, String op) {
     this.left = left;
     this.right = right;
     this.op = op;
@@ -490,7 +490,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitIndex(CLParserParser.IndexContext ctx) {
-    return new IndexExpression(visit(ctx.expression(0)), visit(ctx.expression(1)), "[]");
+    return new IndexExpression((ExpressionNode) visit(ctx.expression(0)), (ExpressionNode) visit(ctx.expression(1)), "[]");
   }
 
   @Override
@@ -660,24 +660,24 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitAddSub(CLParserParser.AddSubContext ctx) {
-    Node left = visit(ctx.expression(0));
-    Node right = visit(ctx.expression(1));
+    ExpressionNode left = (ExpressionNode) visit(ctx.expression(0));
+    ExpressionNode right = (ExpressionNode) visit(ctx.expression(1));
     return new BinaryExpression(left, right, ctx.bop.getText());
 
   }
 
   @Override
   public Node visitMulDivMod(CLParserParser.MulDivModContext ctx) {
-    Node left = visit(ctx.expression(0));
-    Node right = visit(ctx.expression(1));
+    ExpressionNode left = (ExpressionNode) visit(ctx.expression(0));
+    ExpressionNode right = (ExpressionNode) visit(ctx.expression(1));
 //    System.out.println(left.toString() + right);
     return new BinaryExpression(left, right, ctx.bop.getText());
   }
 
   @Override
   public Node visitPartialEqual(CLParserParser.PartialEqualContext ctx) {
-    Node left = visit(ctx.expression(0));
-    Node right = visit(ctx.expression(1));
+    ExpressionNode left = (ExpressionNode) visit(ctx.expression(0));
+    ExpressionNode right = (ExpressionNode) visit(ctx.expression(1));
 //    System.out.println("print partial");
 //    System.out.println(ctx.bop.getText());
     return new BinaryExpression(left, right, ctx.bop.getText());
@@ -695,8 +695,8 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitLogic(CLParserParser.LogicContext ctx) {
-    Node left = visit(ctx.expression(0));
-    Node right = visit(ctx.expression(1));
+    ExpressionNode left = (ExpressionNode) visit(ctx.expression(0));
+    ExpressionNode right = (ExpressionNode) visit(ctx.expression(1));
     return new BinaryExpression(left, right, ctx.bop.getText());
   }
 
