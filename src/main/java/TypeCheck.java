@@ -11,7 +11,7 @@ public class TypeCheck extends ASTBaseListener {
     @Override
     public void exitRangeListInitializer(RangeListInitializer ctx) {
         if (!typeEquals(ctx.start.evalType, ctx.end.evalType)) {
-//            Utils.err("Type Check: RangeListInitializer", "start & end is not the same type!");
+            Utils.err("Type Check: RangeListInitializer", "start & end is not the same type!");
         }
         ctx.evalType = getType("List<" + ctx.start.evalType + ">");
     }
@@ -22,7 +22,7 @@ public class TypeCheck extends ASTBaseListener {
         ExpressionNode firstValue = ctx.values.get(0);
         values_tmp.removeIf((ExpressionNode v) -> v.evalType != firstValue.evalType);
         if (0 != values_tmp.size()) {
-//            Utils.err("Type Check: ValuesListInitializer", "[a, b, c, ...] is not the same type!");
+            Utils.err("Type Check: ValuesListInitializer", "[a, b, c, ...] is not the same type!");
         }
         ctx.evalType = getType("List<" + firstValue.evalType + ">");
     }
@@ -35,7 +35,7 @@ public class TypeCheck extends ASTBaseListener {
     @Override
     public void exitCallExpression(CallExpression ctx) {
         if (null == ctx.symbol) {
-//            Utils.err("Type Check: CallExpression", "Procedure symbol " + ctx.callee.name + " not found!");
+            Utils.err("Type Check: CallExpression", "Procedure symbol " + ctx.callee.name + " not found!");
         }
         ctx.evalType = ctx.symbol.type;
     }
@@ -48,7 +48,7 @@ public class TypeCheck extends ASTBaseListener {
     @Override
     public void exitIdentifier(Identifier ctx) {
         if (null == ctx.symbol) {
-//            Utils.err("Type Check: Identifier", "Identifier " + ctx.name + " not found!");
+            Utils.err("Type Check: Identifier", "Identifier " + ctx.name + " not found!");
         }
         ctx.evalType = ctx.symbol.type;
     }
@@ -62,7 +62,7 @@ public class TypeCheck extends ASTBaseListener {
     public void exitBinaryExpression(BinaryExpression ctx) {
         if (!typeEquals(ctx.left.evalType, ctx.right.evalType)) {
             //todo
-//            Utils.err("Type Check: BinaryExpression", "left & right is not the same type!");
+            Utils.err("Type Check: BinaryExpression", "left & right is not the same type!");
         }
     }
 
@@ -73,7 +73,7 @@ public class TypeCheck extends ASTBaseListener {
             // 只有List<>可以有[]访问下标
             ctx.evalType = getType(typeStr.substring(typeStr.indexOf('<'), typeStr.length() - 1));
         } else {
-//            Utils.err("Type Check: IndexExpression", "left is not a List Type");
+            Utils.err("Type Check: IndexExpression", "left is not a List Type");
         }
     }
 }
