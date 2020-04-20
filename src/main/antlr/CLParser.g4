@@ -67,10 +67,10 @@ emptyLines: NL+;
 expression:
         '(' expression ')'                                        # parens
         | literal                                                 # Lit
-        | IDENTIFIER                                              # id
 	| expression NL? bop = '.' ( IDENTIFIER | procedureCall)  # member
         | listInitializer                                         # listInit
 	| procedureCall                                           # procedure
+    | IDENTIFIER                                              # id
 	| prefix = ('+' | '-' | 'not') expression                 # prefix
 	| expression bop = ('*' | '/' | '%') expression           # MulDivMod
 	| expression bop = ('+' | '-') expression                 # AddSub
