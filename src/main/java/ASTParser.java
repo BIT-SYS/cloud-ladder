@@ -1,5 +1,3 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import symboltable.Scope;
 import symboltable.SimpleType;
 import symboltable.Symbol;
@@ -11,6 +9,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+class Label {
+  static int label = 0;
+}
+
+class Temp extends ExpressionNode {
+  static int indexOfAll = 0;
+  int index;
+
+  Temp() {
+    index = indexOfAll++;
+  }
+
+  @Override
+  public String toString() {
+    return "t" + Integer.toString(index);
+  }
+}
 
 class ASTWalker {
   public void walk(ASTBaseListener astListener, Node node) {
@@ -76,26 +92,58 @@ class ASTWalker {
 /**
  * Base Node.
  */
-interface Node {
-  List<Node> getChildren();
-}
+//interface Node {
+//  List<Node> getChildren();
+//}
 
-class ScopePointer {
+abstract class Node {
+  // ScopePointer
   public Scope scope;
   public Symbol symbol;
   public Type evalType;
+
+  //
+  int newLabel() {
+    return ++Label.label;
+  }
+
+  void emitLabel(int i) {
+    System.out.print("L" + i + ":");
+  }
+
+  void emit(String s) {
+    System.out.println("\t" + s);
+  }
+
+  public String gen(int before, int after) {
+    System.out.println(this.getClass().getName());
+    return "";
+  }
+
+  abstract List<Node> getChildren();
 }
 
-class Program extends ScopePointer implements Node {
-  public List<Node> statement;
+class ScopePointer {
+}
 
-  Program() {
-    statement = new ArrayList<>();
+class Program extends Node {
+  public Block statements;
+
+  Program(Block bl) {
+    statements = bl;
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    // never used params
+    // TODO
+    statements.gen(0, 0);
+    return "";
   }
 
   @Override
   public List<Node> getChildren() {
-    return statement;
+    return statements.getChildren();
   }
 }
 
@@ -103,6 +151,25 @@ class RangeListInitializer extends ExpressionNode {
   public ExpressionNode start;
   public ExpressionNode end;
   public boolean exclusiveEnd;
+
+  @Override
+  public ExpressionNode reduce() {
+    ExpressionNode _start = start.reduce();
+    ExpressionNode _end = end.reduce();
+    Temp t = new Temp();
+    emit(t.toString() + " = [" + start.toString() + "," + end.toString() + "]");
+    return t;
+  }
+
+  @Override
+  public ExpressionNode gen() {
+    return reduce();
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    return gen().toString();
+  }
 
   @Override
   public List<Node> getChildren() {
@@ -123,6 +190,12 @@ class Assign extends ExpressionNode {
   }
 
   @Override
+  public String gen(int before, int after) {
+    emit(lvalue.gen() + " = " + rvalue.gen());
+    return "";
+  }
+
+  @Override
   public List<Node> getChildren() {
     return new ArrayList<Node>() {{
       add(lvalue);
@@ -139,6 +212,7 @@ class ValuesListInitializer extends ExpressionNode {
     return values.stream().map(en -> (Node) en).collect(Collectors.toList());
   }
 }
+
 
 class LambdaExpression extends ExpressionNode {
 
@@ -157,37 +231,75 @@ class LambdaExpression extends ExpressionNode {
   }
 }
 
-class Break implements Node {
+class Break extends Node {
   @Override
   public List<Node> getChildren() {
     return new ArrayList<>();
   }
+
+  @Override
+  public String gen(int before, int after) {
+    emit("goto L" + after);
+    return "";
+  }
 }
 
-class Continue implements Node {
+class Continue extends Node {
   @Override
   public List<Node> getChildren() {
     return new ArrayList<>();
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    emit("goto L" + before);
+    return "";
   }
 }
 
 // so what's the difference between Block and Program
-class Block extends ScopePointer implements Node {
+class Block extends Node {
 
-  public List<Node> statement;
+  public List<Node> statements;
 
   Block() {
-    statement = new ArrayList<>();
+    statements = new ArrayList<>();
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    before = newLabel();
+    after = newLabel();
+    emitLabel(before);
+    for (int i = 0; i < statements.size(); i++) {
+      statements.get(i).gen(before, after);
+      if (i != statements.size() - 1) {
+        before = newLabel();
+      }
+    }
+    emitLabel(after);
+    return "";
   }
 
   @Override
   public List<Node> getChildren() {
-    return new ArrayList<>(statement);
+    return new ArrayList<>(statements);
   }
 }
 
-class IfElseBlock implements Node {
-  public List<Block> ifelses = new ArrayList<>();
+class IfElseBlock extends Node {
+  public List<Node> ifelses = new ArrayList<>();
+
+  @Override
+  public String gen(int before, int after) {
+    // TODO 作用域 和 标签的冲突
+    for (Node n : ifelses) {
+      after = newLabel();
+      n.gen(0, after);
+      emitLabel(after);
+    }
+    return "";
+  }
 
   @Override
   public List<Node> getChildren() {
@@ -195,17 +307,32 @@ class IfElseBlock implements Node {
   }
 }
 
-class IfBlock extends Block {
+class IfBlock extends Node {
   public ExpressionNode condition;
   // may be null
+  public Block statements;
 
   IfBlock(Block bl) {
-    this.statement = bl.statement;
+    this.statements = bl;
+  }
+
+
+  @Override
+  public String gen(int before, int after) {
+    int label = newLabel();
+    String conditionLabel = condition.gen(before, label);
+    emitLabel(label);
+    int blockAfter = newLabel();
+    emit("ifnot " + conditionLabel + " goto L" + blockAfter);
+    statements.gen(label, after);
+    emit("goto L" + after);
+    emitLabel(blockAfter);
+    return "";
   }
 
   @Override
   public List<Node> getChildren() {
-    List<Node> l = super.getChildren();
+    List<Node> l = statements.getChildren();
     return new ArrayList<Node>() {{
       add(condition);
       addAll(l);
@@ -213,16 +340,30 @@ class IfBlock extends Block {
   }
 }
 
-class ElifBlock extends Block {
+class ElifBlock extends Node {
   public ExpressionNode condition;
+  public Block statements;
 
   ElifBlock(Block bl) {
-    this.statement = bl.statement;
+    this.statements = bl;
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    int label = newLabel();
+    String conditionLabel = condition.gen(before, label);
+    emitLabel(label);
+    int blockAfter = newLabel();
+    emit("ifnot " + conditionLabel + " goto L" + blockAfter);
+    statements.gen(label, after);
+    emit("goto L" + after);
+    emitLabel(blockAfter);
+    return "";
   }
 
   @Override
   public List<Node> getChildren() {
-    List<Node> l = super.getChildren();
+    List<Node> l = statements.getChildren();
     return new ArrayList<Node>() {
       {
         add(condition);
@@ -233,23 +374,51 @@ class ElifBlock extends Block {
   }
 }
 
-class ElseBlock extends Block {
+class ElseBlock extends Node {
+  public Block statements;
+
   ElseBlock(Block bl) {
-    this.statement = bl.statement;
+    this.statements = bl;
   }
 
+  @Override
+  public String gen(int before, int after) {
+    statements.gen(0, after);
+    return "";
+  }
+
+  @Override
+  List<Node> getChildren() {
+    return statements.getChildren();
+  }
 }
 
-class WhileBlock extends Block {
+class WhileBlock extends Node {
   public ExpressionNode condition;
+  public Block statements;
 
   WhileBlock(Block bl) {
-    this.statement = bl.statement;
+    this.statements = bl;
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    before = newLabel();
+    after = newLabel();
+
+    emitLabel(before);
+
+    emit("iffalse " + condition.gen(0, 0) + " goto L" + after);
+    statements.gen(before, after);
+
+    emitLabel(after);
+    return "";
+
   }
 
   @Override
   public List<Node> getChildren() {
-    List<Node> l = super.getChildren();
+    List<Node> l = statements.getChildren();
     return new ArrayList<Node>() {{
       add(condition);
       addAll(l);
@@ -257,18 +426,44 @@ class WhileBlock extends Block {
   }
 }
 
-class ForBlock extends Block {
+class ForBlock extends Node {
   public Identifier for_id;
   public ExpressionNode for_expr;
   public String iter_type;
+  public Block statements;
 
   ForBlock(Block bl) {
-    this.statement = bl.statement;
+    this.statements = bl;
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    before = newLabel();
+    after = newLabel();
+    String expr = for_expr.gen(0, 0);
+    Temp t = new Temp();
+    Temp len = new Temp();
+    // get expr len
+    emit(len.toString() + " = call " + expr + ".size");
+    emit(t.toString() + " = 0");
+    emitLabel(before);
+    // if false then jump
+    emit(for_id.toString() + " = " + expr + ".get " + t.toString());
+    emit("iffalse " + t.toString() + " < " + len.toString() + " goto L" + after);
+    // execuete
+    statements.gen(before, after);
+
+
+    // +1 and jump
+    emit(t.toString() + " = " + t.toString() + " + 1");
+    emit("goto L"+ before);
+    emitLabel(after);
+    return "";
   }
 
   @Override
   public List<Node> getChildren() {
-    List<Node> l = super.getChildren();
+    List<Node> l = statements.getChildren();
     return new ArrayList<Node>() {{
       add(for_id);
       add(for_expr);
@@ -277,7 +472,7 @@ class ForBlock extends Block {
   }
 }
 
-class Parameter implements Node {
+class Parameter extends Node {
   public String type;
   public Identifier id;
 
@@ -289,7 +484,7 @@ class Parameter implements Node {
   }
 }
 
-class ParameterList implements Node {
+class ParameterList extends Node {
   public List<Parameter> parameters;
 
   ParameterList(List<Parameter> ps) {
@@ -304,17 +499,41 @@ class ParameterList implements Node {
 
 class IndexExpression extends BinaryExpression {
 
-  IndexExpression(Node left, Node right, String op) {
+  IndexExpression(ExpressionNode left, ExpressionNode right, String op) {
     super(left, right, op);
+  }
+
+  @Override
+  public ExpressionNode gen() {
+    ExpressionNode l = left.reduce();
+    ExpressionNode r = right.reduce();
+    Temp t = new Temp();
+    emit(t + " = call " + l.toString() + ".get " + r.toString());
+    return t;
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    return gen().toString();
   }
 }
 
-class ProcedureDefinition extends ScopePointer implements Node {
+class ProcedureDefinition extends Node {
   public ParameterList parameters;
   public String returnType;
   // function name
   public Identifier id;
   public Block body;
+
+  @Override
+  public String gen(int before, int after) {
+    emit("Define " + id.toString());
+
+    body.gen(0, 0);
+
+    emit("EndDefine " + id.toString());
+    return "";
+  }
 
   @Override
   public List<Node> getChildren() {
@@ -326,10 +545,16 @@ class ProcedureDefinition extends ScopePointer implements Node {
 }
 
 
-class VariableDeclaration extends ScopePointer implements Node {
+class VariableDeclaration extends Node {
   public String type;
   public Identifier id;
-  public Node expr;
+  public ExpressionNode expr;
+
+  @Override
+  public String gen(int before, int after) {
+    emit(id.gen() + " = " + expr.gen());
+    return "";
+  }
 
   @Override
   public List<Node> getChildren() {
@@ -340,11 +565,24 @@ class VariableDeclaration extends ScopePointer implements Node {
   }
 }
 
-class ExpressionNode extends ScopePointer implements Node {
+class ExpressionNode extends Node {
+
+  public ExpressionNode reduce() {
+    return this;
+  }
+
+  public ExpressionNode gen() {
+    System.out.println("unimplemented gen: " + this.getClass().getName());
+    return null;
+  }
 
   @Override
   public List<Node> getChildren() {
     return new ArrayList<>();
+  }
+
+  public void jumping(int i, int after) {
+    System.out.println("jump");
   }
 }
 
@@ -352,6 +590,30 @@ class CallExpression extends ExpressionNode {
   // identifier or MemberExpression
   public FunctionIdentifier callee;
   public List<ExpressionNode> arguments;
+
+
+  @Override
+  public ExpressionNode reduce() {
+
+    List<ExpressionNode> args = arguments.stream().map(ExpressionNode::reduce).collect(Collectors.toCollection(ArrayList::new));
+    Temp t = new Temp();
+    String args_str = String.join(
+            " ",
+            args.stream().map(ExpressionNode::toString).collect(Collectors.toCollection((ArrayList::new)))
+    );
+    emit(t.toString() + " = call " + callee + " " + args_str);
+    return t;
+  }
+
+  @Override
+  public ExpressionNode gen() {
+    return reduce();
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    return gen().toString();
+  }
 
   @Override
   public List<Node> getChildren() {
@@ -363,8 +625,28 @@ class CallExpression extends ExpressionNode {
 }
 
 class MemberExpression extends ExpressionNode {
+  // TODO 求值顺序
   public ExpressionNode object;
   public ExpressionNode property;
+
+  @Override
+  public ExpressionNode reduce() {
+    ExpressionNode object_reduced = object.reduce();
+    Temp temp = new Temp();
+    // TODO call
+    emit(temp.toString() + " = call " + object_reduced.toString() + "." + property.toString());
+    return temp;
+  }
+
+  @Override
+  public ExpressionNode gen() {
+    return reduce();
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    return gen().toString();
+  }
 
   @Override
   public List<Node> getChildren() {
@@ -389,6 +671,21 @@ class Identifier extends ExpressionNode {
   }
 
   @Override
+  public ExpressionNode gen() {
+    return this;
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    return gen().toString();
+  }
+
+  @Override
+  public String toString() {
+    return name;
+  }
+
+  @Override
   public List<Node> getChildren() {
     return new ArrayList<>();
   }
@@ -407,6 +704,16 @@ class FunctionIdentifier extends ExpressionNode {
   }
 
   @Override
+  public ExpressionNode reduce() {
+    return this;
+  }
+
+  @Override
+  public String toString() {
+    return name;
+  }
+
+  @Override
   public List<Node> getChildren() {
     return new ArrayList<>();
   }
@@ -422,19 +729,82 @@ class Literal extends ExpressionNode {
   }
 
   @Override
+  public ExpressionNode gen() {
+    return this;
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    return this.toString();
+  }
+
+  @Override
+  public String toString() {
+    return raw;
+  }
+
+  @Override
   public List<Node> getChildren() {
     return new ArrayList<>();
   }
 }
 
+class ArithmeticExpression extends BinaryExpression {
+  ArithmeticExpression(ExpressionNode left, ExpressionNode right, String op) {
+    super(left, right, op);
+  }
+
+  @Override
+  public ExpressionNode gen() {
+    return new ArithmeticExpression(left.reduce(), right.reduce(), op);
+  }
+
+
+  @Override
+  public String gen(int before, int after) {
+    return reduce().toString();
+  }
+
+  @Override
+  public String toString() {
+    return left.toString() + " " + op + " " + right.toString();
+  }
+}
+
+class LogicExpression extends BinaryExpression {
+
+  LogicExpression(ExpressionNode left, ExpressionNode right, String op) {
+    super(left, right, op);
+  }
+
+  @Override
+  public ExpressionNode gen() {
+    return new ArithmeticExpression(left.reduce(), right.reduce(), op);
+  }
+
+  @Override
+  public String gen(int before, int after) {
+    return reduce().toString();
+  }
+
+}
+
 class BinaryExpression extends ExpressionNode {
-  public Node left;
+  public ExpressionNode left;
 
   public String op;
-  public Node right;
+  public ExpressionNode right;
 
 
-  BinaryExpression(Node left, Node right, String op) {
+  @Override
+  public ExpressionNode reduce() {
+    ExpressionNode reducedExpr = gen();
+    Temp t = new Temp();
+    emit(t.toString() + " = " + reducedExpr.toString());
+    return t;
+  }
+
+  BinaryExpression(ExpressionNode left, ExpressionNode right, String op) {
     this.left = left;
     this.right = right;
     this.op = op;
@@ -459,7 +829,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     String type = ctx.typeType().getText();
     Identifier id = new Identifier(name);
     vd.type = type;
-    vd.expr = visit(ctx.expression());
+    vd.expr = (ExpressionNode) visit(ctx.expression());
     vd.id = id;
     return vd;
   }
@@ -480,6 +850,11 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   }
 
   @Override
+  public Node visitBool(CLParserParser.BoolContext ctx) {
+    return new Literal(ctx.getText(), new SimpleType("Boolean"));
+  }
+
+  @Override
   public Node visitRangeListInitializer(CLParserParser.RangeListInitializerContext ctx) {
     RangeListInitializer rli = new RangeListInitializer();
     rli.start = (ExpressionNode) visit(ctx.expression(0));
@@ -490,7 +865,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitIndex(CLParserParser.IndexContext ctx) {
-    return new IndexExpression(visit(ctx.expression(0)), visit(ctx.expression(1)), "[]");
+    return new IndexExpression((ExpressionNode) visit(ctx.expression(0)), (ExpressionNode) visit(ctx.expression(1)), "[]");
   }
 
   @Override
@@ -521,7 +896,8 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
             n -> {
 //              System.out.println(n.getText());
               Node ret = visit(n);
-              bl.statement.add(ret);
+              if (ret != null)
+                bl.statements.add(ret);
             }
     );
 
@@ -550,7 +926,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
       ieb.ifelses.add(eb);
     }
 
-    return ib;
+    return ieb;
   }
 
   @Override
@@ -660,27 +1036,36 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitAddSub(CLParserParser.AddSubContext ctx) {
-    Node left = visit(ctx.expression(0));
-    Node right = visit(ctx.expression(1));
-    return new BinaryExpression(left, right, ctx.bop.getText());
+    ExpressionNode left = visitAndGetExpresionNode(ctx.expression(0));
+    ExpressionNode right = visitAndGetExpresionNode(ctx.expression(1));
+    return new ArithmeticExpression(left, right, ctx.bop.getText());
 
+  }
+
+  private ExpressionNode visitAndGetExpresionNode(CLParserParser.ExpressionContext ctx) {
+    return (ExpressionNode) visit(ctx);
   }
 
   @Override
   public Node visitMulDivMod(CLParserParser.MulDivModContext ctx) {
-    Node left = visit(ctx.expression(0));
-    Node right = visit(ctx.expression(1));
+    ExpressionNode left = visitAndGetExpresionNode(ctx.expression(0));
+    ExpressionNode right = visitAndGetExpresionNode(ctx.expression(1));
 //    System.out.println(left.toString() + right);
-    return new BinaryExpression(left, right, ctx.bop.getText());
+    return new ArithmeticExpression(left, right, ctx.bop.getText());
   }
 
   @Override
   public Node visitPartialEqual(CLParserParser.PartialEqualContext ctx) {
-    Node left = visit(ctx.expression(0));
-    Node right = visit(ctx.expression(1));
-//    System.out.println("print partial");
-//    System.out.println(ctx.bop.getText());
-    return new BinaryExpression(left, right, ctx.bop.getText());
+    ExpressionNode left = visitAndGetExpresionNode(ctx.expression(0));
+    ExpressionNode right = visitAndGetExpresionNode(ctx.expression(1));
+    return new LogicExpression(left, right, ctx.bop.getText());
+  }
+
+  @Override
+  public Node visitCompare(CLParserParser.CompareContext ctx) {
+    ExpressionNode left = visitAndGetExpresionNode(ctx.expression(0));
+    ExpressionNode right = visitAndGetExpresionNode(ctx.expression(1));
+    return new LogicExpression(left, right, ctx.bop.getText());
   }
 
   @Override
@@ -695,14 +1080,14 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitLogic(CLParserParser.LogicContext ctx) {
-    Node left = visit(ctx.expression(0));
-    Node right = visit(ctx.expression(1));
-    return new BinaryExpression(left, right, ctx.bop.getText());
+    ExpressionNode left = visitAndGetExpresionNode(ctx.expression(0));
+    ExpressionNode right = visitAndGetExpresionNode(ctx.expression(1));
+    return new LogicExpression(left, right, ctx.bop.getText());
   }
 
   @Override
   public Node visitProgram(CLParserParser.ProgramContext ctx) {
-    Program p = new Program();
+    Block bl = new Block();
     ctx.statement().forEach(
             (n) -> {
               if (n == null)
@@ -710,10 +1095,11 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
               // must return Node, not `null`
               Node v = visit(n);
               if (v != null)
-                p.statement.add(v);
+                bl.statements.add(v);
             }
     );
 
+    Program p = new Program(bl);
 //    Gson g = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 //    System.out.println(g.toJson(p));
     ASTWalker astWalker = new ASTWalker();
