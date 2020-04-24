@@ -9,7 +9,7 @@ import java.io.*;
 public class ASTParserTester {
 
   @Test
-  public static void IterTestASTBuild() throws IOException {
+  public void IterTestASTBuild() throws IOException {
     File file = new File("examples");
     File[] fs = file.listFiles();
     assert fs != null;
@@ -20,7 +20,7 @@ public class ASTParserTester {
     }
   }
 
-  public  static Program tryToBuildAST(String inputFile) throws IOException {
+  public static Program tryToBuildAST(String inputFile) throws IOException {
 
     System.out.println("test file: " + inputFile);
     InputStream is = System.in;

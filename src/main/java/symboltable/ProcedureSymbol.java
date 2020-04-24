@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ProcedureSymbol extends Symbol implements Scope {
-    Map<String, Symbol> arguments = new LinkedHashMap<>();
+    public Map<String, Symbol> arguments = new LinkedHashMap<>();
     Scope enclosingScope;
 
     public ProcedureSymbol(String name, Type retType, Scope enclosingScope) {

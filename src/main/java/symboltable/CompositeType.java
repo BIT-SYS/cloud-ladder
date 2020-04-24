@@ -15,7 +15,7 @@ public class CompositeType implements Type {
         String container = string.substring(0, lt_pos);
         if (!containerTypes.contains(container)) {
             //todo 报错
-            System.err.println(container + "is not a composite container!");
+            System.err.println(container + " is not a composite container!");
         }
         this.container = container;
 
