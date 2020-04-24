@@ -1,3 +1,5 @@
+import IR.IR;
+import IR.AssignIR;
 import symboltable.Scope;
 import symboltable.SimpleType;
 import symboltable.Symbol;
@@ -101,13 +103,14 @@ abstract class Node {
   public Scope scope;
   public Symbol symbol;
   public Type evalType;
-
+  static public IR ir;
   //
   int newLabel() {
     return ++Label.label;
   }
 
   void emitLabel(int i) {
+    ir.emitLabel(i);
     System.out.print("L" + i + ":");
   }
 
@@ -131,6 +134,7 @@ class Program extends Node {
 
   Program(Block bl) {
     statements = bl;
+    ir = new IR();
   }
 
   @Override
@@ -191,6 +195,9 @@ class Assign extends ExpressionNode {
 
   @Override
   public String gen(int before, int after) {
+    String l = lvalue.gen().toString();
+    String r = rvalue.gen().toString();
+    ir.emit(new AssignIR(l,r));
     emit(lvalue.gen() + " = " + rvalue.gen());
     return "";
   }
