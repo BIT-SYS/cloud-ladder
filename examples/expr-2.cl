@@ -7,20 +7,20 @@ Number a = 0
 Number b = 0
 Number c = 1
 Number term = 21
-a = b + c;
-a = b - c;
-a = b * c;
-a = b / c;
-a = -b;
+a = b + c
+a = b - c
+a = b * c
+a = b / c
+a = -b
 
-d = a - b - c;
-d = a * b * c;
-d = a + b * c;
-d = a * b + c;
+d = a - b - c
+d = a * b * c
+d = a + b * c
+d = a * b + c
 
-d = (a - b) - c;
-d = a - (b - c);
-d = (a + b) * c;
-d = a * (b + c);
+d = (a - b) - c
+d = a - (b - c)
+d = (a + b) * c
+d = a * (b + c)
 
-term = b*b -4.0*a*c;
+term = b*b -4.0*a*c
