@@ -26,9 +26,12 @@ jobs:
     - name: setup environment for antlr
       run: |
         sudo curl https://www.antlr.org/download/antlr-4.8-complete.jar -o /usr/local/lib/antlr-complete.jar
-        bash_path=$(echo $(whereis bash) | cut -d ' ' -f2)
-        sudo printf "#!%s\njava -cp .:/usr/local/lib/antlr-complete.jar org.antlr.v4.gui.TestRig \"\$@\"\n" $(echo $bash_path) > /usr/bin/grun
-        sudo cat /usr/bin/grun
+        whereis bash
+        whereis sh
+        sudo tee -a /usr/bin/grun > /dev/null << 'EOF'
+        \#!/usr/bin/bash
+        java -cp .:/usr/local/lib/antlr-complete.jar org.antlr.v4.gui.TestRig "$@"
+        EOF
         sudo chmod 777 /usr/bin/grun
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew  
