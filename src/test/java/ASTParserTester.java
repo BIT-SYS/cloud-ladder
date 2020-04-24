@@ -9,7 +9,7 @@ import java.io.*;
 public class ASTParserTester {
 
   @Test
-  public void IterTestASTBuild() throws IOException {
+  public static void IterTestASTBuild() throws IOException {
     File file = new File("examples");
     File[] fs = file.listFiles();
     assert fs != null;
@@ -20,7 +20,7 @@ public class ASTParserTester {
     }
   }
 
-  public void tryToBuildAST(String inputFile) throws IOException {
+  public  static Program tryToBuildAST(String inputFile) throws IOException {
 
     System.out.println("test file: " + inputFile);
     InputStream is = System.in;
@@ -38,9 +38,18 @@ public class ASTParserTester {
     walker.walk(ast2IR, p);
     Gson g = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     System.out.println(g.toJson(ast2IR));
+    return p;
   }
 
+  public static void tryToBuildIR(String inputFile) throws IOException {
+    Program p = tryToBuildAST(inputFile);
+    int before = p.newLabel();
+    int after = p.newLabel();
+    p.emitLabel(before);
+    p.gen(before, after);
+    p.emitLabel(after);
+  }
   public static void main(String[] args) throws Exception {
-    System.out.println("in Main");
+    tryToBuildIR("examples/leap-year.cl");
   }
 }

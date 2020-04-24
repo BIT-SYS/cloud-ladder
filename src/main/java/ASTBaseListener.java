@@ -1,5 +1,14 @@
 public class ASTBaseListener {
 
+	public void enterLabel(Label node) {}
+	public void exitLabel(Label node) {}
+
+	public void enterTemp(Temp node) {}
+	public void exitTemp(Temp node) {}
+
+	public void enterNode(Node node) {}
+	public void exitNode(Node node) {}
+
 	public void enterScopePointer(ScopePointer node) {}
 	public void exitScopePointer(ScopePointer node) {}
 
@@ -77,6 +86,12 @@ public class ASTBaseListener {
 
 	public void enterLiteral(Literal node) {}
 	public void exitLiteral(Literal node) {}
+
+	public void enterArithmeticExpression(ArithmeticExpression node) {}
+	public void exitArithmeticExpression(ArithmeticExpression node) {}
+
+	public void enterLogicExpression(LogicExpression node) {}
+	public void exitLogicExpression(LogicExpression node) {}
 
 	public void enterBinaryExpression(BinaryExpression node) {}
 	public void exitBinaryExpression(BinaryExpression node) {}
