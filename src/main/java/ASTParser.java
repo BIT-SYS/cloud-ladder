@@ -143,7 +143,9 @@ class Program extends Node {
 
   @Override
   public List<Node> getChildren() {
-    return statements.getChildren();
+    return new ArrayList<Node>(){{
+      add(statements);
+    }};
   }
 }
 
@@ -332,10 +334,9 @@ class IfBlock extends Node {
 
   @Override
   public List<Node> getChildren() {
-    List<Node> l = statements.getChildren();
     return new ArrayList<Node>() {{
       add(condition);
-      addAll(l);
+      add(statements);
     }};
   }
 }
@@ -363,11 +364,10 @@ class ElifBlock extends Node {
 
   @Override
   public List<Node> getChildren() {
-    List<Node> l = statements.getChildren();
     return new ArrayList<Node>() {
       {
         add(condition);
-        addAll(l);
+        add(statements);
       }
     };
 
@@ -389,7 +389,9 @@ class ElseBlock extends Node {
 
   @Override
   List<Node> getChildren() {
-    return statements.getChildren();
+    return new ArrayList<Node>() {{
+      add(statements);
+    }};
   }
 }
 
@@ -418,10 +420,9 @@ class WhileBlock extends Node {
 
   @Override
   public List<Node> getChildren() {
-    List<Node> l = statements.getChildren();
     return new ArrayList<Node>() {{
       add(condition);
-      addAll(l);
+      add(statements);
     }};
   }
 }
@@ -463,11 +464,10 @@ class ForBlock extends Node {
 
   @Override
   public List<Node> getChildren() {
-    List<Node> l = statements.getChildren();
     return new ArrayList<Node>() {{
       add(for_id);
       add(for_expr);
-      addAll(l);
+      add(statements);
     }};
   }
 }
