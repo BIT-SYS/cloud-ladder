@@ -12,4 +12,6 @@ proc foot(String self) -> Number {
     42
 }
 
-Boolean is_the_same = cat.foot() == how_many_foot
+for cat in string_list {
+    Boolean is_the_same = cat.foot() == how_many_foot
+}

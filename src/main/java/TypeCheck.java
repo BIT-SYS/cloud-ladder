@@ -1,11 +1,11 @@
 import symboltable.ProcedureSymbol;
 import symboltable.Symbol;
+import symboltable.Type;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static symboltable.Utils.getType;
-import static symboltable.Utils.typeEquals;
+import static symboltable.Utils.*;
 
 public class TypeCheck extends ASTBaseListener {
 
@@ -55,6 +55,7 @@ public class TypeCheck extends ASTBaseListener {
         if (null == firstSymbol) {
             Utils.err("Type Check: MemberExpression", "Procedure " + procedure.name + " is not a method");
         }
+        assert null != firstSymbol;
         if (!typeEquals(firstSymbol.type, ctx.object.evalType)) {
             Utils.err("Type Check: MemberExpression", "Procedure " + procedure.name + " is not a method of " + ctx.object.evalType);
         }
@@ -69,10 +70,10 @@ public class TypeCheck extends ASTBaseListener {
         ctx.evalType = ctx.symbol.type;
     }
 
-    @Override
-    public void exitLiteral(Literal ctx) {
-        // 是放在这里好还是建立AST时？
-    }
+//    @Override
+//    public void exitLiteral(Literal ctx) {
+//        // 是放在这里好还是建立AST时？
+//    }
 
     @Override
     public void exitBinaryExpression(BinaryExpression ctx) {
@@ -86,9 +87,28 @@ public class TypeCheck extends ASTBaseListener {
         String typeStr = ctx.left.evalType.toString();
         if (typeStr.startsWith("List<")) {
             // 只有List<>可以有[]访问下标
-            ctx.evalType = getType(typeStr.substring(typeStr.indexOf('<') + 1, typeStr.length() - 1));
+            ctx.evalType = getElementType(typeStr);
         } else {
             Utils.err("Type Check: IndexExpression", "left is not a List Type");
         }
     }
+
+    @Override
+    public void exitForBlock(ForBlock ctx) {
+        String typeStr = ctx.for_expr.evalType.toString();
+        if (!typeStr.startsWith("List<")) {
+            Utils.err("Type Check: ForBlock", "for_expr is not a List Type");
+        }
+        if (!typeEquals(ctx.for_id.evalType, getElementType(typeStr))) {
+            Utils.err("Type Check: ForBlock",
+                    "can not retrieve " +ctx.for_id.evalType + " from " +typeStr);
+        }
+    }
+
+//    @Override
+//    public void exitAssign(Assign ctx) {
+//        if (!typeEquals(ctx.lvalue.evalType, ctx.rvalue.evalType)) {
+//            Utils.err("Type Check: Assign", "left & right is not the same type!");
+//        }
+//    }
 }
