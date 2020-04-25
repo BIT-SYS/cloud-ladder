@@ -2,11 +2,13 @@ package IR;
 
 public class AssignIR extends TripleNode {
 
-  AssignIR(){
-    op = IROperator.Assign;
+  public AssignIR(Object lvalue, Object rvalue) {
+    super(lvalue, rvalue);
+
   }
-  public AssignIR(String lvalue, String rvalue) {
-    arg1 = lvalue;
-    arg2 = rvalue;
+
+  @Override
+  public IROperator getOp() {
+    return IROperator.Assign;
   }
 }

@@ -1,6 +1,6 @@
 package IR;
 
-public class QuadrupleNode extends IRNode {
+public abstract class QuadrupleNode extends IRNode {
   public String arg1;
   public String arg2;
   public String result;
@@ -8,10 +8,14 @@ public class QuadrupleNode extends IRNode {
   QuadrupleNode() {
   }
 
-  QuadrupleNode(IROperator op, String arg1, String arg2, String result) {
-    this.op = op;
-    this.arg1 = arg1;
-    this.arg2 = arg2;
-    this.result = result;
+  QuadrupleNode(Object arg1, Object arg2, Object result) {
+    this.arg1 = arg1.toString();
+    this.arg2 = arg2.toString();
+    this.result = result.toString();
+  }
+
+  @Override
+  public String toString() {
+    return String.format("%s %s = %s %s\n",labels, result, arg1, arg2);
   }
 }
