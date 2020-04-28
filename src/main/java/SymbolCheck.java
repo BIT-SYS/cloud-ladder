@@ -165,6 +165,9 @@ public class SymbolCheck extends ASTBaseListener {
     public void enterVariableDeclaration(VariableDeclaration ctx) {
         // 和exitParameter同样的原因改成进入时就定义
         String name = ctx.id.name;
+        if (null != currentScope.resolveWithin(name)) {
+            Utils.err("Symbol Check: VariableDeclaration", "Variable " + name + " has been declared!");
+        }
         Type type = getType(ctx.type);
         VariableSymbol variableSymbol = new VariableSymbol(name, type);
         currentScope.define(variableSymbol);
@@ -189,7 +192,7 @@ public class SymbolCheck extends ASTBaseListener {
         String identifier = ctx.name;
         Symbol symbol = currentScope.resolve(identifier);
         if (null == symbol) {
-            System.err.println("<variable " + identifier + "> not found in " + currentScope.getScopeName());
+            Utils.err("Symbol Check: Identifier", "<variable " + identifier + "> not found in " + currentScope.getScopeName());
         } else {
             ctx.symbol = symbol;
         }
@@ -200,7 +203,7 @@ public class SymbolCheck extends ASTBaseListener {
         String identifier = ctx.callee.name;
         Symbol symbol = currentScope.resolve(identifier);
         if (null == symbol) {
-            System.err.println("<function " + identifier + "> not found in " + currentScope.getScopeName());
+            Utils.err("Symbol Check: CallExpression", "<function " + identifier + "> not found in " + currentScope.getScopeName());
         } else {
             ctx.symbol = symbol;
         }
@@ -219,13 +222,13 @@ public class SymbolCheck extends ASTBaseListener {
 
         public void addBreak() {
             if (loopCounter < 1) {
-                System.err.println("<break> not in a loop");
+                Utils.err("Symbol Check: LoopWatcher", "<break> not in a loop");
             }
         }
 
         public void addContinue() {
             if (loopCounter < 1) {
-                System.err.println("<continue> not in a loop");
+                Utils.err("Symbol Check: LoopWatcher", "<continue> not in a loop");
             }
         }
     }

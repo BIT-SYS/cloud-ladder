@@ -13,7 +13,8 @@ Number hexDouble2 = 0x1.956ad0aae33a4p117
 Number octal = 01234567
 Number hexUpper = 0x1234567890ABCDEFL
 Number hexLower = 0x1234567890abcedfl
-Number x1 = _52              // This is an identifier, not a numeric literal
+// 下面这个的确可以识别为 标识符 _52 ，但目前会影响后面的检查（因为这就是个错误），所以先注释掉
+// Number x1 = _52              // This is an identifier, not a numeric literal
 Number x2 = 5_2              // OK (decimal literal)
 Number x4 = 5_______2        // OK (decimal literal)
 Number x7 = 0x5_2            // OK (hexadecimal literal)
