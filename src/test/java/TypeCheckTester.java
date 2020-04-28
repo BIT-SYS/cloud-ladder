@@ -11,7 +11,7 @@ import java.io.InputStream;
 public class TypeCheckTester {
     public static void main(String[] args) throws Exception {
         // 单独测试某个文件
-        InputStream is = new FileInputStream("examples/test-type-simple.cl");
+        InputStream is = new FileInputStream("examples/leap-year.cl");
 
         ANTLRInputStream input = new ANTLRInputStream(is);
         CLParserLexer lexer = new CLParserLexer(input);
@@ -43,7 +43,6 @@ public class TypeCheckTester {
     }
 
     public void testTypeCheck(String inputFile) throws IOException {
-        if (inputFile.endsWith("leap-year.cl")) return;//todo
         System.out.println("testing file: " + inputFile);
         InputStream is = new FileInputStream(inputFile);
 
