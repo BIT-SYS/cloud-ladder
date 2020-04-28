@@ -65,9 +65,8 @@ emptyLines: NL+;
 
 // TODO 初始化列表/哈希表
 expression:
-        '(' expression ')'                                        # parens
-        | literal                                                 # Lit
-	| expression NL? bop = '.' ( IDENTIFIER | procedureCall)  # member
+        literal                                                 # Lit
+	| expression NL? bop = '.' ( procedureCall | IDENTIFIER )  # member
         | listInitializer                                         # listInit
 	| procedureCall                                           # procedure
     | IDENTIFIER                                              # id
@@ -80,6 +79,7 @@ expression:
 	| expression bop = ('and' | 'or'| 'xor') expression       # Logic
         | lambda                                                  # lam
         | expression'[' index=expression ']'                      # index
+        | '(' expression ')'                                        # parens
         ;
 
 listInitializer: 

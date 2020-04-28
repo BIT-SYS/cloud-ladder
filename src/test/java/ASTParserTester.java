@@ -33,11 +33,6 @@ public class ASTParserTester {
 
     ASTParser trans = new ASTParser();
     Program p = (Program) trans.visit(tree);
-    AST2IR ast2IR = new AST2IR();
-    ASTWalker walker = new ASTWalker();
-    walker.walk(ast2IR, p);
-    Gson g = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    System.out.println(g.toJson(ast2IR));
     return p;
   }
 
