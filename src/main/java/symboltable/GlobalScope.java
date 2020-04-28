@@ -5,6 +5,7 @@ public class GlobalScope extends BaseScope {
         super(enclosingScope);
     }
 
+    @Override
     public String getScopeName() {
         return "globals";
     }

@@ -30,10 +30,10 @@ public class SymbolCheck extends ASTBaseListener {
 
     @Override
     public void enterProgram(Program ctx) {
-        globals = new GlobalScope(null);
+        globals = new GlobalScope(new PredefinedScope(null));
         currentScope = globals;
         System.out.println(">>>>> enter program");
-
+        System.out.println("stdlib: " + currentScope.getEnclosingScope());
         ctx.scope = globals;
     }
 
