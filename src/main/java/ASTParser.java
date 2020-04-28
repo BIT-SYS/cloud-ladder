@@ -1,3 +1,4 @@
+import IR.*;
 import symboltable.Scope;
 import symboltable.SimpleType;
 import symboltable.Symbol;
@@ -101,6 +102,7 @@ abstract class Node {
   public Scope scope;
   public Symbol symbol;
   public Type evalType;
+  static public IR ir;
 
   //
   int newLabel() {
@@ -108,6 +110,7 @@ abstract class Node {
   }
 
   void emitLabel(int i) {
+    ir.emitLabel(i);
     System.out.print("L" + i + ":");
   }
 
@@ -118,6 +121,10 @@ abstract class Node {
   public String gen(int before, int after) {
     System.out.println(this.getClass().getName());
     return "";
+  }
+
+  public void register(IRNode n) {
+    ir.emit(n);
   }
 
   abstract List<Node> getChildren();
@@ -131,6 +138,7 @@ class Program extends Node {
 
   Program(Block bl) {
     statements = bl;
+    ir = new IR();
   }
 
   @Override
@@ -193,6 +201,9 @@ class Assign extends ExpressionNode {
 
   @Override
   public String gen(int before, int after) {
+    String l = lvalue.gen().toString();
+    String r = rvalue.gen().toString();
+    ir.emit(new AssignIR(l, r));
     emit(lvalue.gen() + " = " + rvalue.gen());
     return "";
   }
@@ -457,7 +468,7 @@ class ForBlock extends Node {
 
     // +1 and jump
     emit(t.toString() + " = " + t.toString() + " + 1");
-    emit("goto L"+ before);
+    emit("goto L" + before);
     emitLabel(after);
     return "";
   }
@@ -552,7 +563,8 @@ class VariableDeclaration extends Node {
 
   @Override
   public String gen(int before, int after) {
-    emit(id.gen() + " = " + expr.gen());
+    VariableDeclarationIR vdir = new VariableDeclarationIR(id.gen(), expr.gen());
+    register(vdir);
     return "";
   }
 
@@ -601,6 +613,8 @@ class CallExpression extends ExpressionNode {
             " ",
             args.stream().map(ExpressionNode::toString).collect(Collectors.toCollection((ArrayList::new)))
     );
+    CallExprIR ceir = new CallExprIR(callee.toString(), args.stream().map(i -> (Object) i).collect(Collectors.toList()));
+    ir.emit(ceir);
     emit(t.toString() + " = call " + callee + " " + args_str);
     return t;
   }
@@ -800,6 +814,11 @@ class BinaryExpression extends ExpressionNode {
   public ExpressionNode reduce() {
     ExpressionNode reducedExpr = gen();
     Temp t = new Temp();
+    if (reducedExpr instanceof BinaryExpression) {
+      BinaryExpression be = (BinaryExpression) reducedExpr;
+      BinaryExprIR beir = new BinaryExprIR(be.op, be.left, be.right, t);
+      ir.emit(beir);
+    }
     emit(t.toString() + " = " + reducedExpr.toString());
     return t;
   }
