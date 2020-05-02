@@ -17,6 +17,6 @@ public class JumpIfNotTrueIR extends IRNode {
 
   @Override
   public String toString() {
-    return String.format("%s if true != %s goto %s\n",labels,condition, to);
+    return String.format("%s if true != %s goto %s",labels,condition, to);
   }
 }

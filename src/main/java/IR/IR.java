@@ -53,7 +53,29 @@ public class IR {
   @Override
   public String toString() {
 
-    System.out.println(String.format("Operation Count: %d, Labels Count: %d\n",IRs.size(), labelMap.size()));
-    return IRs.stream().map(Object::toString).collect(Collectors.joining());
+    StringBuilder ret = new StringBuilder(String.format("Operation Count: %d, Labels Count: %d\n", IRs.size(), labelMap.size()));
+    int indentLevel = 0;
+    for (int i = 0; i < IRs.size(); i++) {
+      IRNode ir = IRs.get(i);
+      System.out.println(ir);
+
+      switch (ir.getOp()){
+        case LazyExecutionStart:
+          indentLevel +=1;
+          break;
+        default:
+      }
+      ret.append("  ".repeat(indentLevel));
+      ret.append(ir.toString());
+      ret.append("\n");
+
+      switch (ir.getOp()){
+        case LazyExecutionEnd:
+          indentLevel -=1;
+          break;
+        default:
+      }
+    }
+    return ret.toString();
   }
 }

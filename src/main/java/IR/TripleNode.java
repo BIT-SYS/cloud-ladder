@@ -7,7 +7,7 @@ public abstract class TripleNode extends IRNode {
 
   @Override
   public String toString() {
-    return String.format("%s %s %s %s\n", labels, getOp(), arg1, arg2);
+    return String.format("%s %s %s %s", labels, getOp(), arg1, arg2);
   }
 
   public TripleNode(Object arg1, Object arg2) {

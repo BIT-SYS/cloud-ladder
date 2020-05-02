@@ -16,6 +16,6 @@ public abstract class QuadrupleNode extends IRNode {
 
   @Override
   public String toString() {
-    return String.format("%s %s = %s %s\n",labels, result, arg1, arg2);
+    return String.format("%s %s = %s %s",labels, result, arg1, arg2);
   }
 }
