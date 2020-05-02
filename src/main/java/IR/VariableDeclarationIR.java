@@ -10,4 +10,9 @@ public class VariableDeclarationIR extends TripleNode {
   public IROperator getOp() {
     return IROperator.VariableDeclaration;
   }
+
+  @Override
+  public String toString() {
+    return String.format("%s let %s = %s\n", labels, arg1, arg2);
+  }
 }

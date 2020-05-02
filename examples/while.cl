@@ -11,6 +11,7 @@ while true {
         } else {
             continue
         }
+        a = a + i
     }
     if i >= 10 {
         break

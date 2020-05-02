@@ -1,3 +1,4 @@
+import IR.NoOperationIR;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.antlr.v4.runtime.*;
@@ -43,6 +44,8 @@ public class ASTParserTester {
     p.emitLabel(before);
     p.gen(before, after);
     p.emitLabel(after);
+    Node.ir.emit(new NoOperationIR());
+    System.out.println(Node.ir);
   }
   public static void main(String[] args) throws Exception {
     tryToBuildIR("examples/leap-year.cl");

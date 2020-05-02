@@ -7,6 +7,7 @@ import symboltable.Type;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -89,6 +90,10 @@ class ASTWalker {
   }
 }
 
+interface HaveConditionAndBlock {
+  public ExpressionNode getCondition();
+  public Block getBlock();
+}
 
 /**
  * Base Node.
@@ -151,7 +156,7 @@ class Program extends Node {
 
   @Override
   public List<Node> getChildren() {
-    return new ArrayList<Node>(){{
+    return new ArrayList<Node>() {{
       add(statements);
     }};
   }
@@ -167,6 +172,8 @@ class RangeListInitializer extends ExpressionNode {
     ExpressionNode _start = start.reduce();
     ExpressionNode _end = end.reduce();
     Temp t = new Temp();
+    // TODO
+//    ir.emit(new )
     emit(t.toString() + " = [" + start.toString() + "," + end.toString() + "]");
     return t;
   }
@@ -252,6 +259,7 @@ class Break extends Node {
 
   @Override
   public String gen(int before, int after) {
+    ir.emit(new BreakIR(ir.getLabel(after)));
     emit("goto L" + after);
     return "";
   }
@@ -265,6 +273,7 @@ class Continue extends Node {
 
   @Override
   public String gen(int before, int after) {
+    ir.emit(new ContinueIR(ir.getLabel(before)));
     emit("goto L" + before);
     return "";
   }
@@ -281,16 +290,9 @@ class Block extends Node {
 
   @Override
   public String gen(int before, int after) {
-    before = newLabel();
-    after = newLabel();
-    emitLabel(before);
     for (int i = 0; i < statements.size(); i++) {
       statements.get(i).gen(before, after);
-      if (i != statements.size() - 1) {
-        before = newLabel();
-      }
     }
-    emitLabel(after);
     return "";
   }
 
@@ -306,11 +308,23 @@ class IfElseBlock extends Node {
   @Override
   public String gen(int before, int after) {
     // TODO 作用域 和 标签的冲突
+    int last = newLabel();
     for (Node n : ifelses) {
-      after = newLabel();
-      n.gen(0, after);
-      emitLabel(after);
+      int middle = newLabel();
+      if (n instanceof HaveConditionAndBlock) {
+        HaveConditionAndBlock n1 = (HaveConditionAndBlock) n;
+        String condition =  n1.getCondition().gen(0,0);
+        JumpIfNotTrueIR j = new JumpIfNotTrueIR(condition,ir.getLabel(middle));
+        ir.emit(j);
+        n1.getBlock().gen(before, after);
+        ir.emit(new JumpIR(ir.getLabel(last)));
+      } else {
+        System.err.println("ERROR AST");;
+      }
+      ir.emitLabel(middle);
+      emitLabel(middle);
     }
+    ir.emitLabel(last);
     return "";
   }
 
@@ -320,7 +334,7 @@ class IfElseBlock extends Node {
   }
 }
 
-class IfBlock extends Node {
+class IfBlock extends Node implements HaveConditionAndBlock {
   public ExpressionNode condition;
   // may be null
   public Block statements;
@@ -330,16 +344,17 @@ class IfBlock extends Node {
   }
 
 
+
   @Override
   public String gen(int before, int after) {
     int label = newLabel();
-    String conditionLabel = condition.gen(before, label);
-    emitLabel(label);
+    String reduced_condition = condition.gen(before, label);
+    ir.emitLabel(label);
     int blockAfter = newLabel();
-    emit("ifnot " + conditionLabel + " goto L" + blockAfter);
+    ir.emit(new JumpIfNotTrueIR(reduced_condition, ir.getLabel(blockAfter)));
     statements.gen(label, after);
-    emit("goto L" + after);
-    emitLabel(blockAfter);
+    ir.emit(new JumpIR(ir.getLabel(after)));
+    ir.emitLabel(blockAfter);
     return "";
   }
 
@@ -350,9 +365,19 @@ class IfBlock extends Node {
       add(statements);
     }};
   }
+
+  @Override
+  public ExpressionNode getCondition() {
+    return condition;
+  }
+
+  @Override
+  public Block getBlock() {
+    return statements;
+  }
 }
 
-class ElifBlock extends Node {
+class ElifBlock extends Node implements HaveConditionAndBlock {
   public ExpressionNode condition;
   public Block statements;
 
@@ -383,9 +408,19 @@ class ElifBlock extends Node {
     };
 
   }
+
+  @Override
+  public ExpressionNode getCondition() {
+    return condition;
+  }
+
+  @Override
+  public Block getBlock() {
+    return statements;
+  }
 }
 
-class ElseBlock extends Node {
+class ElseBlock extends Node implements HaveConditionAndBlock {
   public Block statements;
 
   ElseBlock(Block bl) {
@@ -404,6 +439,16 @@ class ElseBlock extends Node {
       add(statements);
     }};
   }
+
+  @Override
+  public ExpressionNode getCondition() {
+    return new Literal("true", new SimpleType("Boolean"));
+  }
+
+  @Override
+  public Block getBlock() {
+    return statements;
+  }
 }
 
 class WhileBlock extends Node {
@@ -420,10 +465,15 @@ class WhileBlock extends Node {
     after = newLabel();
 
     emitLabel(before);
-
-    emit("iffalse " + condition.gen(0, 0) + " goto L" + after);
+    ir.emitLabel(before);
+    String reduced_condition = condition.gen(0, 0);
+    JumpIfNotTrueIR jintir = new JumpIfNotTrueIR(reduced_condition, ir.getLabel(after));
+    ir.emit(jintir);
+    emit("iffalse " + reduced_condition + " goto L" + after);
     statements.gen(before, after);
 
+    ir.emit(new JumpIR(ir.getLabel(before)));
+    ir.emitLabel(after);
     emitLabel(after);
     return "";
 
@@ -456,18 +506,30 @@ class ForBlock extends Node {
     Temp t = new Temp();
     Temp len = new Temp();
     // get expr len
+    ir.emit(new CallExprIR("size", expr, len, new ArrayList<>()));
     emit(len.toString() + " = call " + expr + ".size");
+
+    ir.emit(new VariableDeclarationIR(t, new Literal("0", new SimpleType("Number"))));
     emit(t.toString() + " = 0");
+    ir.emitLabel(before);
     emitLabel(before);
     // if false then jump
+    ir.emit(new CallExprIR("get", expr, for_id, new ArrayList<Object>(){{add(t);}} ));
     emit(for_id.toString() + " = " + expr + ".get " + t.toString());
+    LogicExpression condition = new LogicExpression(t, len,"<");
+    String condition_reduced = condition.gen(0,0);
+    ir.emit(new JumpIfNotTrueIR(condition_reduced,ir.getLabel(after)));
     emit("iffalse " + t.toString() + " < " + len.toString() + " goto L" + after);
     // execuete
     statements.gen(before, after);
 
 
     // +1 and jump
+    BinaryExpression b = new BinaryExpression(t, new Literal("1", new SimpleType("Number")), "+");
+    String b_reduced = b.gen(0,0);
+    ir.emit( new AssignIR(t,b_reduced));
     emit(t.toString() + " = " + t.toString() + " + 1");
+    ir.emit(new JumpIR(ir.getLabel(before)));
     emit("goto L" + before);
     emitLabel(after);
     return "";
@@ -613,7 +675,7 @@ class CallExpression extends ExpressionNode {
             " ",
             args.stream().map(ExpressionNode::toString).collect(Collectors.toCollection((ArrayList::new)))
     );
-    CallExprIR ceir = new CallExprIR(callee.toString(), args.stream().map(i -> (Object) i).collect(Collectors.toList()));
+    CallExprIR ceir = new CallExprIR(callee.toString(), null, t, args.stream().map(i -> (Object) i).collect(Collectors.toList()));
     ir.emit(ceir);
     emit(t.toString() + " = call " + callee + " " + args_str);
     return t;
@@ -648,7 +710,13 @@ class MemberExpression extends ExpressionNode {
     ExpressionNode object_reduced = object.reduce();
     Temp temp = new Temp();
     // TODO call
-    emit(temp.toString() + " = call " + object_reduced.toString() + "." + property.toString());
+    if (property instanceof CallExpression) {
+      CallExpression proc = (CallExpression) property;
+      CallExprIR ceir = new CallExprIR(proc.callee.toString(), object_reduced, temp,
+              proc.arguments.stream().map(e -> (Object) e).collect(Collectors.toList()));
+      ir.emit(ceir);
+      emit(temp.toString() + " = call " + object_reduced.toString() + "." + property.toString());
+    }
     return temp;
   }
 
@@ -1016,6 +1084,12 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
       me.property = (ExpressionNode) visit(ctx.procedureCall());
     }
     return me;
+  }
+
+
+  @Override
+  public Node visitProcedure(CLParserParser.ProcedureContext ctx) {
+    return visit(ctx.procedureCall());
   }
 
   @Override
