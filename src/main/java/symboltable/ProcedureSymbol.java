@@ -6,6 +6,7 @@ import java.util.Map;
 public class ProcedureSymbol extends Symbol implements Scope {
     public Map<String, Symbol> arguments = new LinkedHashMap<>();
     Scope enclosingScope;
+    public ProcedureSymbol next = null;
 
     public ProcedureSymbol(String name, Type retType, Scope enclosingScope) {
         super(name, retType);
@@ -37,6 +38,12 @@ public class ProcedureSymbol extends Symbol implements Scope {
             return getEnclosingScope().resolve(name);
         }
         return null; // not found
+    }
+
+    // 👇 会用到么？
+    @Override
+    public Symbol resolveWithin(String name) {
+        return arguments.get(name);
     }
 
     public String toString() {
