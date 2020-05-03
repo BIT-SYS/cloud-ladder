@@ -10,4 +10,5 @@ public enum IROperator {
   JumpIfNotTrue,
   Jump,
   Break, Continue,
+  PushStack, PopStack
 }

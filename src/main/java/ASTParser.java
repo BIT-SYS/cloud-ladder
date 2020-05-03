@@ -170,7 +170,6 @@ class RangeListInitializer extends ExpressionNode {
     ExpressionNode _end = end.reduce();
     Temp t = new Temp();
     ir.emit(new BuildListIR(t, _start, _end));
-    emit(t.toString() + " = [" + start.toString() + "," + end.toString() + "]");
     return t;
   }
 
@@ -515,7 +514,7 @@ class ForBlock extends Node {
     // get expr len
     ir.emit(new CallExprIR("size", expr, len, new ArrayList<>()));
 
-    ir.emit(new VariableDeclarationIR(t, new Literal("0", new SimpleType("Number"))));
+    ir.emit(new VariableDeclarationIR(t,new SimpleType("Number"),new Literal("0", new SimpleType("Number"))));
     ir.emitLabel(before);
     // if false then jump
     ir.emit(new CallExprIR("get", expr, for_id, new ArrayList<>() {{
@@ -632,7 +631,11 @@ class VariableDeclaration extends Node {
 
   @Override
   public String gen(int before, int after) {
-    VariableDeclarationIR vdir = new VariableDeclarationIR(id.gen(), expr.gen());
+    System.out.println(id);
+    System.out.println(id.toString());
+    // ! ERROR: warning: TODO
+    Symbol s = scope.resolve(id.toString());
+    VariableDeclarationIR vdir = new VariableDeclarationIR(id.gen(),s.type, expr.gen());
     register(vdir);
     return "";
   }

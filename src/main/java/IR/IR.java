@@ -47,7 +47,15 @@ public class IR {
     ir.labels = tempLabelList;
     ir.labels.forEach(l -> l.iRNode = ir);
     tempLabelList = new ArrayList<>();
+    if (IRs.size() > 0) {
+      IRNode last_ir  = IRs.get(IRs.size()-1);
+      last_ir.setNext(ir);
+    }
     IRs.add(ir);
+  }
+
+  public IRNodeInterface getFirst() {
+    return IRs.get(0);
   }
 
   @Override

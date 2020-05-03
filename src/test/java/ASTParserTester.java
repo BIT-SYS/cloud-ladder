@@ -39,11 +39,19 @@ public class ASTParserTester {
 
   public static void tryToBuildIR(String inputFile) throws IOException {
     Program p = tryToBuildAST(inputFile);
+    ASTWalker walker = new ASTWalker();
+
+    SymbolCheck symbolChecker = new SymbolCheck();
+    walker.walk(symbolChecker, p);
+
+    TypeCheck typeChecker = new TypeCheck();
+    walker.walk(typeChecker, p);
+
     int before = p.newLabel();
     int after = p.newLabel();
-    p.emitLabel(before);
+    Node.ir.emitLabel(before);
     p.gen(before, after);
-    p.emitLabel(after);
+    Node.ir.emitLabel(after);
     Node.ir.emit(new NoOperationIR());
     System.out.println(Node.ir);
   }
