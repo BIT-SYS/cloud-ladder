@@ -1,6 +1,5 @@
 import symboltable.ProcedureSymbol;
 import symboltable.Symbol;
-import symboltable.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,16 +47,31 @@ public class TypeCheck extends ASTBaseListener {
         // 原来 MemberExpression 竟然是包括方法调用……
         // todo 检查
         ExpressionNode callee = ctx.property;
-        assert callee.symbol instanceof ProcedureSymbol;
-        ProcedureSymbol procedure = (ProcedureSymbol) callee.symbol;
-        assert !procedure.arguments.isEmpty();
-        Symbol firstSymbol = procedure.arguments.get("self");
-        if (null == firstSymbol) {
-            Utils.err("Type Check: MemberExpression", "Procedure " + procedure.name + " is not a method");
-        }
-        assert null != firstSymbol;
-        if (!typeEquals(firstSymbol.type, ctx.object.evalType)) {
-            Utils.err("Type Check: MemberExpression", "Procedure " + procedure.name + " is not a method of " + ctx.object.evalType);
+        while (true) {
+            assert callee.symbol instanceof ProcedureSymbol;
+            ProcedureSymbol procedure = (ProcedureSymbol) callee.symbol;
+            assert !procedure.arguments.isEmpty();
+            Symbol firstSymbol = procedure.arguments.get("self");
+            if (null == firstSymbol) {
+                ProcedureSymbol next = procedure.next;
+                if (null == next)
+                    Utils.err("Type Check: MemberExpression", "Procedure " + procedure.name + " is not a method");
+                else {
+                    callee.symbol = next;
+                    continue;
+                }
+            }
+            assert null != firstSymbol;
+            if (!typeEquals(firstSymbol.type, ctx.object.evalType)) {
+                ProcedureSymbol next = procedure.next;
+                if (null == next)
+                    Utils.err("Type Check: MemberExpression", "Procedure " + procedure.name + " is not a method of " + ctx.object.evalType);
+                else {
+                    callee.symbol = next;
+                    continue;
+                }
+            }
+            break;
         }
         ctx.evalType = ctx.property.evalType;
     }
@@ -101,7 +115,7 @@ public class TypeCheck extends ASTBaseListener {
         }
         if (!typeEquals(ctx.for_id.evalType, getElementType(typeStr))) {
             Utils.err("Type Check: ForBlock",
-                    "can not retrieve " +ctx.for_id.evalType + " from " +typeStr);
+                    "can not retrieve " + ctx.for_id.evalType + " from " + typeStr);
         }
     }
 

@@ -14,4 +14,4 @@ for Number year in [1..till_now] {
 [1..till_now]
     .filter(is_leap_year)
     .map(|Number year| -> String {year.toString()})
-    .forEach(|Number y| -> String {print(y + " is leap year!\n")})
+    .forEach(|String y| -> String {print(y + " is leap year!\n")})

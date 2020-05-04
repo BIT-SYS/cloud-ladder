@@ -13,6 +13,7 @@ a = b * c
 a = b / c
 a = -b
 
+Number d = 0
 d = a - b - c
 d = a * b * c
 d = a + b * c

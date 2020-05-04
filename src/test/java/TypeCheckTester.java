@@ -11,7 +11,7 @@ import java.io.InputStream;
 public class TypeCheckTester {
     public static void main(String[] args) throws Exception {
         // 单独测试某个文件
-        InputStream is = new FileInputStream("examples/test-type-simple.cl");
+        InputStream is = new FileInputStream("examples/leap-year.cl");
 
         ANTLRInputStream input = new ANTLRInputStream(is);
         CLParserLexer lexer = new CLParserLexer(input);
@@ -32,15 +32,14 @@ public class TypeCheckTester {
 
     @Test
     public void iterTestTypeCheck() throws IOException {
-//        File dir = new File("examples");
-//        File[] files = dir.listFiles();
-//        assert files != null;
-//        for (File file : files) {
-//            if (file.isFile()) {
-//                testTypeCheck(file.getAbsolutePath());
-//            }
-//        }
-        testTypeCheck("examples/test-type-simple.cl");
+        File dir = new File("examples");
+        File[] files = dir.listFiles();
+        assert files != null;
+        for (File file : files) {
+            if (file.isFile()) {
+                testTypeCheck(file.getAbsolutePath());
+            }
+        }
     }
 
     public void testTypeCheck(String inputFile) throws IOException {

@@ -5,7 +5,7 @@ import java.util.List;
 
 public class SimpleType implements Type {
     private final static List<String> simpleTypes =
-            Arrays.asList("Number", "Image", "String", "Audio", "Video", "Boolean", "Invalid");
+            Arrays.asList("Number", "Image", "String", "Audio", "Video", "Boolean", "Invalid", "Proc");
 
     String name;
 
@@ -14,7 +14,8 @@ public class SimpleType implements Type {
             name = string;
         } else {
             //todo 报错
-            System.err.println("Sorry I don't know what is " + string + "type");
+            System.err.println("Sorry I don't know what is " + string + " type");
+            name = "Invalid";
         }
     }
 

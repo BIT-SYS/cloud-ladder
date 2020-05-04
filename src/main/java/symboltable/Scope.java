@@ -17,4 +17,9 @@ public interface Scope {
      * Look up name in this scope or in enclosing scope if not here
      */
     Symbol resolve(String name);
+
+    /**
+     * 只看当前scope有没有（用于检查重定义）
+     */
+    Symbol resolveWithin(String name);
 }

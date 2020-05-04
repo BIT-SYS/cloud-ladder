@@ -10,7 +10,7 @@ import java.io.InputStream;
 public class SymbolCheckTester {
     public static void main(String[] args) throws Exception {
         // 单独测试某个文件
-        InputStream is = new FileInputStream("examples/nim.cl");
+        InputStream is = new FileInputStream("examples/biorhythms.cl");
 
         ANTLRInputStream input = new ANTLRInputStream(is);
         CLParserLexer lexer = new CLParserLexer(input);
