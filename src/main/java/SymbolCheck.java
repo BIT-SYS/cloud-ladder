@@ -76,12 +76,20 @@ public class SymbolCheck extends ASTBaseListener {
         pushScope(ctx, procedureSymbol);
 
         ctx.scope = currentScope;
+        ctx.evalType = type;
+        ctx.symbol = procedureSymbol;
     }
 
     @Override
     public void exitLambdaExpression(LambdaExpression node) {
         exitBlockKai("<<<<< exit lambda:");
         //要不要删除这个匿名函数的symbol呢？应该不要
+    }
+
+    @Override
+    public void exitCallExpression(CallExpression ctx) {
+        // 为了TypeCheck里检查参数类型对不对
+        ctx.scope = currentScope;
     }
 
     // 貌似block是匿名函数独占的子节点了
@@ -92,7 +100,6 @@ public class SymbolCheck extends ASTBaseListener {
         LocalScope localScope = new LocalScope(currentScope);
         pushScope(ctx, localScope);
 
-        // 需要么？
         ctx.scope = currentScope;
     }
 
@@ -183,6 +190,11 @@ public class SymbolCheck extends ASTBaseListener {
         Type type = getType(ctx.type);
         VariableSymbol variableSymbol = new VariableSymbol(name, type);
         currentScope.define(variableSymbol);
+    }
+
+    @Override
+    public void exitParameterList(ParameterList ctx) {
+        ctx.scope = currentScope;
     }
 
     // 👇 验证变量、函数是否存在

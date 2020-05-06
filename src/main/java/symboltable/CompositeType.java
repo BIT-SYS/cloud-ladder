@@ -20,11 +20,7 @@ public class CompositeType implements Type {
         this.container = container;
 
         String remain = string.substring(lt_pos + 1, string.length() - 1);
-        if (remain.contains("<")) {
-            element = new CompositeType(remain);
-        } else {
-            element = new SimpleType(remain);
-        }
+        element = Utils.getType(remain);
     }
 
     @Override

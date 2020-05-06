@@ -5,13 +5,31 @@ public class Utils {
         // 可以维护一个“类型池”，不知道有没有必要
         if (string.contains("<")) {
             return new CompositeType(string.replace(" ", ""));
+        } else if (string.startsWith("Type")) {
+            return new GenericType(string);
         } else {
-            return new SimpleType(string.replace(" ", ""));
+            return new SimpleType(string.replace(" ", "")); //啊？我写replace干嘛？
         }
     }
 
-    public static boolean typeEquals(Type a, Type b) {
+    public static boolean sameType(Type a, Type b) {
         return a.toString().equals(b.toString());
+    }
+
+
+    public static boolean sameParameterType(Type argType, Type parType) {
+        System.out.println("argType " + argType);
+        System.out.println("parType " + parType);
+//        // 两者之间可能有一个是Proc
+//        if (parType.toString().equals("Proc")) {
+//            return true; //todo 目前没法判断传进来的是返回argType的函数还是就是argType的变量
+//        } else
+        if (!parType.toString().contains("Type")) {
+            return argType.toString().equals(parType.toString());
+        } else {
+            // todo 形参是泛型
+            return true;
+        }
     }
 
     public static Type getElementType(String typeStr) {
