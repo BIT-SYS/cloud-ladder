@@ -1,6 +1,8 @@
 package IR;
 
 
+import AST.ExpressionNode;
+
 public class BinaryExprIR extends QuadrupleNode {
   private IROperator op;
 
@@ -9,8 +11,8 @@ public class BinaryExprIR extends QuadrupleNode {
     return op;
   }
 
-  public BinaryExprIR(String op, Object arg1, Object arg2, Object result) {
-    super(arg1, arg2, result);
+  public BinaryExprIR(String op, ExpressionNode arg1, ExpressionNode arg2, ExpressionNode result) {
+    super(new Value(arg1), new Value(arg2), new Value(result));
     switch (op) {
       case "+":
         this.op = IROperator.AddExpr;

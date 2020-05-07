@@ -1,16 +1,17 @@
 package IR;
 
+import symboltable.Type;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class LazyExecutionStartIR extends IRNode {
   String name;
-  List<String> parameters;
-  String retType;
+  List<Value> parameters;
+  Type retType;
 
-  public LazyExecutionStartIR(String name, String ret,List<Object> parameters){
+  public LazyExecutionStartIR(String name, Type ret,List<Value> parameters){
     this.name = name;
-    this.parameters = parameters.stream().map(Object::toString).collect(Collectors.toList());
+    this.parameters = parameters;
     this.retType = ret;
   }
   @Override

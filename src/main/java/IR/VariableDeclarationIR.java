@@ -1,9 +1,9 @@
 package IR;
 
-public class VariableDeclarationIR extends QuadrupleNode {
+public class VariableDeclarationIR extends TripleNode {
 
-  public VariableDeclarationIR(Object result, Object type, Object value) {
-    super(type, value, result);
+  public VariableDeclarationIR(Value result, Value value) {
+    super(value, result);
   }
 
   @Override
@@ -13,6 +13,6 @@ public class VariableDeclarationIR extends QuadrupleNode {
 
   @Override
   public String toString() {
-    return String.format("%s %s %s = %s", labels,arg1, result, arg2);
+    return String.format("%s %s = %s", labels,arg2, arg1);
   }
 }

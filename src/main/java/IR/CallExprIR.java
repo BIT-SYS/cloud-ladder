@@ -1,35 +1,39 @@
 package IR;
 
+import AST.ExpressionNode;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CallExprIR extends IRNode {
 
-  public String caller;
+  public Value caller;
   public String callee;
-  public String result;
-  public List<String> args;
+  public Value result;
+  public List<Value> args;
 
   @Override
   public IROperator getOp() {
     return IROperator.CallExpr;
   }
 
-  public CallExprIR(String callee, Object caller, Object result, List<Object> args) {
+  public CallExprIR(String callee, ExpressionNode caller, ExpressionNode result, List<ExpressionNode> args) {
     this.callee = callee;
-    this.caller = caller != null ? caller.toString() : null;
-    this.result = result != null ? result.toString() : null;
+    this.caller = caller != null ? new Value(caller): null;
+    this.result = result != null ? new Value(result) : null;
     args = (args == null) ? new ArrayList<>() : args;
-    this.args = args.stream().map(Object::toString).collect(Collectors.toList());
+    this.args = args.stream().map(e -> new Value(e)).collect(Collectors.toList());
   }
 
   @Override
   public String toString() {
     if (caller != null && result != null) {
       return String.format("%s %s = %s.%s(%s)", labels,result, caller, callee, args);
+    } else if (result != null) {
+      return String.format("%s %s = %s(%s)", labels, result,callee,args);
     }
-    if (caller != null) {
+    else if (caller != null) {
       return String.format("%s %s.%s(%s)", labels, caller, callee, args);
     } else {
       return String.format("%s %s(%s)", labels, callee, args);

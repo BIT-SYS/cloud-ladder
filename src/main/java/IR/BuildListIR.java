@@ -1,21 +1,23 @@
 package IR;
 
+import AST.ExpressionNode;
+
 public class BuildListIR extends IRNode {
-  String start;
-  String end;
-  String result;
+  Value start;
+  Value end;
+  Value result;
   @Override
   public IROperator getOp() {
     return IROperator.BuildList;
   }
 
-  public BuildListIR(Object result){
-    this.result = result.toString();
+  public BuildListIR(ExpressionNode result){
+    this.result = new Value(result);
   }
-  public BuildListIR(Object result, Object start, Object end) {
+  public BuildListIR(ExpressionNode result, ExpressionNode start, ExpressionNode end) {
     this(result);
-    this.start = start.toString();
-    this.end = end.toString();
+    this.start = new Value(start);
+    this.end = new Value(end);
   }
 
   @Override

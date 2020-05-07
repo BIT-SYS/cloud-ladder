@@ -2,7 +2,7 @@ package IR;
 
 public class JumpIfNotTrueIR extends IRNode {
   public Label to;
-  public String condition;
+  public Value condition;
   @Override
   public IROperator getOp() {
     return IROperator.JumpIfNotTrue;
@@ -10,8 +10,8 @@ public class JumpIfNotTrueIR extends IRNode {
   JumpIfNotTrueIR(){
 
   }
-  public JumpIfNotTrueIR(Object condition, Label to) {
-    this.condition = condition.toString();
+  public JumpIfNotTrueIR(Value condition, Label to) {
+    this.condition = condition;
     this.to = to;
   }
 

@@ -1,11 +1,14 @@
+import AST.ASTParser;
+import AST.ASTWalker;
+import AST.Node;
+import AST.Program;
 import IR.NoOperationIR;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
 import java.io.*;
+import Grammar.*;
 
 public class ASTParserTester {
 

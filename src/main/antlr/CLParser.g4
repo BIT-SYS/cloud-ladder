@@ -53,7 +53,7 @@ statement:
 	| procedureDeclaration NL # procedureDecl
 	| typeType IDENTIFIER '=' expression NL  # variableDecl
 	| assignment NL # assign
-        | expression NL? # expr
+    | expression NL? # expr
 	| emptyLines # empty
         ;
 

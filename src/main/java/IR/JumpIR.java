@@ -1,10 +1,12 @@
 package IR;
 
+import symboltable.SimpleType;
+
 public class JumpIR extends JumpIfNotTrueIR {
 
   public JumpIR(Label to) {
     this.to = to;
-    this.condition = "false";
+    this.condition = Value.LiteralBoolean("false");
   }
 
   @Override

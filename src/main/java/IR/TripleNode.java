@@ -1,8 +1,8 @@
 package IR;
 
 public abstract class TripleNode extends IRNode {
-  public String arg1;
-  public String arg2;
+  public Value arg1;
+  public Value arg2;
 
 
   @Override
@@ -10,8 +10,8 @@ public abstract class TripleNode extends IRNode {
     return String.format("%s %s %s %s", labels, getOp(), arg1, arg2);
   }
 
-  public TripleNode(Object arg1, Object arg2) {
-    this.arg1 = arg1.toString();
-    this.arg2 = arg2.toString();
+  public TripleNode(Value arg1, Value arg2) {
+    this.arg1 = arg1;
+    this.arg2 = arg2;
   }
 }

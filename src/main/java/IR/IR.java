@@ -1,6 +1,7 @@
 package IR;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,7 +74,8 @@ public class IR {
           break;
         default:
       }
-      ret.append("  ".repeat(indentLevel));
+      String leading_spaces = String.join("", Collections.nCopies(indentLevel, "  "));
+      ret.append(leading_spaces);
       ret.append(ir.toString());
       ret.append("\n");
 

@@ -1,3 +1,7 @@
+import AST.ASTParser;
+import AST.ASTWalker;
+import AST.Program;
+import Grammar.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
