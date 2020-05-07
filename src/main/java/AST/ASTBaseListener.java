@@ -86,9 +86,6 @@ public class ASTBaseListener {
 	public void enterRangeListInitializer(RangeListInitializer node) {}
 	public void exitRangeListInitializer(RangeListInitializer node) {}
 
-	public void enterScopePointer(ScopePointer node) {}
-	public void exitScopePointer(ScopePointer node) {}
-
 	public void enterValuesListInitializer(ValuesListInitializer node) {}
 	public void exitValuesListInitializer(ValuesListInitializer node) {}
 
