@@ -44,7 +44,7 @@ public class TypeCheck extends ASTBaseListener {
         if (null == ctx.symbol) {
             Utils.err("Type Check: CallExpression", "Procedure symbol " + ctx.callee.name + " not found!");
         }
-//        ctx.evalType = ctx.symbol.type;
+
         int give = ctx.arguments.size();
         List<Type> signature = ((ProcedureSymbol) ctx.symbol).signature;
         int need = signature.size() - 1; // 减去的是返回值的类型
