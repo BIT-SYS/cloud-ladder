@@ -1,3 +1,8 @@
+import AST.ASTBaseListener;
+import AST.IfBlock;
+import AST.Program;
+import AST.VariableDeclaration;
+
 public class ASTListenerTester extends ASTBaseListener {
   @Override
   public void enterProgram(Program node) {

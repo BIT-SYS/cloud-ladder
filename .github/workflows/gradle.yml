@@ -8,6 +8,7 @@ on:
     branches:
       - develop
       - ast
+      - IR
   pull_request:
     branches:
       - develop
@@ -25,9 +26,10 @@ jobs:
         java-version: 1.8
     - name: setup environment for antlr
       run: |
-        sudo curl https://www.antlr.org/download/antlr-4.7.1-complete.jar -o /usr/local/lib/antlr-complete.jar
+        sudo curl https://www.antlr.org/download/antlr-4.8-complete.jar -o /usr/local/lib/antlr-complete.jar
+        whereis bash
         sudo tee -a /usr/bin/grun > /dev/null << 'EOF'
-        \#!bash
+        \#!/bin/bash
         java -cp .:/usr/local/lib/antlr-complete.jar org.antlr.v4.gui.TestRig "$@"
         EOF
         sudo chmod 777 /usr/bin/grun

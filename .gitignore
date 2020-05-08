@@ -5,3 +5,8 @@ bin
 .idea
 .gradle
 build
+out
+.attach*
+/src/main/gen/
+/src/main/antlr/
+CLLexer.tokens

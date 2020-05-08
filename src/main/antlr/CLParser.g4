@@ -53,7 +53,7 @@ statement:
 	| procedureDeclaration NL # procedureDecl
 	| typeType IDENTIFIER '=' expression NL  # variableDecl
 	| assignment NL # assign
-        | expression NL? # expr
+    | expression NL? # expr
 	| emptyLines # empty
         ;
 
@@ -65,12 +65,11 @@ emptyLines: NL+;
 
 // TODO 初始化列表/哈希表
 expression:
-        '(' expression ')'                                        # parens
-        | literal                                                 # Lit
-        | IDENTIFIER                                              # id
-	| expression NL? bop = '.' ( IDENTIFIER | procedureCall)  # member
+        literal                                                 # Lit
+	| expression NL? bop = '.' ( procedureCall | IDENTIFIER )  # member
         | listInitializer                                         # listInit
 	| procedureCall                                           # procedure
+    | IDENTIFIER                                              # id
 	| prefix = ('+' | '-' | 'not') expression                 # prefix
 	| expression bop = ('*' | '/' | '%') expression           # MulDivMod
 	| expression bop = ('+' | '-') expression                 # AddSub
@@ -80,6 +79,7 @@ expression:
 	| expression bop = ('and' | 'or'| 'xor') expression       # Logic
         | lambda                                                  # lam
         | expression'[' index=expression ']'                      # index
+        | '(' expression ')'                                        # parens
         ;
 
 listInitializer: 

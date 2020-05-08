@@ -1,10 +1,14 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import AST.ASTParser;
+import AST.ASTWalker;
+import AST.Node;
+import AST.Program;
+import IR.NoOperationIR;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
 import java.io.*;
+import Grammar.*;
 
 public class ASTParserTester {
 
@@ -20,7 +24,7 @@ public class ASTParserTester {
     }
   }
 
-  public void tryToBuildAST(String inputFile) throws IOException {
+  public static Program tryToBuildAST(String inputFile) throws IOException {
 
     System.out.println("test file: " + inputFile);
     InputStream is = System.in;
@@ -33,14 +37,28 @@ public class ASTParserTester {
 
     ASTParser trans = new ASTParser();
     Program p = (Program) trans.visit(tree);
-    AST2IR ast2IR = new AST2IR();
-    ASTWalker walker = new ASTWalker();
-    walker.walk(ast2IR, p);
-    Gson g = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    System.out.println(g.toJson(ast2IR));
+    return p;
   }
 
+  public static void tryToBuildIR(String inputFile) throws IOException {
+    Program p = tryToBuildAST(inputFile);
+    ASTWalker walker = new ASTWalker();
+
+    SymbolCheck symbolChecker = new SymbolCheck();
+    walker.walk(symbolChecker, p);
+
+    TypeCheck typeChecker = new TypeCheck();
+    walker.walk(typeChecker, p);
+
+    int before = p.newLabel();
+    int after = p.newLabel();
+    Node.ir.emitLabel(before);
+    p.gen(before, after);
+    Node.ir.emitLabel(after);
+    Node.ir.emit(new NoOperationIR());
+    System.out.println(Node.ir);
+  }
   public static void main(String[] args) throws Exception {
-    System.out.println("in Main");
+    tryToBuildIR("examples/leap-year.cl");
   }
 }

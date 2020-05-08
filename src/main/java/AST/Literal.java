@@ -1,0 +1,36 @@
+package AST;
+
+import symboltable.Type;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Literal extends ExpressionNode {
+
+  public String raw;
+
+  Literal(String raw, Type type) {
+    this.raw = raw;
+    evalType = type;
+  }
+
+  @Override
+  public ExpressionNode gen() {
+    return this;
+  }
+
+  @Override
+  public ExpressionNode gen(int before, int after) {
+    return this;
+  }
+
+  @Override
+  public String toString() {
+    return raw;
+  }
+
+  @Override
+  public List<Node> getChildren() {
+    return new ArrayList<>();
+  }
+}
