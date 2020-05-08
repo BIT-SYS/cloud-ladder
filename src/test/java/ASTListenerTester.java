@@ -1,7 +1,7 @@
-import AST.ASTBaseListener;
-import AST.IfBlock;
-import AST.Program;
-import AST.VariableDeclaration;
+import ast.ASTBaseListener;
+import ast.IfBlock;
+import ast.Program;
+import ast.VariableDeclaration;
 
 public class ASTListenerTester extends ASTBaseListener {
   @Override

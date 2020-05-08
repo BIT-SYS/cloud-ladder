@@ -1,4 +1,6 @@
-import AST.*;
+import ast.*;
+import grammar.CLParserLexer;
+import grammar.CLParserParser;
 import check.SymbolCheck;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;

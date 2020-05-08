@@ -1,6 +1,6 @@
 package check;
 
-import AST.*;
+import ast.*;
 import symboltable.*;
 
 import java.util.IdentityHashMap;

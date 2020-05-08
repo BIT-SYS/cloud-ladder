@@ -12,8 +12,8 @@ repositories {
 }
 
 generateGrammarSource {
-    arguments += ["-visitor", "-long-messages", "-package", "Grammar", ]
-    outputDirectory = file("${buildDir}/generated-src/antlr/main/Grammar")
+    arguments += ["-visitor", "-long-messages", "-package", "grammar", ]
+    outputDirectory = file("${buildDir}/generated-src/antlr/main/grammar")
 }
 
 task generateASTListener(type: Exec) {

@@ -2,7 +2,7 @@ BEGIN {
   OFS="\n"
   ORS="\n\n"
 
-  print "package AST;"
+  print "package ast;"
   print "public class "CLASS_NAME" {"
 }
 

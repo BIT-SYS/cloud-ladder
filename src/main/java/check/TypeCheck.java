@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import AST.*;
+import ast.*;
 
 import static util.Error.die;
 import static util.Type.*;
