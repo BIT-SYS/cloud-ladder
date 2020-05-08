@@ -2,6 +2,7 @@ package symboltable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class CompositeType implements Type {
     private final static List<String> containerTypes = Arrays.asList("List", "Set", "HashMap", "Stack");
@@ -26,5 +27,19 @@ public class CompositeType implements Type {
     @Override
     public String toString() {
         return container + "<" + element + ">";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CompositeType that = (CompositeType) o;
+        return container.equals(that.container) &&
+                element.equals(that.element);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(container, element);
     }
 }

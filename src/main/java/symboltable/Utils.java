@@ -27,8 +27,8 @@ public class Utils {
 //        if (parType.toString().equals("Proc")) {
 //            return true; //todo 目前没法判断传进来的是返回argType的函数还是就是argType的变量
 //        } else
-        if (parString.contains("Type")) {
-            // todo 形参是泛型
+        if (containsGeneric(parType)) {
+            // 形参是泛型
             // 目前复合类型只有一个空位（List），等字典实现了再用别的方法
             int l = parString.indexOf("Type");
             int r = parString.length() - l - "Type".length() - 1; //必不可能有两个字母以上的TypeX，这是规定
@@ -51,6 +51,14 @@ public class Utils {
         return null;
     }
 
+    public static Type replceGenericType(Type typeWithGenetic, Type coreType) {
+        assert containsGeneric(typeWithGenetic) && !containsGeneric(coreType);
+        String typeStr = typeWithGenetic.toString();
+        int l = typeStr.indexOf("Type");
+        int r = typeStr.length() - l - "Type".length() - 1; //必不可能有两个字母以上的TypeX，这是规定
+        return getType(typeStr.substring(0, l) + coreType.toString() + typeStr.substring(typeStr.length() - r));
+    }
+
     public static Type getElementType(Type type) {
         assert type instanceof CompositeType;
         return ((CompositeType) type).element;
@@ -62,7 +70,7 @@ public class Utils {
         } else return type; // SimpleType or GenericType;
     }
 
-    public static boolean containGeneric(Type type) {
+    public static boolean containsGeneric(Type type) {
         return type.toString().contains("Type");
     }
 
