@@ -1,3 +1,4 @@
+import AST.*;
 import symboltable.*;
 
 import java.util.IdentityHashMap;
@@ -23,7 +24,7 @@ public class SymbolCheck extends ASTBaseListener {
     }
 
 //    @Override
-//    public void exitLiteral(Literal node) {
+//    public void exitLiteral(AST.Literal node) {
 //        System.out.println("exit " + node.evalType + " literal");
 //        System.out.println(node.raw);
 //    }
@@ -56,6 +57,8 @@ public class SymbolCheck extends ASTBaseListener {
         pushScope(ctx, procedureSymbol);
 
         ctx.scope = currentScope;
+        ctx.evalType = type;
+        ctx.symbol = procedureSymbol;
     }
 
     @Override
@@ -173,7 +176,7 @@ public class SymbolCheck extends ASTBaseListener {
         // 和exitParameter同样的原因改成进入时就定义
         String name = ctx.id.name;
         if (null != currentScope.resolveWithin(name)) {
-            Utils.err("Symbol Check: VariableDeclaration", "Variable " + name + " has been declared!");
+            Utils.err("Symbol Check: AST.VariableDeclaration", "Variable " + name + " has been declared!");
         }
         Type type = getType(ctx.type);
         VariableSymbol variableSymbol = new VariableSymbol(name, type);
@@ -204,7 +207,7 @@ public class SymbolCheck extends ASTBaseListener {
         String identifier = ctx.name;
         Symbol symbol = currentScope.resolve(identifier);
         if (null == symbol) {
-            Utils.err("Symbol Check: Identifier", "<variable " + identifier + "> not found in " + currentScope.getScopeName());
+            Utils.err("Symbol Check: AST.Identifier", "<variable " + identifier + "> not found in " + currentScope.getScopeName());
         } else {
             ctx.symbol = symbol;
         }
@@ -215,7 +218,7 @@ public class SymbolCheck extends ASTBaseListener {
         String identifier = ctx.callee.name;
         Symbol symbol = currentScope.resolve(identifier);
         if (null == symbol) {
-            Utils.err("Symbol Check: CallExpression", "<function " + identifier + "> not found in " + currentScope.getScopeName());
+            Utils.err("Symbol Check: AST.CallExpression", "<function " + identifier + "> not found in " + currentScope.getScopeName());
         } else {
             ctx.symbol = symbol;
         }

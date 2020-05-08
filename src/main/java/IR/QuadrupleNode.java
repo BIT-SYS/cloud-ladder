@@ -1,21 +1,21 @@
 package IR;
 
 public abstract class QuadrupleNode extends IRNode {
-  public String arg1;
-  public String arg2;
-  public String result;
+  public Value arg1;
+  public Value arg2;
+  public Value result;
 
   QuadrupleNode() {
   }
 
-  QuadrupleNode(Object arg1, Object arg2, Object result) {
-    this.arg1 = arg1.toString();
-    this.arg2 = arg2.toString();
-    this.result = result.toString();
+  QuadrupleNode(Value arg1, Value arg2, Value result) {
+    this.arg1 = arg1;
+    this.arg2 = arg2;
+    this.result = result;
   }
 
   @Override
   public String toString() {
-    return String.format("%s %s = %s %s\n",labels, result, arg1, arg2);
+    return String.format("%s %s = %s %s",labels, result, arg1, arg2);
   }
 }

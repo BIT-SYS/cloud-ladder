@@ -8,6 +8,6 @@ public class NoOperationIR extends IRNode {
 
   @Override
   public String toString() {
-    return String.format("%s NOP\n", labels);
+    return String.format("%s NOP", labels);
   }
 }

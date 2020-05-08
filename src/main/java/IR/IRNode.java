@@ -4,6 +4,7 @@ import java.util.List;
 
 public abstract class IRNode implements IRNodeInterface {
   public List<Label> labels;
+  IRNodeInterface next;
 
   IRNode(){
 
@@ -16,6 +17,11 @@ public abstract class IRNode implements IRNodeInterface {
 
   @Override
   public IRNodeInterface getNext() {
-    return null;
+    return next;
   }
+
+  public void setNext(IRNode next) {
+    this.next = next;
+  }
+
 }

@@ -1,6 +1,7 @@
 package IR;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,13 +48,43 @@ public class IR {
     ir.labels = tempLabelList;
     ir.labels.forEach(l -> l.iRNode = ir);
     tempLabelList = new ArrayList<>();
+    if (IRs.size() > 0) {
+      IRNode last_ir  = IRs.get(IRs.size()-1);
+      last_ir.setNext(ir);
+    }
     IRs.add(ir);
+  }
+
+  public IRNodeInterface getFirst() {
+    return IRs.get(0);
   }
 
   @Override
   public String toString() {
 
-    System.out.println(String.format("Operation Count: %d, Labels Count: %d\n",IRs.size(), labelMap.size()));
-    return IRs.stream().map(Object::toString).collect(Collectors.joining());
+    StringBuilder ret = new StringBuilder(String.format("Operation Count: %d, Labels Count: %d\n", IRs.size(), labelMap.size()));
+    int indentLevel = 0;
+    for (int i = 0; i < IRs.size(); i++) {
+      IRNode ir = IRs.get(i);
+
+      switch (ir.getOp()){
+        case LazyExecutionStart:
+          indentLevel +=1;
+          break;
+        default:
+      }
+      String leading_spaces = String.join("", Collections.nCopies(indentLevel, "  "));
+      ret.append(leading_spaces);
+      ret.append(ir.toString());
+      ret.append("\n");
+
+      switch (ir.getOp()){
+        case LazyExecutionEnd:
+          indentLevel -=1;
+          break;
+        default:
+      }
+    }
+    return ret.toString();
   }
 }
