@@ -23,16 +23,16 @@ public class BaseScope implements Scope {
 
     @Override
     public void define(Symbol sym) {
-        Symbol sameName = symbols.get(sym.name);
+//        Symbol sameName = symbols.get(sym.name);
         symbols.put(sym.name, sym);
 
-        if (null != sameName) {
-            // 同一个作用域里能定义多遍的，就是函数重载了
-            // 不知道这样实现会不会有问题……
-            assert sameName instanceof ProcedureSymbol;
-            assert sym instanceof ProcedureSymbol;
-            ((ProcedureSymbol) sym).next = (ProcedureSymbol) sameName;
-        }
+//        if (null != sameName) {
+//            // 同一个作用域里能定义多遍的，就是函数重载了
+//            // 不知道这样实现会不会有问题……
+//            assert sameName instanceof ProcedureSymbol;
+//            assert sym instanceof ProcedureSymbol;
+//            ((ProcedureSymbol) sym).next = (ProcedureSymbol) sameName;
+//        }
 
         sym.scope = this; // track the scope in each symbol
     }

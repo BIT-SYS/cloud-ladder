@@ -1,14 +1,21 @@
-import AST.ASTParser;
-import AST.ASTWalker;
-import AST.Node;
-import AST.Program;
-import IR.NoOperationIR;
-import org.antlr.v4.runtime.*;
+import ast.ASTParser;
+import ast.ASTWalker;
+import ast.Node;
+import ast.Program;
+import grammar.CLParserLexer;
+import grammar.CLParserParser;
+import ir.NoOperationIR;
+import check.SymbolCheck;
+import check.TypeCheck;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
-import java.io.*;
-import Grammar.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ASTParserTester {
 

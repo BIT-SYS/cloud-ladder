@@ -21,4 +21,4 @@ Number x7 = 0x5_2            // OK (hexadecimal literal)
 Number x9 = 0_52             // OK (octal literal)
 Number x10 = 05_2            // OK (octal literal)
 
-print(pi+x2+x10)
+print((pi+x2+x10).toString())

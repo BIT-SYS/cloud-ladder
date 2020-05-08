@@ -23,3 +23,10 @@ List<Number> foooot = fooot.map(|Number num| -> Number {num+1-1})
 
 // 打开注释检查重定义变量有没有报错
 // List<Number> fooot = string_list.map(|String string| -> Number {word_count(string)})
+
+proc id(TypeA a) -> TypeA {
+    a
+}
+
+String aString = id("a")
+Number aNumber = id(fooot[1])

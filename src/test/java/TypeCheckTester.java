@@ -1,7 +1,10 @@
-import AST.ASTParser;
-import AST.ASTWalker;
-import AST.Program;
-import Grammar.*;
+import ast.ASTParser;
+import ast.ASTWalker;
+import ast.Program;
+import grammar.CLParserLexer;
+import grammar.CLParserParser;
+import check.SymbolCheck;
+import check.TypeCheck;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -15,7 +18,7 @@ import java.io.InputStream;
 public class TypeCheckTester {
     public static void main(String[] args) throws Exception {
         // 单独测试某个文件
-        InputStream is = new FileInputStream("examples/leap-year.cl");
+        InputStream is = new FileInputStream("examples/test-type-simple.cl");
 
         ANTLRInputStream input = new ANTLRInputStream(is);
         CLParserLexer lexer = new CLParserLexer(input);

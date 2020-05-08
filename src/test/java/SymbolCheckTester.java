@@ -1,8 +1,11 @@
-import AST.ASTParser;
-import AST.ASTWalker;
-import AST.Program;
-import Grammar.*;
-import org.antlr.v4.runtime.*;
+import ast.ASTParser;
+import ast.ASTWalker;
+import ast.Program;
+import grammar.CLParserLexer;
+import grammar.CLParserParser;
+import check.SymbolCheck;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
@@ -14,7 +17,7 @@ import java.io.InputStream;
 public class SymbolCheckTester {
     public static void main(String[] args) throws Exception {
         // 单独测试某个文件
-        InputStream is = new FileInputStream("examples/biorhythms.cl");
+        InputStream is = new FileInputStream("examples/leap-year.cl");
 
         ANTLRInputStream input = new ANTLRInputStream(is);
         CLParserLexer lexer = new CLParserLexer(input);
