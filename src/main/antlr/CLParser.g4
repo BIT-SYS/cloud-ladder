@@ -19,7 +19,7 @@ basicType:
 	| VIDEO
 	| IMAGE;
 
-typeType: basicType; //可能会有自定义类型
+typeType: basicType | GENERICTYPE; //可能会有自定义类型
 
 // LITERAL
 

@@ -1,5 +1,6 @@
 package check;
 
+import ast.*;
 import symboltable.GenericType;
 import symboltable.ProcedureSymbol;
 import symboltable.Type;
@@ -8,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import ast.*;
 
 import static util.Error.die;
 import static util.Type.*;
@@ -16,12 +16,12 @@ import static util.Type.*;
 
 public class TypeCheck extends ASTBaseListener {
 
-    private static Map<GenericType, Type> genericHelper = new HashMap<>();
+    private static final Map<GenericType, Type> genericHelper = new HashMap<>();
     // 👇 首先要exit所有表达式
 
     @Override
     public void exitRangeListInitializer(RangeListInitializer ctx) {
-        if (!sameType(ctx.start.evalType, ctx.end.evalType)) {
+        if (!ctx.start.evalType.equals(ctx.end.evalType)) {
             die("Type Check: RangeListInitializer", "start & end is not the same type!");
         }
         ctx.evalType = getType("List<" + ctx.start.evalType + ">");
@@ -31,7 +31,7 @@ public class TypeCheck extends ASTBaseListener {
     public void exitValuesListInitializer(ValuesListInitializer ctx) {
         List<ExpressionNode> values_tmp = new ArrayList<>(ctx.values);
         ExpressionNode firstValue = ctx.values.get(0);
-        values_tmp.removeIf((ExpressionNode v) -> sameType(v.evalType, firstValue.evalType));
+        values_tmp.removeIf((ExpressionNode v) -> v.evalType.equals(firstValue.evalType));
         if (0 != values_tmp.size()) {
             die("Type Check: ValuesListInitializer", "[a, b, c, ...] is not the same type!");
         }
@@ -73,7 +73,7 @@ public class TypeCheck extends ASTBaseListener {
                     GenericType gType = (GenericType) getInnermostElementType(ithParType);
                     Type matchType = matchGenericType(ithArg.evalType, ithParType);
                     genericHelper.computeIfAbsent(gType, k -> matchType);
-                    if (!sameType(genericHelper.get(gType), matchType)) {
+                    if (!genericHelper.get(gType).equals(matchType)) {
                         die("Type Check: CallExpression", "Wrong generic Type! The Types of " + gType + " is different!");
                     }
                 }
@@ -104,7 +104,7 @@ public class TypeCheck extends ASTBaseListener {
         ExpressionNode callee = ctx.property;
         assert callee.symbol instanceof ProcedureSymbol;
         ProcedureSymbol procedure = (ProcedureSymbol) callee.symbol;
-        if (procedure.name.equals("toString")){
+        if (procedure.name.equals("toString")) {
             System.out.println("ssss");
         }
         if (procedure.isMethod()) {
@@ -115,14 +115,14 @@ public class TypeCheck extends ASTBaseListener {
                         "Procedure " + procedure.name + " is not a method of " + ctx.object.evalType);
             }
             if (containsGeneric(selfType)) {
-                GenericType gType = (GenericType)getInnermostElementType(selfType);
+                GenericType gType = (GenericType) getInnermostElementType(selfType);
                 Type matchType = matchGenericType(ctx.object.evalType, selfType);
                 genericHelper.computeIfAbsent(gType, k -> matchType); // 有可能self的类型是第一次出现的TypeX
-                if (!sameType(genericHelper.get(gType), matchType)) {
+                if (!genericHelper.get(gType).equals(matchType)) {
                     die("Type Check: MemberExpression", "Procedure " + procedure.name + " have wrong GenericType");
                 }
             }
-            Type retType = procedure.type ;
+            Type retType = procedure.type;
             if (containsGeneric(retType)) {
                 GenericType gType = (GenericType) getInnermostElementType(retType);
                 Type corriType = genericHelper.get(gType);
@@ -151,10 +151,13 @@ public class TypeCheck extends ASTBaseListener {
 
     @Override
     public void exitArithmeticExpression(ArithmeticExpression ctx) {
-        if (!sameType(ctx.left.evalType, ctx.right.evalType)) {
-            die("Type Check: ArithmeticExpression", "left & right is not the same type!");
+        // 加啊，减啊，可不一定只有同类型才行。但目前认为不行，必须强制转换
+        Type left = ctx.left.evalType;
+        Type right = ctx.right.evalType;
+        if (!left.equals(right)) {
+            die("Type Check: ArithmeticExpression", "left & right is not the same type: " + left + " & " + right);
         }
-        ctx.evalType = ctx.left.evalType;
+        ctx.evalType = left;
     }
 
     @Override
@@ -174,16 +177,9 @@ public class TypeCheck extends ASTBaseListener {
         if (!type.toString().startsWith("List<")) {
             die("Type Check: ForBlock", "for_expr is not a List Type");
         }
-        if (!sameType(ctx.for_id.evalType, getElementType(type))) {
+        if (!ctx.for_id.evalType.equals(getElementType(type))) {
             die("Type Check: ForBlock",
                     "can not retrieve " + ctx.for_id.evalType + " from " + type);
         }
     }
-
-//    @Override
-//    public void exitAssign(Assign ctx) {
-//        if (!typeEquals(ctx.lvalue.evalType, ctx.rvalue.evalType)) {
-//            err("Type Check: Assign", "left & right is not the same type!");
-//        }
-//    }
 }

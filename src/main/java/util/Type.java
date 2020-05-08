@@ -16,11 +16,6 @@ public class Type {
         }
     }
 
-    public static boolean sameType(symboltable.Type a, symboltable.Type b) {
-        return a.toString().equals(b.toString());
-    }
-
-
     public static boolean sameParameterType(symboltable.Type argType, symboltable.Type parType) {
         System.out.println("argType " + argType);
         System.out.println("parType " + parType);
