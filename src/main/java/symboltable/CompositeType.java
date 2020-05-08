@@ -4,11 +4,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static util.Type.getType;
+
 public class CompositeType implements Type {
     private final static List<String> containerTypes = Arrays.asList("List", "Set", "HashMap", "Stack");
 
     String container;
-    Type element;
+    public Type element;
 
     // todo HashMap 有两个 element
     public CompositeType(String string) {
@@ -21,7 +23,7 @@ public class CompositeType implements Type {
         this.container = container;
 
         String remain = string.substring(lt_pos + 1, string.length() - 1);
-        element = Utils.getType(remain);
+        element = getType(remain);
     }
 
     @Override

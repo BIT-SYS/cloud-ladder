@@ -1,7 +1,7 @@
 package symboltable;
 
-import static symboltable.Utils.mkprmtr;
-import static symboltable.Utils.mkproc;
+import static util.Symbol.mkprmtr;
+import static util.Symbol.mkproc;
 
 public class PredefinedScope extends BaseScope {
     public PredefinedScope(Scope enclosingScope) {

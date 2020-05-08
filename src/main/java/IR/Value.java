@@ -3,7 +3,8 @@ package IR;
 import AST.*;
 import symboltable.SimpleType;
 import symboltable.Type;
-import symboltable.Utils;
+
+import static util.Type.getType;
 
 public class Value {
   // 123 is not symbol -> literal is not symbol
@@ -62,7 +63,7 @@ public class Value {
     } else if (exp instanceof Parameter) {
       Parameter p = (Parameter) exp;
       this.is_symbol = true;
-      this.type = Utils.getType(p.type);
+      this.type = getType(p.type);
       this.value = p.id.name;
     } else {
       if (exp != null)

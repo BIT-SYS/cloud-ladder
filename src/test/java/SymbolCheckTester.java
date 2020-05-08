@@ -1,8 +1,9 @@
 import AST.ASTParser;
 import AST.ASTWalker;
 import AST.Program;
-import Grammar.*;
-import org.antlr.v4.runtime.*;
+import check.SymbolCheck;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 

@@ -1,7 +1,11 @@
-package symboltable;
+package util;
 
-public class Utils {
-    public static Type getType(String string) {
+import symboltable.CompositeType;
+import symboltable.GenericType;
+import symboltable.SimpleType;
+
+public class Type {
+    public static symboltable.Type getType(String string) {
         // 可以维护一个“类型池”，不知道有没有必要
         if (string.contains("<")) {
             return new CompositeType(string.replace(" ", ""));
@@ -12,12 +16,12 @@ public class Utils {
         }
     }
 
-    public static boolean sameType(Type a, Type b) {
+    public static boolean sameType(symboltable.Type a, symboltable.Type b) {
         return a.toString().equals(b.toString());
     }
 
 
-    public static boolean sameParameterType(Type argType, Type parType) {
+    public static boolean sameParameterType(symboltable.Type argType, symboltable.Type parType) {
         System.out.println("argType " + argType);
         System.out.println("parType " + parType);
         String parString = parType.toString();
@@ -40,7 +44,7 @@ public class Utils {
         }
     }
 
-    public static Type matchGenericType(Type argType, Type parType) {
+    public static symboltable.Type matchGenericType(symboltable.Type argType, symboltable.Type parType) {
         // 给List<List<Number>>和List<TypeA>得到List<Number>（对应TypeA的类型）
         if (parType instanceof GenericType) {
             return argType;
@@ -51,7 +55,7 @@ public class Utils {
         return null;
     }
 
-    public static Type replceGenericType(Type typeWithGenetic, Type coreType) {
+    public static symboltable.Type replceGenericType(symboltable.Type typeWithGenetic, symboltable.Type coreType) {
         assert containsGeneric(typeWithGenetic) && !containsGeneric(coreType);
         String typeStr = typeWithGenetic.toString();
         int l = typeStr.indexOf("Type");
@@ -59,34 +63,18 @@ public class Utils {
         return getType(typeStr.substring(0, l) + coreType.toString() + typeStr.substring(typeStr.length() - r));
     }
 
-    public static Type getElementType(Type type) {
+    public static symboltable.Type getElementType(symboltable.Type type) {
         assert type instanceof CompositeType;
         return ((CompositeType) type).element;
     }
 
-    public static Type getInnermostElementType(Type type) {
+    public static symboltable.Type getInnermostElementType(symboltable.Type type) {
         if (type instanceof CompositeType) {
             return getInnermostElementType(((CompositeType) type).element);
         } else return type; // SimpleType or GenericType;
     }
 
-    public static boolean containsGeneric(Type type) {
+    public static boolean containsGeneric(symboltable.Type type) {
         return type.toString().contains("Type");
-    }
-
-    public static ProcedureSymbol mkproc(Scope scope, String name, String retType, Symbol... args) {
-        ProcedureSymbol proc = new ProcedureSymbol(name, getType(retType), scope);
-        for (Symbol arg : args) {
-            proc.define(arg);
-        }
-        return proc;
-    }
-
-    public static VariableSymbol mkprmtr(String typeStr, String name) {
-        return new VariableSymbol(name, getType(typeStr));
-    }
-
-    public static VariableSymbol mkprmtr(String typeStr) {
-        return new VariableSymbol("", getType(typeStr)); // 不需要非得有名字吧？
     }
 }

@@ -1,10 +1,13 @@
+package check;
+
 import AST.*;
 import symboltable.*;
 
 import java.util.IdentityHashMap;
 import java.util.UUID;
 
-import static symboltable.Utils.getType;
+import static util.Error.die;
+import static util.Type.getType;
 
 public class SymbolCheck extends ASTBaseListener {
 
@@ -176,7 +179,7 @@ public class SymbolCheck extends ASTBaseListener {
         // 和exitParameter同样的原因改成进入时就定义
         String name = ctx.id.name;
         if (null != currentScope.resolveWithin(name)) {
-            Utils.err("Symbol Check: AST.VariableDeclaration", "Variable " + name + " has been declared!");
+            die("Symbol Check: AST.VariableDeclaration", "Variable " + name + " has been declared!");
         }
         Type type = getType(ctx.type);
         VariableSymbol variableSymbol = new VariableSymbol(name, type);
@@ -207,7 +210,7 @@ public class SymbolCheck extends ASTBaseListener {
         String identifier = ctx.name;
         Symbol symbol = currentScope.resolve(identifier);
         if (null == symbol) {
-            Utils.err("Symbol Check: AST.Identifier", "<variable " + identifier + "> not found in " + currentScope.getScopeName());
+            die("Symbol Check: AST.Identifier", "<variable " + identifier + "> not found in " + currentScope.getScopeName());
         } else {
             ctx.symbol = symbol;
         }
@@ -218,7 +221,7 @@ public class SymbolCheck extends ASTBaseListener {
         String identifier = ctx.callee.name;
         Symbol symbol = currentScope.resolve(identifier);
         if (null == symbol) {
-            Utils.err("Symbol Check: AST.CallExpression", "<function " + identifier + "> not found in " + currentScope.getScopeName());
+            die("Symbol Check: AST.CallExpression", "<function " + identifier + "> not found in " + currentScope.getScopeName());
         } else {
             ctx.symbol = symbol;
         }
@@ -237,13 +240,13 @@ public class SymbolCheck extends ASTBaseListener {
 
         public void addBreak() {
             if (loopCounter < 1) {
-                Utils.err("Symbol Check: LoopWatcher", "<break> not in a loop");
+                die("Symbol Check: LoopWatcher", "<break> not in a loop");
             }
         }
 
         public void addContinue() {
             if (loopCounter < 1) {
-                Utils.err("Symbol Check: LoopWatcher", "<continue> not in a loop");
+                die("Symbol Check: LoopWatcher", "<continue> not in a loop");
             }
         }
     }

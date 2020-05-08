@@ -3,12 +3,13 @@ import AST.ASTWalker;
 import AST.Node;
 import AST.Program;
 import IR.NoOperationIR;
+import check.SymbolCheck;
+import check.TypeCheck;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
 import java.io.*;
-import Grammar.*;
 
 public class ASTParserTester {
 
