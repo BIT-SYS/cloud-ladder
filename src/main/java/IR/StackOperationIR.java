@@ -11,10 +11,20 @@ public class StackOperationIR extends IRNode {
     this.op = op;
   }
 
-  static StackOperationIR PushStack() {
+  public static StackOperationIR PushStack() {
     return new StackOperationIR(IROperator.PushStack);
   }
-  static StackOperationIR popStack() {
+  public static StackOperationIR PopStack() {
     return new StackOperationIR(IROperator.PopStack);
+  }
+
+  @Override
+  public String toString() {
+    if (op == IROperator.PopStack) {
+
+      return "POP @STACK";
+    } else {
+      return "PUSH @STACK";
+    }
   }
 }

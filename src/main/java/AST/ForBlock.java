@@ -24,6 +24,7 @@ public class ForBlock extends Node {
     ExpressionNode expr = for_expr.gen(0, 0);
     Temp t = new Temp();
     Temp len = new Temp();
+    ir.emit(StackOperationIR.PushStack());
     // get expr len
     ir.emit(new CallExprIR("size", expr , len, new ArrayList<>()));
 
@@ -37,15 +38,19 @@ public class ForBlock extends Node {
     ExpressionNode condition_reduced = condition.gen(0, 0);
     ir.emit(new JumpIfNotTrueIR(new Value(condition_reduced), ir.getLabel(after)));
 
+    ir.emit(StackOperationIR.PushStack());
     // execuete
     statements.gen(before, after);
 
+    ir.emitLabel(after);
+    ir.emit(StackOperationIR.PopStack());
 
     // +1 and jump
     ArithmeticExpression b = new ArithmeticExpression(t, new Literal("1", new SimpleType("Number")), "+");
     ExpressionNode b_reduced = b.gen(0, 0);
     ir.emit(new AssignIR(t, b_reduced));
     ir.emit(new JumpIR(ir.getLabel(before)));
+    ir.emit(StackOperationIR.PopStack());
     return null;
   }
 

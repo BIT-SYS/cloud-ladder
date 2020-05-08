@@ -14,7 +14,6 @@ public class Continue extends Node {
   @Override
   public ExpressionNode gen(int before, int after) {
     ir.emit(new ContinueIR(ir.getLabel(before)));
-    emit("goto L" + before);
     return null;
   }
 }

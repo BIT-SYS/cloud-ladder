@@ -2,6 +2,7 @@ package AST;
 
 import IR.JumpIR;
 import IR.JumpIfNotTrueIR;
+import IR.StackOperationIR;
 import IR.Value;
 
 import java.util.ArrayList;
@@ -21,7 +22,9 @@ public class IfElseBlock extends Node {
         ExpressionNode condition = n1.getCondition().gen(0, 0);
         JumpIfNotTrueIR j = new JumpIfNotTrueIR(new Value(condition), ir.getLabel(middle));
         ir.emit(j);
+        ir.emit(StackOperationIR.PushStack());
         n1.getBlock().gen(before, after);
+        ir.emit(StackOperationIR.PopStack());
         ir.emit(new JumpIR(ir.getLabel(last)));
       } else {
         System.err.println("ERROR AST");

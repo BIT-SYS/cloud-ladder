@@ -2,6 +2,7 @@ package AST;
 
 import IR.JumpIR;
 import IR.JumpIfNotTrueIR;
+import IR.StackOperationIR;
 import IR.Value;
 
 import java.util.ArrayList;
@@ -24,8 +25,9 @@ public class WhileBlock extends Node {
     ExpressionNode reduced_condition = condition.gen(0, 0);
     JumpIfNotTrueIR jintir = new JumpIfNotTrueIR(new Value(reduced_condition), ir.getLabel(after));
     ir.emit(jintir);
+    ir.emit(StackOperationIR.PushStack());
     statements.gen(before, after);
-
+    ir.emit(StackOperationIR.PopStack());
     ir.emit(new JumpIR(ir.getLabel(before)));
     ir.emitLabel(after);
     return null;

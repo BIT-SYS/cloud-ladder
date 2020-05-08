@@ -66,7 +66,6 @@ public class IR {
     int indentLevel = 0;
     for (int i = 0; i < IRs.size(); i++) {
       IRNode ir = IRs.get(i);
-      System.out.println(ir);
 
       switch (ir.getOp()){
         case LazyExecutionStart:

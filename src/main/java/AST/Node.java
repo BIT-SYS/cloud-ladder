@@ -26,11 +26,6 @@ public abstract class Node {
     return ++Label.label;
   }
 
-
-  void emit(String s) {
-    System.out.println("\t" + s);
-  }
-
   public ExpressionNode gen(int before, int after) {
     System.out.println(this.getClass().getName());
     return null;

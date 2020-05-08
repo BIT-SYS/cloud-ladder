@@ -14,8 +14,8 @@ public class VariableDeclaration extends Node {
 
   @Override
   public ExpressionNode gen(int before, int after) {
-    System.out.println(id);
-    System.out.println(id.toString());
+//    System.out.println(id);
+//    System.out.println(id.toString());
     // ! ERROR: warning: TODO
     Symbol s = scope.resolve(id.toString());
     System.out.println(String.format("===>< %s %s\n", evalType, symbol));

@@ -24,6 +24,16 @@ public class BinaryExpression extends ExpressionNode {
     return t;
   }
 
+
+  @Override
+  public ExpressionNode gen() {
+    ExpressionNode l = left.reduce();
+    ExpressionNode r = right.reduce();
+    Temp t = new Temp();
+    ir.emit(new BinaryExprIR(op,l,r,t));
+    return t;
+  }
+
   BinaryExpression(ExpressionNode left, ExpressionNode right, String op) {
     this.left = left;
     this.right = right;
