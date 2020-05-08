@@ -50,6 +50,10 @@ public class ProcedureSymbol extends Symbol implements Scope {
         return parameters.get(name);
     }
 
+    public boolean isMethod() {
+        return null != parameters.get("self"); // todo 检查是不是只有第一个参数叫self
+    }
+
     public String toString() {
         String[] temp = super.toString().split(":");
         return "proc " + temp[0] + " " + parameters.values() + ":" + temp[1];

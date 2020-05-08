@@ -1,13 +1,17 @@
+import symboltable.GenericType;
 import symboltable.ProcedureSymbol;
 import symboltable.Type;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static symboltable.Utils.*;
 
 public class TypeCheck extends ASTBaseListener {
 
+    private static Map<GenericType, Type> genericHelper;
     // 👇 首先要exit所有表达式
 
     @Override
@@ -46,61 +50,67 @@ public class TypeCheck extends ASTBaseListener {
         int need = signature.size() - 1; // 减去的是返回值的类型
         if (need == give || give == need - 1) {
             int offset = need == give ? 0 : 1; // 0 是直接调用函数，1 是调用方法
+
+            genericHelper = new HashMap<>();
+
             for (int i = 0; i < give; i++) {
                 ExpressionNode ithArg = ctx.arguments.get(i);
+                Type ithParType = signature.get(i + offset);
+
                 // 这个参数可能是函数
                 if (((ithArg instanceof Identifier && ctx.scope.resolve(((Identifier) ithArg).name) instanceof ProcedureSymbol)
                         || ithArg instanceof LambdaExpression)
-                        && signature.get(i + offset).toString().equals("Proc")) {
+                        && ithParType.toString().equals("Proc")) {
                     continue;
                 }
-                if (!sameParameterType(ctx.arguments.get(i).evalType, signature.get(i + offset))) {
+                if (!sameParameterType(ithArg.evalType, ithParType)) {
                     Utils.err("Type Check: CallExpression", ctx.symbol + " : No. " + (i + 1 + offset) + " argument is not correct Type");
                 }
-                // todo 是泛型就建表、查表
+                if (containGeneric(ithParType)) {
+                    // 是泛型就建表、查表
+                    GenericType gType = (GenericType) getInnermostElementType(ithParType);
+                    Type matchType = matchGenericType(ithArg.evalType, ithParType);
+                    genericHelper.computeIfAbsent(gType, k -> matchType);
+                    if (!sameType(genericHelper.get(gType), matchType)) {
+                        Utils.err("Type Check: CallExpression", "Wrong generic Type! The Types of " + gType + " is different!");
+                    }
+                }
+            }
+
+            if (0 == offset) {
+                // todo 检查返回值
+                genericHelper.clear();
             }
         } else {
             Utils.err("Type Check: CallExpression", "There are " + (need > give ? "more" : "fewer") + " arguments applied to " + ctx.symbol);
         }
-    }
 
-    @Override
-    public void enterMemberExpression(MemberExpression ctx) {
-        System.out.println("enter mem" + ctx.property.symbol);
     }
 
     @Override
     public void exitMemberExpression(MemberExpression ctx) {
         System.out.println("exit mem" + ctx.property.symbol + "\n\n");
         // 原来 MemberExpression 竟然是包括方法调用……
-        // todo 检查
         ExpressionNode callee = ctx.property;
-//        while (true) {
-//            assert callee.symbol instanceof ProcedureSymbol;
-//            ProcedureSymbol procedure = (ProcedureSymbol) callee.symbol;
-//            assert !procedure.arguments.isEmpty();
-//            Symbol firstSymbol = procedure.arguments.get("self");
-//            if (null == firstSymbol) {
-//                ProcedureSymbol next = procedure.next;
-//                if (null == next)
-//                    Utils.err("Type Check: MemberExpression", "Procedure " + procedure.name + " is not a method");
-//                else {
-//                    callee.symbol = next;
-//                    continue;
-//                }
-//            }
-//            assert null != firstSymbol;
-//            if (!typeEquals(firstSymbol.type, ctx.object.evalType)) {
-//                ProcedureSymbol next = procedure.next;
-//                if (null == next)
-//                    Utils.err("Type Check: MemberExpression", "Procedure " + procedure.name + " is not a method of " + ctx.object.evalType);
-//                else {
-//                    callee.symbol = next;
-//                    continue;
-//                }
-//            }
-//            break;
-//        }
+        assert callee.symbol instanceof ProcedureSymbol;
+        ProcedureSymbol procedure = (ProcedureSymbol) callee.symbol;
+        if (procedure.isMethod()) {
+            List<Type> signature = procedure.signature;
+            Type selfType = signature.get(0);
+            if (!sameParameterType(ctx.object.evalType, selfType)) {
+                Utils.err("Type Check: MemberExpression",
+                        "Procedure " + procedure.name + " is not a method of " + ctx.object.evalType);
+            }
+            if (containGeneric(selfType)) {
+                GenericType gType = (GenericType)getInnermostElementType(selfType);
+                Type matchType = matchGenericType(ctx.object.evalType, selfType);
+                if (!sameType(genericHelper.get(gType), matchType)) {
+                    Utils.err("Type Check: MemberExpression", "Procedure " + procedure.name + " have wrong GenericType");
+                }
+            }
+        } else {
+            Utils.err("Type Check: MemberExpression", "Procedure " + procedure.name + " is not a method");
+        }
         ctx.evalType = ctx.property.evalType;
     }
 
@@ -127,10 +137,10 @@ public class TypeCheck extends ASTBaseListener {
 
     @Override
     public void exitIndexExpression(IndexExpression ctx) {
-        String typeStr = ctx.left.evalType.toString();
-        if (typeStr.startsWith("List<")) {
+        Type type = ctx.left.evalType;
+        if (type.toString().startsWith("List<")) {
             // 只有List<>可以有[]访问下标
-            ctx.evalType = getElementType(typeStr);
+            ctx.evalType = getElementType(type);
         } else {
             Utils.err("Type Check: IndexExpression", "left is not a List Type");
         }
@@ -138,13 +148,13 @@ public class TypeCheck extends ASTBaseListener {
 
     @Override
     public void exitForBlock(ForBlock ctx) {
-        String typeStr = ctx.for_expr.evalType.toString();
-        if (!typeStr.startsWith("List<")) {
+        Type type = ctx.for_expr.evalType;
+        if (!type.toString().startsWith("List<")) {
             Utils.err("Type Check: ForBlock", "for_expr is not a List Type");
         }
-        if (!sameType(ctx.for_id.evalType, getElementType(typeStr))) {
+        if (!sameType(ctx.for_id.evalType, getElementType(type))) {
             Utils.err("Type Check: ForBlock",
-                    "can not retrieve " + ctx.for_id.evalType + " from " + typeStr);
+                    "can not retrieve " + ctx.for_id.evalType + " from " + type);
         }
     }
 
