@@ -9,7 +9,7 @@ import static util.Type.getType;
 public class CompositeType implements Type {
     private final static List<String> containerTypes = Arrays.asList("List", "Set", "HashMap", "Stack");
 
-    String container;
+    public String container;
     public Type element;
 
     // todo HashMap 有两个 element

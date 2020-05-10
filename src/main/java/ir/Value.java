@@ -9,10 +9,10 @@ import static util.Type.getType;
 public class Value {
   // 123 is not symbol -> literal is not symbol
   // till_now is symbol
-  boolean is_symbol;
-  boolean is_temp;
-  String value;
-  Type type;
+  public boolean is_symbol;
+  public boolean is_temp;
+  public String value;
+  public Type type;
 
   Value(boolean is_symbol, String value, Type type) {
     this.is_symbol = is_symbol;
@@ -74,6 +74,12 @@ public class Value {
       }
     }
   }
+
+  public interpreter.Value toInterpreterValue() {
+    return new interpreter.Value(this);
+  }
+
+
 
   @Override
   public String toString() {

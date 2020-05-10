@@ -2,44 +2,31 @@ import ast.ASTParser;
 import ast.ASTWalker;
 import ast.Node;
 import ast.Program;
-import grammar.CLParserLexer;
-import grammar.CLParserParser;
-import interpreter.Interpreter;
-import ir.IR;
-import ir.NoOperationIR;
 import check.SymbolCheck;
 import check.TypeCheck;
+import grammar.CLParserLexer;
+import grammar.CLParserParser;
+import interpreter.Value;
+import ir.IR;
+import ir.NoOperationIR;
 import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.junit.Test;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Scanner;
 
-public class ASTParserTester {
+public class Interpreter {
 
-  @Test
-  public void IterTestASTBuild() throws IOException {
-    File file = new File("examples");
-    File[] fs = file.listFiles();
-    assert fs != null;
-    for (File f : fs) {
-      if (f.isFile()) {
-        tryToBuildAST(f.getAbsolutePath());
-      }
-    }
-  }
+  public static Program tryToBuildAST(String input) throws IOException {
 
-  public static Program tryToBuildAST(String inputFile) throws IOException {
-
-    System.out.println("test file: " + inputFile);
-    InputStream is = System.in;
-    if (inputFile != null) is = new FileInputStream(inputFile);
-    ANTLRInputStream input = new ANTLRInputStream(is);
-    CLParserLexer lexer = new CLParserLexer(input);
+    InputStream is = new ByteArrayInputStream(input.getBytes());
+    CLParserLexer lexer = new CLParserLexer(CharStreams.fromStream(is));
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     CLParserParser parser = new CLParserParser(tokens);
     ParseTree tree = parser.program();
@@ -69,14 +56,18 @@ public class ASTParserTester {
     return Node.ir;
   }
 
-  public static void tryToInterprete(String inputFile) throws IOException {
-    IR ir = tryToBuildIR(inputFile);
-    Interpreter i = new Interpreter();
-    i.execute(ir);
+  public static Object tryToInterpret(String input) throws IOException {
+    IR ir = tryToBuildIR(input);
+    interpreter.Interpreter i = new interpreter.Interpreter();
+    i.debug = false;
+    return i.execute(ir);
   }
 
-  public static void main(String[] args) throws Exception {
-//    tryToBuildIR("examples/expr.cl");
-    tryToInterprete("examples/block1.cl");
+  public static void main(String[] args) throws IOException {
+    while (true) {
+      Scanner sc = new Scanner(System.in);
+      String input = sc.nextLine();
+      System.out.println(tryToInterpret(input));
+    }
   }
 }

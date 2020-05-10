@@ -5,27 +5,52 @@ import symboltable.Type;
 import java.util.HashMap;
 
 public class Scope {
-  Scope PrevScope;
+  Scope prev_scope;
 
   // Name: value
   HashMap<String, Value> scope;
 
-  Value resolve_local(String name) {
+  public Scope() {
+    scope = new HashMap<>();
+  }
 
-    return null;
+  public Scope(Scope prev_scope) {
+    scope = new HashMap<>();
+    this.prev_scope = prev_scope;
+  }
+
+  Value resolve_local(String name) {
+    // TODO: return a copy?
+    return scope.get(name);
   }
 
   // recursively find Symbol's value
   public Value resolve(String name) {
-
-    return null;
+    Value result = scope.get(name);
+    if (result == null && prev_scope != null) {
+      result = prev_scope.resolve(name);
+    }
+    // TODO? check if is null
+    return result;
   }
 
-  public void Insert(String name, Value value) {
-
+  public void insert(String name, Value value) {
+    scope.put(name, value);
   }
 
-  public void Update(String name, Value value) {
+  // return: if update success.
+  // TODO: update must be successful?
+  public Boolean update(String name, Value value) {
+    if(scope.containsKey(name)) {
+      scope.put(name, value);
+    } else {
+      prev_scope.update(name, value);
+    }
+    return true;
+  }
 
+  @Override
+  public String toString() {
+    return String.valueOf(scope);
   }
 }

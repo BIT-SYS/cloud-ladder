@@ -8,7 +8,7 @@ public class SimpleType implements Type {
     private final static List<String> simpleTypes =
             Arrays.asList("Number", "Image", "String", "Audio", "Video", "Boolean", "Invalid", "Proc");
 
-    String name;
+    public String name;
 
     public SimpleType(String string) {
         if (simpleTypes.contains(string)) {
