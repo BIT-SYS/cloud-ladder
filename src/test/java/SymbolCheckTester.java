@@ -1,25 +1,22 @@
 import ast.ASTParser;
 import ast.ASTWalker;
 import ast.Program;
+import check.SymbolCheck;
 import grammar.CLParserLexer;
 import grammar.CLParserParser;
-import check.SymbolCheck;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class SymbolCheckTester {
     public static void main(String[] args) throws Exception {
         // 单独测试某个文件
-        InputStream is = new FileInputStream("examples/leap-year.cl");
-
-        ANTLRInputStream input = new ANTLRInputStream(is);
+        CharStream input = CharStreams.fromFileName("examples/leap-year.cl");
         CLParserLexer lexer = new CLParserLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CLParserParser parser = new CLParserParser(tokens);
@@ -47,9 +44,8 @@ public class SymbolCheckTester {
 
     public void testSymbolCheck(String inputFile) throws IOException {
         System.out.println("testing file: " + inputFile);
-        InputStream is = new FileInputStream(inputFile);
 
-        ANTLRInputStream input = new ANTLRInputStream(is);
+        CharStream input = CharStreams.fromFileName(inputFile);
         CLParserLexer lexer = new CLParserLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CLParserParser parser = new CLParserParser(tokens);
