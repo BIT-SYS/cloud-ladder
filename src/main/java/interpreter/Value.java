@@ -4,6 +4,8 @@ import symboltable.CompositeType;
 import symboltable.SimpleType;
 import symboltable.Type;
 
+import static util.Type.getType;
+
 
 public class Value {
   Type type;
@@ -68,9 +70,9 @@ public class Value {
 
   public Value add(Value v,Interpreter context) {
     if (type instanceof SimpleType) {
-      if (((SimpleType) type).name ==  "Number") {
+      if (((SimpleType) type).name.equals("Number")) {
         return Value.valueOf(this.getFloat() + v.getFloat());
-      } else if (((SimpleType) type).name == "String") {
+      } else if (((SimpleType) type).name.equals("String")) {
         return Value.valueOf(this.getString() + v.getString());
       }
     }
@@ -79,13 +81,29 @@ public class Value {
 
   public Value sub(Value v) {
     if (type instanceof SimpleType) {
-      if (((SimpleType) type).name ==  "Number") {
+      if (((SimpleType) type).name.equals("Number")) {
         return Value.valueOf(this.getFloat() - v.getFloat());
       }
     }
     throw new RuntimeException("type error when sub.");
   }
 
+  public Value mul(Value v) {
+    if (type.equals(getType("Number"))) {
+      return Value.valueOf(getFloat() * v.getFloat());
+    }
+    throw new RuntimeException("type error when mul.");
+  }
+
+  public Value div(Value v) {
+    if (type.equals(getType("Number"))) {
+      if (v.getFloat() == 0) {
+        throw new RuntimeException("? error #DIV/0!");
+      }
+      return Value.valueOf(getFloat() / v.getFloat());
+    }
+    throw new RuntimeException("type error when div.");
+  }
 
   @Override
   public String toString() {
