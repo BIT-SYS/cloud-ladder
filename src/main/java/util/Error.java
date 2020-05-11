@@ -5,4 +5,7 @@ public class Error {
         System.err.println(errType + "\n\t" + errMsg);
         System.exit(0);
     }
+
+    final public static boolean debugSymbolCheck = false;
+    final public static boolean debugTypeCheck = false;
 }

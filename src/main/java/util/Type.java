@@ -4,6 +4,8 @@ import symboltable.CompositeType;
 import symboltable.GenericType;
 import symboltable.SimpleType;
 
+import static util.Error.debugTypeCheck;
+
 public class Type {
     public static symboltable.Type getType(String string) {
         // 可以维护一个“类型池”，不知道有没有必要
@@ -17,8 +19,10 @@ public class Type {
     }
 
     public static boolean sameParameterType(symboltable.Type argType, symboltable.Type parType) {
-        System.out.println("argType " + argType);
-        System.out.println("parType " + parType);
+        if (debugTypeCheck) {
+            System.out.println("argType " + argType);
+            System.out.println("parType " + parType);
+        }
         String parString = parType.toString();
         String argString = argType.toString();
 

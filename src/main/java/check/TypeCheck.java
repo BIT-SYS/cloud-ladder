@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static util.Error.debugTypeCheck;
 import static util.Error.die;
 import static util.Type.*;
 
@@ -45,7 +46,9 @@ public class TypeCheck extends ASTBaseListener {
 
     @Override
     public void exitCallExpression(CallExpression ctx) {
-        System.out.println("exit call" + ctx.symbol);
+        if (debugTypeCheck) {
+            System.out.println("exit call" + ctx.symbol);
+        }
         if (null == ctx.symbol) {
             die("Type Check: CallExpression", "Procedure symbol " + ctx.callee.name + " not found!");
         }
@@ -99,14 +102,13 @@ public class TypeCheck extends ASTBaseListener {
 
     @Override
     public void exitMemberExpression(MemberExpression ctx) {
-        System.out.println("exit mem" + ctx.property.symbol + "\n\n");
+        if (debugTypeCheck) {
+            System.out.println("exit mem" + ctx.property.symbol + "\n\n");
+        }
         // 原来 MemberExpression 竟然是包括方法调用……
         ExpressionNode callee = ctx.property;
         assert callee.symbol instanceof ProcedureSymbol;
         ProcedureSymbol procedure = (ProcedureSymbol) callee.symbol;
-        if (procedure.name.equals("toString")) {
-            System.out.println("ssss");
-        }
         if (procedure.isMethod()) {
             List<Type> signature = procedure.signature;
             Type selfType = signature.get(0);
@@ -143,11 +145,6 @@ public class TypeCheck extends ASTBaseListener {
         }
         ctx.evalType = ctx.symbol.type;
     }
-
-//    @Override
-//    public void exitLiteral(Literal ctx) {
-//        // 是放在这里好还是建立AST时？
-//    }
 
     @Override
     public void exitArithmeticExpression(ArithmeticExpression ctx) {
