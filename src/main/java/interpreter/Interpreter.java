@@ -98,10 +98,16 @@ public class Interpreter {
               resolveResult(binaryExprIR.result, result);
               break;
             case SubExpr:
+              result = left_v.sub(right_v);
+              resolveResult(binaryExprIR.result, result);
               break;
             case MulExpr:
+              result = left_v.mul(right_v);
+              resolveResult(binaryExprIR.result, result);
               break;
             case DivExpr:
+              result = left_v.div(right_v);
+              resolveResult(binaryExprIR.result, result);
               break;
             case AndExpr:
               break;
