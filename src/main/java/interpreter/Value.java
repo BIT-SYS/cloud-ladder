@@ -15,7 +15,22 @@ public class Value {
     } else if (t.equals(new SimpleType("String"))) {
         return raw_value;
     } else if (t.equals(new SimpleType("Number"))) {
+      raw_value = raw_value.replace("_","");
+      if (raw_value.startsWith("0x") || raw_value.startsWith("0X")) {
+        raw_value = raw_value.substring(2);
+        Long l= Long.parseLong(raw_value, 16);
+        return Float.valueOf(l);
+      } else if (raw_value.startsWith("0b")) {
+        raw_value = raw_value.substring(2);
+        Long l= Long.parseLong(raw_value, 2);
+        return Float.valueOf(l);
+      } else if (raw_value.startsWith("0") && raw_value.length() >= 2 && !raw_value.startsWith("00")) {
+        // oct
+        Long l= Long.parseLong(raw_value, 8);
+        return Float.valueOf(l);
+      } else {
         return Float.valueOf(raw_value);
+      }
     } else if (t instanceof CompositeType) {
         if(((CompositeType) t).container.equals("List")) {
           // ???
@@ -34,6 +49,11 @@ public class Value {
   public Value(Type t, Object v) {
     type = t;
     value = v;
+  }
+
+  public Value( ProcSignature p) {
+    type = new SimpleType("Proc");
+    value = p;
   }
 
   public Value(ir.Value v) {

@@ -93,4 +93,12 @@ public class Value {
       return String.format("%s:%s", type, value);
     }
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    Value that = (Value) obj;
+    return this.is_symbol == that.is_symbol && this.is_temp == that.is_temp && this.type.equals(that.type) && this.value.equals(that.value);
+  }
 }
