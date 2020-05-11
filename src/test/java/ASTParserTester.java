@@ -9,7 +9,8 @@ import ir.IR;
 import ir.NoOperationIR;
 import check.SymbolCheck;
 import check.TypeCheck;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
@@ -38,15 +39,14 @@ public class ASTParserTester {
     System.out.println("test file: " + inputFile);
     InputStream is = System.in;
     if (inputFile != null) is = new FileInputStream(inputFile);
-    ANTLRInputStream input = new ANTLRInputStream(is);
+    CharStream input = CharStreams.fromStream(is);
     CLParserLexer lexer = new CLParserLexer(input);
     CommonTokenStream tokens = new CommonTokenStream(lexer);
     CLParserParser parser = new CLParserParser(tokens);
     ParseTree tree = parser.program();
 
     ASTParser trans = new ASTParser();
-    Program p = (Program) trans.visit(tree);
-    return p;
+    return (Program) trans.visit(tree);
   }
 
   public static IR tryToBuildIR(String inputFile) throws IOException {

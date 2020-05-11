@@ -1,20 +1,16 @@
 import ast.*;
+import check.SymbolCheck;
 import grammar.CLParserLexer;
 import grammar.CLParserParser;
-import check.SymbolCheck;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-
-import java.io.FileInputStream;
-import java.io.InputStream;
 
 public class ASTOlderTester {
     public static void main(String[] args) throws Exception {
         // 单独测试某个文件
-        InputStream is = new FileInputStream("examples/leap-year.cl");
-
-        ANTLRInputStream input = new ANTLRInputStream(is);
+        CharStream input = CharStreams.fromFileName("examples/leap-year.cl");
         CLParserLexer lexer = new CLParserLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CLParserParser parser = new CLParserParser(tokens);

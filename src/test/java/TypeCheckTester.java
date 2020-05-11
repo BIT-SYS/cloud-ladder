@@ -1,26 +1,23 @@
 import ast.ASTParser;
 import ast.ASTWalker;
 import ast.Program;
-import grammar.CLParserLexer;
-import grammar.CLParserParser;
 import check.SymbolCheck;
 import check.TypeCheck;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import grammar.CLParserLexer;
+import grammar.CLParserParser;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class TypeCheckTester {
     public static void main(String[] args) throws Exception {
         // 单独测试某个文件
-        InputStream is = new FileInputStream("examples/test-type-simple.cl");
-
-        ANTLRInputStream input = new ANTLRInputStream(is);
+        CharStream input = CharStreams.fromFileName("examples/test-type-simple.cl");
         CLParserLexer lexer = new CLParserLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CLParserParser parser = new CLParserParser(tokens);
@@ -51,9 +48,8 @@ public class TypeCheckTester {
 
     public void testTypeCheck(String inputFile) throws IOException {
         System.out.println("testing file: " + inputFile);
-        InputStream is = new FileInputStream(inputFile);
 
-        ANTLRInputStream input = new ANTLRInputStream(is);
+        CharStream input = CharStreams.fromFileName(inputFile);
         CLParserLexer lexer = new CLParserLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CLParserParser parser = new CLParserParser(tokens);

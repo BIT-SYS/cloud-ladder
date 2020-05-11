@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import static util.Error.die;
 import static util.Type.getType;
+import static util.Error.debugSymbolCheck;
 
 public class SymbolCheck extends ASTBaseListener {
 
@@ -26,25 +27,23 @@ public class SymbolCheck extends ASTBaseListener {
         currentScope = currentScope.getEnclosingScope();
     }
 
-//    @Override
-//    public void exitLiteral(AST.Literal node) {
-//        System.out.println("exit " + node.evalType + " literal");
-//        System.out.println(node.raw);
-//    }
-
     @Override
     public void enterProgram(Program ctx) {
         globals = new GlobalScope(new PredefinedScope(null));
         currentScope = globals;
-        System.out.println(">>>>> enter program");
-        System.out.println("stdlib: " + currentScope.getEnclosingScope());
+        if (debugSymbolCheck) {
+            System.out.println(">>>>> enter program");
+            System.out.println("stdlib: " + currentScope.getEnclosingScope());
+        }
         ctx.scope = globals;
     }
 
     @Override
     public void exitProgram(Program ctx) {
-        System.out.println("<<<<< exit program:");
-        System.out.println(globals);
+        if (debugSymbolCheck) {
+            System.out.println("<<<<< exit program:");
+            System.out.println(globals);
+        }
     }
 
     @Override
@@ -53,7 +52,9 @@ public class SymbolCheck extends ASTBaseListener {
         String typeType = ctx.returnType;
         Type type = getType(typeType);
 
-        System.out.println(">>>>> enter procedure " + name);
+        if (debugSymbolCheck) {
+            System.out.println(">>>>> enter procedure " + name);
+        }
 
         ProcedureSymbol procedureSymbol = new ProcedureSymbol(name, type, currentScope);
         currentScope.define(procedureSymbol);
@@ -75,7 +76,10 @@ public class SymbolCheck extends ASTBaseListener {
         String name = "^\\" + UUID.randomUUID().toString().replace("-", "");
         Type type = getType(retType);
 
-        System.out.println(">>>>> enter lambda " + name);
+        if (debugSymbolCheck) {
+            System.out.println(">>>>> enter lambda " + name);
+
+        }
 
         ProcedureSymbol procedureSymbol = new ProcedureSymbol(name, type, currentScope);
         currentScope.define(procedureSymbol);
@@ -102,7 +106,9 @@ public class SymbolCheck extends ASTBaseListener {
     // 好日子来临力！现在for、if、else也改回来啦！
     @Override
     public void enterBlock(Block ctx) {
-        System.out.println(">>>>> enter block(prog/lamb/proc/for/while/if-else):");
+        if (debugSymbolCheck) {
+            System.out.println(">>>>> enter block(prog/lamb/proc/for/while/if-else):");
+        }
         LocalScope localScope = new LocalScope(currentScope);
         pushScope(ctx, localScope);
 
@@ -120,14 +126,18 @@ public class SymbolCheck extends ASTBaseListener {
     }
 
     private void exitBlockKai(String exitMessage) {
-        System.out.println(exitMessage);
-        System.out.println(currentScope);
+        if (debugSymbolCheck) {
+            System.out.println(exitMessage);
+            System.out.println(currentScope);
+        }
         popScope();
     }
 
     @Override
     public void enterForBlock(ForBlock ctx) {
-        System.out.println(">>>>> enter for:");
+        if (debugSymbolCheck) {
+            System.out.println(">>>>> enter for:");
+        }
         if (null != ctx.iter_type) {
             enterBlockKai(ctx);
             // 创建新变量
@@ -146,21 +156,27 @@ public class SymbolCheck extends ASTBaseListener {
             // 创建了新变量就要弹出作用域
             exitBlockKai("<<<<< exit for:");
         } else {
-            System.out.println("<<<<< exit for:");
+            if (debugSymbolCheck) {
+                System.out.println("<<<<< exit for:");
+            }
         }
         loopWatcher.popLoop();
     }
 
     @Override
     public void enterWhileBlock(WhileBlock ctx) {
-        System.out.println(">>>>> enter while:");
+        if (debugSymbolCheck) {
+            System.out.println(">>>>> enter while:");
+        }
         enterBlockKai(ctx);
         loopWatcher.pushLoop();
     }
 
     @Override
     public void exitWhileBlock(WhileBlock ctx) {
-        exitBlockKai("<<<<< exit while:");
+        if (debugSymbolCheck) {
+            exitBlockKai("<<<<< exit while:");
+        }
         loopWatcher.popLoop();
     }
 
