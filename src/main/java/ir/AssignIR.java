@@ -8,6 +8,14 @@ public class AssignIR extends TripleNode {
     super(new Value(lvalue), new Value(rvalue));
   }
 
+  public Value getLValue() {
+    return arg1;
+  }
+
+  public Value getRValue() {
+    return arg2;
+  }
+
   @Override
   public IROperator getOp() {
     return IROperator.Assign;

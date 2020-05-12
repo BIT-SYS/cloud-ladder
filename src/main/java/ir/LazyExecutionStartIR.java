@@ -5,6 +5,19 @@ import symboltable.Type;
 import java.util.List;
 
 public class LazyExecutionStartIR extends IRNode {
+  public String getName() {
+    return name;
+  }
+
+  public List<Value> getParameters() {
+    return parameters;
+  }
+
+  @Override
+  public IRNodeInterface getNext() {
+    return super.getNext();
+  }
+
   String name;
   List<Value> parameters;
   Type retType;

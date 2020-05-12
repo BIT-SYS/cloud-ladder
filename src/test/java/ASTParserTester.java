@@ -4,6 +4,8 @@ import ast.Node;
 import ast.Program;
 import grammar.CLParserLexer;
 import grammar.CLParserParser;
+import interpreter.Interpreter;
+import ir.IR;
 import ir.NoOperationIR;
 import check.SymbolCheck;
 import check.TypeCheck;
@@ -47,7 +49,7 @@ public class ASTParserTester {
     return (Program) trans.visit(tree);
   }
 
-  public static void tryToBuildIR(String inputFile) throws IOException {
+  public static IR tryToBuildIR(String inputFile) throws IOException {
     Program p = tryToBuildAST(inputFile);
     ASTWalker walker = new ASTWalker();
 
@@ -63,9 +65,19 @@ public class ASTParserTester {
     p.gen(before, after);
     Node.ir.emitLabel(after);
     Node.ir.emit(new NoOperationIR());
-    System.out.println(Node.ir);
+//    System.out.println(Node.ir);
+    return Node.ir;
   }
+
+  public static void tryToInterprete(String inputFile, Boolean debug) throws IOException {
+    IR ir = tryToBuildIR(inputFile);
+    Interpreter.debug = debug;
+    Interpreter i = new Interpreter();
+    i.execute(ir);
+  }
+
   public static void main(String[] args) throws Exception {
-    tryToBuildIR("examples/leap-year.cl");
+//    tryToBuildIR("examples/expr.cl");
+    tryToInterprete("examples/if-elif.cl", false);
   }
 }

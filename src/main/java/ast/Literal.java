@@ -1,5 +1,6 @@
 package ast;
 
+import symboltable.SimpleType;
 import symboltable.Type;
 
 import java.util.ArrayList;
@@ -10,6 +11,9 @@ public class Literal extends ExpressionNode {
   public String raw;
 
   Literal(String raw, Type type) {
+    if (type.equals(new SimpleType("String"))) {
+      raw = raw.substring(1, raw.length() - 1);
+    }
     this.raw = raw;
     evalType = type;
   }

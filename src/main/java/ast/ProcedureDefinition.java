@@ -2,6 +2,7 @@ package ast;
 
 import ir.LazyExecutionEndIR;
 import ir.LazyExecutionStartIR;
+import ir.ReturnIR;
 import ir.Value;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class ProcedureDefinition extends Node {
 
     body.gen(0, 0);
 
+    ir.emit(new ReturnIR());
     ir.emit(new LazyExecutionEndIR());
     return null;
   }

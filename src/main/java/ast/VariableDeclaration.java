@@ -17,8 +17,9 @@ public class VariableDeclaration extends Node {
 //    System.out.println(id);
 //    System.out.println(id.toString());
     // ! ERROR: warning: TODO
-    Symbol s = scope.resolve(id.toString());
-    System.out.println(String.format("===>< %s %s\n", evalType, symbol));
+//    Symbol s = scope.resolve(id.toString());
+    // code below print: ===>< null null
+//    System.out.println(String.format("===>< %s %s\n", evalType, symbol));
     VariableDeclarationIR vdir = new VariableDeclarationIR(new Value(id.gen()),new Value(expr.gen()));
     ir.emit(vdir);
     return null;

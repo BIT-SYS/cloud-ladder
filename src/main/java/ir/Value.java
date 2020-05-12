@@ -9,10 +9,10 @@ import static util.Type.getType;
 public class Value {
   // 123 is not symbol -> literal is not symbol
   // till_now is symbol
-  boolean is_symbol;
-  boolean is_temp;
-  String value;
-  Type type;
+  public boolean is_symbol;
+  public boolean is_temp;
+  public String value;
+  public Type type;
 
   Value(boolean is_symbol, String value, Type type) {
     this.is_symbol = is_symbol;
@@ -75,16 +75,26 @@ public class Value {
     }
   }
 
+  public interpreter.Value toInterpreterValue() {
+    return new interpreter.Value(this);
+  }
+
+
+
   @Override
   public String toString() {
-    if (is_symbol) {
-      if (is_temp){
-        return String.format("@%s", value);
-      } else {
-        return String.format("%s:%s", type, value);
-      }
+    if (type !=null) {
+      return String.format("%s:%s", type,value);
     } else {
-      return String.format("%s:%s", type, value);
+      return value.toString();
     }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    Value that = (Value) obj;
+    return this.is_symbol == that.is_symbol && this.is_temp == that.is_temp && this.type.equals(that.type) && this.value.equals(that.value);
   }
 }
