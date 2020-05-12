@@ -1,8 +1,12 @@
 package interpreter;
 
+import interpreter.builtIn.BuiltInPrint;
+import interpreter.builtIn.BuiltInToString;
 import ir.*;
+import util.Type;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Interpreter {
 
@@ -10,12 +14,14 @@ public class Interpreter {
 
   boolean lazy_execution = false;
 
-  Scope current_scope;
+  public Scope current_scope;
   Stack current_stack;
+  CallStack call_stack;
 
   void prepare() {
     current_scope = new Scope();
     current_stack = new Stack();
+    call_stack = new CallStack();
   }
 
   // resolve args.
@@ -45,18 +51,63 @@ public class Interpreter {
       // error
       throw new RuntimeException();
     }
+  }
 
+  // resolve type, won't change context.
+  symboltable.Type resolveType(ir.Value v) {
+    if (v.is_symbol && v.is_temp) {
+      return current_stack.peek().type;
+    } else if (v.is_symbol) {
+      return current_scope.resolve(v.value).type;
+    } else {
+      // should already have type information
+      return v.type;
+    }
   }
 
   // save frame, create new frame then jump.
-  IRNodeInterface call(ProcSignature dest_proc, ProcSignature src_proc) {
+  IRNodeInterface call(ProcSignature dest_proc, ProcSignature src_proc, ir.Value lvalue, IRNodeInterface next_ir) {
     // TODO
+    current_scope = new Scope(current_scope);
 
+    for (int i = 0; i < dest_proc.args.size(); i++) {
+      current_scope.insert(dest_proc.args.get(i).value.toString(), resolve(src_proc.args.get(i)));
+    }
+    call_stack.push(next_ir, lvalue);
+    if(dest_proc.external) {
+      // this is where *external* call actually happen
+      Value ret = dest_proc.external(this);
+      if(ret != null) {
+        current_stack.push(ret);
+      }
+    }
     return dest_proc.next_ir;
   }
 
+  IRNodeInterface ret() {
+    CallStack.CallFrame cf = call_stack.pop();
+
+    if (cf.result != null) {
+      Value ret_val = current_stack.pop();
+      current_scope = current_scope.prev_scope;
+      resolveResult(cf.result, ret_val);
+    } else {
+      current_scope = current_scope.prev_scope;
+    }
+    return cf.next_ir;
+  }
+
+
   public Interpreter() {
     prepare();
+    injection_external();
+  }
+
+  void injection_external() {
+    ProcSignature p = new BuiltInToString();
+    current_scope.insert(p.getSignature(),new Value(p));
+    p = new BuiltInPrint();
+    current_scope.insert(p.getSignature(), new Value(p));
   }
 
   public Object execute(IR ir_list) {
@@ -66,13 +117,13 @@ public class Interpreter {
 
     while (current_ir != null) {
       if (debug) {
+        System.out.println("=========================");
         System.out.println(current_ir);
       }
       if (lazy_execution) {
         if (current_ir.getOp() == IROperator.LazyExecutionEnd)
           lazy_execution = false;
-        else
-          if (debug)
+        else if (debug)
           System.out.println("Because of lazy execution, we skip.");
       } else {
         switch (current_ir.getOp()) {
@@ -162,12 +213,26 @@ public class Interpreter {
             if (callExprIR.caller != null) {
               args.add(0, callExprIR.caller);
             }
-            ProcSignature procSignature_index = new ProcSignature(callExprIR.callee,args,null);
-            ProcSignature dest_proc = (ProcSignature) current_scope.resolve(procSignature_index.getSignature()).value;
+            // TODO 多个临时值会有冲突
+            args.forEach(v -> {
+              if (v.type == null) {
+                System.out.println(v);
+                v.type = resolveType(v);
+                System.out.println(v.type);
+              }
+            });
+            ProcSignature procSignature_index = new ProcSignature(callExprIR.callee, args, null);
+            String signature = procSignature_index.getSignature();
+            System.out.println(procSignature_index);
+            ProcSignature dest_proc = (ProcSignature) current_scope.resolve(signature).value;
             System.out.println("hhhh");
             System.out.println(dest_proc);
 
-            current_ir = call(dest_proc, procSignature_index);
+            current_ir = call(dest_proc, procSignature_index, callExprIR.result, current_ir.getNext());
+            continue;
+          case Return:
+            current_ir = ret();
+            printDebugInfo();
             continue;
           case BuildList:
             break;
@@ -213,7 +278,6 @@ public class Interpreter {
       return;
     System.out.printf(current_scope.toString() + "\n");
     System.out.printf(current_stack.toString() + "\n");
-    System.out.println("=========================");
   }
 
 }

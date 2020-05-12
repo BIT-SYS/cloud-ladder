@@ -7,6 +7,7 @@ public enum IROperator {
   ModExpr,EqualExpr,NotEqualExpr,
   LessThanExpr, GreaterThanExpr,LessEqualThanExpr,GreaterEqualThanExpr,
   CallExpr, BuildList,
+  Return,
   JumpIfNotTrue,
   Jump,
   Break, Continue,

@@ -83,14 +83,10 @@ public class Value {
 
   @Override
   public String toString() {
-    if (is_symbol) {
-      if (is_temp){
-        return String.format("@%s", value);
-      } else {
-        return String.format("%s:%s", type, value);
-      }
+    if (type !=null) {
+      return String.format("%s:%s", type,value);
     } else {
-      return String.format("%s:%s", type, value);
+      return value.toString();
     }
   }
 

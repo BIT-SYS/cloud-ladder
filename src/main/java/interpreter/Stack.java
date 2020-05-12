@@ -17,6 +17,10 @@ public class Stack {
     return stack.pop();
   }
 
+  public Value peek() {
+    return stack.peek();
+  }
+
   @Override
   public String toString() {
     return stack.toString();
