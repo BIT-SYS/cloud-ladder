@@ -26,7 +26,7 @@ public class Value {
         raw_value = raw_value.substring(2);
         Long l= Long.parseLong(raw_value, 2);
         return Float.valueOf(l);
-      } else if (raw_value.startsWith("0") && raw_value.length() >= 2 && !raw_value.startsWith("00")) {
+      } else if (raw_value.startsWith("0") && raw_value.length() >= 2 && !raw_value.startsWith("00") && !raw_value.contains(".")) {
         // oct
         Long l= Long.parseLong(raw_value, 8);
         return Float.valueOf(l);
@@ -123,6 +123,20 @@ public class Value {
       return Value.valueOf(getFloat() / v.getFloat());
     }
     throw new RuntimeException("type error when div.");
+  }
+
+  public Value equal(Value v) {
+    if (!type.equals(v.type))
+      return Value.valueOf(false);
+    if (type instanceof SimpleType) {
+      if (type.equals(getType("Number"))) {
+        // epsilon == 1e-7
+        return Value.valueOf(Math.abs((getFloat() - v.getFloat())) < 1e-7);
+      } else {
+        return Value.valueOf(value == v.value);
+      }
+    }
+    return Value.valueOf(false);
   }
 
   @Override

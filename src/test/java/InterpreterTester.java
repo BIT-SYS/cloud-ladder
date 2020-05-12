@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 
-public class Interpreter {
+public class InterpreterTester {
 
   public static Program tryToBuildAST(String input) throws IOException {
 

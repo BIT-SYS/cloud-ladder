@@ -191,6 +191,8 @@ public class Interpreter {
               case ModExpr:
                 break;
               case EqualExpr:
+                result = left_v.equal(right_v);
+                resolveResult(binaryExprIR.result, result);
                 break;
               case NotEqualExpr:
                 break;
@@ -216,17 +218,12 @@ public class Interpreter {
             // TODO 多个临时值会有冲突
             args.forEach(v -> {
               if (v.type == null) {
-                System.out.println(v);
                 v.type = resolveType(v);
-                System.out.println(v.type);
               }
             });
             ProcSignature procSignature_index = new ProcSignature(callExprIR.callee, args, null);
             String signature = procSignature_index.getSignature();
-            System.out.println(procSignature_index);
             ProcSignature dest_proc = (ProcSignature) current_scope.resolve(signature).value;
-            System.out.println("hhhh");
-            System.out.println(dest_proc);
 
             current_ir = call(dest_proc, procSignature_index, callExprIR.result, current_ir.getNext());
             continue;

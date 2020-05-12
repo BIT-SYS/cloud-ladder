@@ -65,18 +65,19 @@ public class ASTParserTester {
     p.gen(before, after);
     Node.ir.emitLabel(after);
     Node.ir.emit(new NoOperationIR());
-    System.out.println(Node.ir);
+//    System.out.println(Node.ir);
     return Node.ir;
   }
 
-  public static void tryToInterprete(String inputFile) throws IOException {
+  public static void tryToInterprete(String inputFile, Boolean debug) throws IOException {
     IR ir = tryToBuildIR(inputFile);
+    Interpreter.debug = debug;
     Interpreter i = new Interpreter();
     i.execute(ir);
   }
 
   public static void main(String[] args) throws Exception {
 //    tryToBuildIR("examples/expr.cl");
-    tryToInterprete("examples/proc.cl");
+    tryToInterprete("examples/if-elif.cl", false);
   }
 }
