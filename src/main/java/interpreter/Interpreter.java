@@ -3,8 +3,11 @@ package interpreter;
 import interpreter.builtIn.BuiltInPrint;
 import interpreter.builtIn.BuiltInToString;
 import ir.*;
+import symboltable.CompositeType;
 import util.Type;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,14 +73,14 @@ public class Interpreter {
     // TODO
     current_scope = new Scope(current_scope);
 
-    for (int i = 0; i < dest_proc.args.size(); i++) {
+    for (int i = dest_proc.args.size() - 1; 0 <= i; i--) {
       current_scope.insert(dest_proc.args.get(i).value.toString(), resolve(src_proc.args.get(i)));
     }
     call_stack.push(next_ir, lvalue);
-    if(dest_proc.external) {
+    if (dest_proc.external) {
       // this is where *external* call actually happen
       Value ret = dest_proc.external(this);
-      if(ret != null) {
+      if (ret != null) {
         current_stack.push(ret);
       }
     }
@@ -101,13 +104,16 @@ public class Interpreter {
   public Interpreter() {
     prepare();
     injection_external();
+    current_scope = new Scope(current_scope);
   }
 
   void injection_external() {
-    ProcSignature p = new BuiltInToString();
-    current_scope.insert(p.getSignature(),new Value(p));
-    p = new BuiltInPrint();
-    current_scope.insert(p.getSignature(), new Value(p));
+    List<ProcSignature> ps = new ArrayList<ProcSignature>() {{
+      add(new BuiltInToString());
+      add(new BuiltInPrint());
+      add(new BuiltInToString("List<Number>"));
+    }};
+    ps.forEach(p -> current_scope.insert(p.getSignature(), new Value(p)));
   }
 
   public Object execute(IR ir_list) {
@@ -189,6 +195,8 @@ public class Interpreter {
               case XorExpr:
                 break;
               case ModExpr:
+                result = left_v.mod(right_v);
+                resolveResult(binaryExprIR.result, result);
                 break;
               case EqualExpr:
                 result = left_v.equal(right_v);
@@ -199,10 +207,14 @@ public class Interpreter {
               case LessThanExpr:
                 break;
               case GreaterThanExpr:
+                result = left_v.greaterThan(right_v);
+                resolveResult(binaryExprIR.result, result);
                 break;
               case LessEqualThanExpr:
                 break;
               case GreaterEqualThanExpr:
+                result = left_v.greaterEqualThan(right_v);
+                resolveResult(binaryExprIR.result, result);
                 break;
             }
 
@@ -232,6 +244,19 @@ public class Interpreter {
             printDebugInfo();
             continue;
           case BuildList:
+            BuildListIR buildListIR = (BuildListIR) current_ir;
+            // little bit tricky, we just using `type` field, omitting `value`
+            Value a = Value.newArray(buildListIR.type);
+            if (buildListIR.has_range()) {
+              // need to insert from start to end
+              Integer start = Math.round(resolve(buildListIR.start).getFloat());
+              Integer end = Math.round(resolve(buildListIR.end).getFloat());
+              List<Value> ar = (List<Value>) a.value;
+              for (int i = start; i < end; i++) {
+                ar.add(Value.valueOf(i));
+              }
+            }
+            resolveResult(buildListIR.result, a);
             break;
           case JumpIfNotTrue:
             JumpIfNotTrueIR jumpIfNotTrueIR = (JumpIfNotTrueIR) current_ir;

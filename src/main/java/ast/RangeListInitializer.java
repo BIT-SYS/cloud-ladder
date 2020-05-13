@@ -14,8 +14,9 @@ public class RangeListInitializer extends ExpressionNode {
   public ExpressionNode reduce() {
     ExpressionNode _start = start.gen();
     ExpressionNode _end = end.gen();
+    System.out.println(evalType);
     Temp t = new Temp();
-    ir.emit(new BuildListIR(t, _start, _end));
+    ir.emit(new BuildListIR(t, evalType, _start, _end));
     return t;
   }
 

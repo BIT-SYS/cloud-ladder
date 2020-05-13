@@ -31,6 +31,9 @@ public class Scope {
       result = prev_scope.resolve(name);
     }
     // TODO? check if is null
+    if (result == null) {
+      System.err.println(String.format("Variable/Procedure not found: %s", name));
+    }
     return result;
   }
 
