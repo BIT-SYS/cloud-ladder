@@ -24,14 +24,18 @@ public class IfElseBlock extends Node {
         condition.ctx = n1.getCondition().ctx;
 
         JumpIfNotTrueIR j = new JumpIfNotTrueIR(new Value(condition), ir.getLabel(middle));
-        j.setDebugInfo(condition.getLineNumber(),condition.getSourceCode());
+        if (n1 instanceof ElseBlock) {
+          j.setDebugInfo(condition.getLineNumber(), "else");
+        } else {
+          j.setDebugInfo(condition.getLineNumber(),condition.getSourceCode());
+        }
         ir.emit(j);
         ir.emit(StackOperationIR.PushStack());
         n1.getBlock().gen(before, after);
         ir.emit(StackOperationIR.PopStack());
 
         JumpIR jumpIR = new JumpIR(ir.getLabel(last));
-        jumpIR.setDebugInfo(condition.getLineNumber(), condition.getSourceCode());
+        jumpIR.setDebugInfo(this.ctx.stop.getLine(), this.getSourceCodeLastLine());
         ir.emit(jumpIR);
       } else {
         System.err.println("ERROR AST");

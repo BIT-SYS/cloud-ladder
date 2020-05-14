@@ -1,6 +1,7 @@
 package symboltable;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class BaseScope implements Scope {
@@ -23,17 +24,11 @@ public class BaseScope implements Scope {
 
     @Override
     public void define(Symbol sym) {
-//        Symbol sameName = symbols.get(sym.name);
-        symbols.put(sym.name, sym);
-
-//        if (null != sameName) {
-//            // 同一个作用域里能定义多遍的，就是函数重载了
-//            // 不知道这样实现会不会有问题……
-//            assert sameName instanceof ProcedureSymbol;
-//            assert sym instanceof ProcedureSymbol;
-//            ((ProcedureSymbol) sym).next = (ProcedureSymbol) sameName;
-//        }
-
+        if (sym instanceof ProcedureSymbol) {
+            symbols.put(sym.name + ((ProcedureSymbol) sym).signature, sym);
+        } else {
+            symbols.put(sym.name, sym);
+        }
         sym.scope = this; // track the scope in each symbol
     }
 
@@ -44,6 +39,22 @@ public class BaseScope implements Scope {
         // if not here, check any enclosing scope
         if (enclosingScope != null) return enclosingScope.resolve(name);
         return null; // not found
+    }
+
+    @Override
+    public boolean hasProcedure(String name) {
+        return symbols.keySet().stream()
+                .anyMatch(str -> str.startsWith(name) && str.substring(name.length()).startsWith("["))
+                || (null != enclosingScope && enclosingScope.hasProcedure(name));
+    }
+
+    public LinkedList<ProcedureSymbol> resolveProcedures(String name) {
+        LinkedList<ProcedureSymbol> list = new LinkedList<>();
+        symbols.keySet().stream().filter(str -> str.startsWith(name) && str.substring(name.length()).startsWith("["))
+                .map(str -> (ProcedureSymbol) symbols.get(str)).forEachOrdered(list::add);
+        if (null != enclosingScope)
+            list.addAll(enclosingScope.resolveProcedures(name));
+        return list;
     }
 
     @Override

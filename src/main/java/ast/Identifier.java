@@ -7,6 +7,7 @@ import java.util.List;
 
 public class Identifier extends ExpressionNode {
   public String name;
+  public boolean isProc = false;
 
   Identifier(CLParserParser.IdContext ctx) {
     name = ctx.getText();

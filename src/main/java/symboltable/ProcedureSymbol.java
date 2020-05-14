@@ -1,13 +1,10 @@
 package symboltable;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 public class ProcedureSymbol extends Symbol implements Scope {
     LinkedHashMap<String, Symbol> parameters = new LinkedHashMap<>();
     Scope enclosingScope;
-//    public ProcedureSymbol next = null;
     public List<Type> signature = new ArrayList<>();
 
     public ProcedureSymbol(String name, Type retType, Scope enclosingScope) {
@@ -30,7 +27,7 @@ public class ProcedureSymbol extends Symbol implements Scope {
     public void define(Symbol sym) {
         parameters.put(sym.name, sym);
         sym.scope = this;
-        signature.add(signature.size()-1, sym.type);
+        signature.add(signature.size() - 1, sym.type);
     }
 
     @Override
@@ -50,6 +47,16 @@ public class ProcedureSymbol extends Symbol implements Scope {
         return parameters.get(name);
     }
 
+    @Override
+    public boolean hasProcedure(String name) {
+        return enclosingScope.hasProcedure(name);
+    }
+
+    @Override
+    public LinkedList<ProcedureSymbol> resolveProcedures(String name) {
+        return enclosingScope.resolveProcedures(name);
+    }
+
     public boolean isMethod() {
         return null != parameters.get("self"); // todo 检查是不是只有第一个参数叫self
     }
@@ -57,5 +64,18 @@ public class ProcedureSymbol extends Symbol implements Scope {
     public String toString() {
         String[] temp = super.toString().split(":");
         return "proc " + temp[0] + " " + parameters.values() + ":" + temp[1];
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProcedureSymbol that = (ProcedureSymbol) o;
+        return signature.equals(that.signature);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

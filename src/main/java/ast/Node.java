@@ -55,6 +55,18 @@ public abstract class Node implements  GenerateIR,Listener, DebugInfo {
     return cs.getText(new Interval(a, b));
   }
 
+  public String getSourceCodeLastLine() {
+    String code = getSourceCode();
+    code = code.substring(code.lastIndexOf('\n')).replace("\n","");
+    return code;
+  }
+  public String getSourceCodeFirstLine() {
+    String code = getSourceCode();
+    code = code.substring(0, code.indexOf('\n')).replace("\n","");
+    return code;
+  }
+
+
   @Override
   public Integer getLineNumber() {
     return ctx.start.getLine();

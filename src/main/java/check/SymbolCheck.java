@@ -6,9 +6,9 @@ import symboltable.*;
 import java.util.IdentityHashMap;
 import java.util.UUID;
 
+import static util.Error.debugSymbolCheck;
 import static util.Error.die;
 import static util.Type.getType;
-import static util.Error.debugSymbolCheck;
 
 public class SymbolCheck extends ASTBaseListener {
 
@@ -57,7 +57,7 @@ public class SymbolCheck extends ASTBaseListener {
         }
 
         ProcedureSymbol procedureSymbol = new ProcedureSymbol(name, type, currentScope);
-        currentScope.define(procedureSymbol);
+//        currentScope.define(procedureSymbol); 生成signature之后再define
         pushScope(ctx, procedureSymbol);
 
         ctx.scope = currentScope;
@@ -68,6 +68,7 @@ public class SymbolCheck extends ASTBaseListener {
     @Override
     public void exitProcedureDefinition(ProcedureDefinition ctx) {
         exitBlockKai("<<<<< exit procedure " + ctx.id.name + ":");
+        currentScope.define(ctx.symbol);
     }
 
     @Override
@@ -82,7 +83,7 @@ public class SymbolCheck extends ASTBaseListener {
         }
 
         ProcedureSymbol procedureSymbol = new ProcedureSymbol(name, type, currentScope);
-        currentScope.define(procedureSymbol);
+//        currentScope.define(procedureSymbol);
         pushScope(ctx, procedureSymbol);
 
         ctx.scope = currentScope;
@@ -91,9 +92,10 @@ public class SymbolCheck extends ASTBaseListener {
     }
 
     @Override
-    public void exitLambdaExpression(LambdaExpression node) {
+    public void exitLambdaExpression(LambdaExpression ctx) {
         exitBlockKai("<<<<< exit lambda:");
         //要不要删除这个匿名函数的symbol呢？应该不要
+        currentScope.define(ctx.symbol);
     }
 
     @Override
@@ -145,7 +147,6 @@ public class SymbolCheck extends ASTBaseListener {
             Type type = getType(ctx.iter_type);
             VariableSymbol variableSymbol = new VariableSymbol(name, type);
             currentScope.define(variableSymbol);
-
         }
         loopWatcher.pushLoop();
     }
@@ -226,7 +227,12 @@ public class SymbolCheck extends ASTBaseListener {
         String identifier = ctx.name;
         Symbol symbol = currentScope.resolve(identifier);
         if (null == symbol) {
-            die("Symbol Check: AST.Identifier", "<variable " + identifier + "> not found in " + currentScope.getScopeName());
+            if (currentScope.hasProcedure(identifier)) {
+                ctx.scope = currentScope;
+                ctx.isProc = true;
+            } else {
+                die("Symbol Check: AST.Identifier", "<variable " + identifier + "> not found in " + currentScope.getScopeName());
+            }
         } else {
             ctx.symbol = symbol;
         }
@@ -235,11 +241,10 @@ public class SymbolCheck extends ASTBaseListener {
     @Override
     public void enterCallExpression(CallExpression ctx) {
         String identifier = ctx.callee.name;
-        Symbol symbol = currentScope.resolve(identifier);
-        if (null == symbol) {
-            die("Symbol Check: AST.CallExpression", "<function " + identifier + "> not found in " + currentScope.getScopeName());
+        if (currentScope.hasProcedure(identifier)) {
+            ctx.scope = currentScope;
         } else {
-            ctx.symbol = symbol;
+            die("Symbol Check: AST.CallExpression", "<function " + identifier + "> not found in " + currentScope.getScopeName());
         }
     }
 

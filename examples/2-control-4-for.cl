@@ -5,6 +5,6 @@ proc add1(Number x) -> Number {
 Number x = 1
 for x in [1..2] {
     for Number x in [3..4] {
-        print(add1(x).toString())
+        print(add1(x))
     }
 }
