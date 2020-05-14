@@ -49,57 +49,71 @@ public class TypeCheck extends ASTBaseListener {
         if (debugTypeCheck) {
             System.out.println("exit call" + ctx.symbol);
         }
-        if (null == ctx.symbol) {
+        if (null == ctx.scope) { // 说明之前hasProcedure是false，就没有ctx.scope = currentscope
             die("Type Check: CallExpression", "Procedure symbol " + ctx.callee.name + " not found!");
         }
-
+        boolean found = false;
         int give = ctx.arguments.size();
-        ProcedureSymbol proc = ((ProcedureSymbol) ctx.symbol);
-        List<Type> signature = proc.signature;
-        int need = signature.size() - 1; // 减去的是返回值的类型
-        if (need == give) {
-            if (ctx.isMethodCall != proc.isMethod()) {
-                die("Type Check: CallExpression", proc + (proc.isMethod()?" is a method":" is not a method"));
-            }
-            for (int i = 0; i < give; i++) {
-                // 比较
-                ExpressionNode ithArg = ctx.arguments.get(i);
-                Type ithParType = signature.get(i);
+        tryproc:
+        for (ProcedureSymbol proc :
+                ctx.scope.resolveProcedures(ctx.callee.name)) {
+            // 挨个找哪个函数类型能对上
+            if (debugTypeCheck)
+                System.out.println("==========try " + proc);
+            genericHelper.clear();
 
-                // 这个参数可能是函数
-                if (((ithArg instanceof Identifier && ctx.scope.resolve(((Identifier) ithArg).name) instanceof ProcedureSymbol)
-                        || ithArg instanceof LambdaExpression)
-                        && ithParType.toString().equals("Proc")) {
-                    continue; // 如果这个实参是函数，且形参是Proc，就别往下走了：在这里批准了。
+            List<Type> signature = proc.signature;
+            int need = signature.size() - 1; // 减去的是返回值的类型
+            if (need == give) {
+                if (ctx.isMethodCall != proc.isMethod()) {
+                    continue;
                 }
+                for (int i = 0; i < give; i++) {
+                    // 比较
+                    ExpressionNode ithArg = ctx.arguments.get(i);
+                    Type ithParType = signature.get(i);
 
-                // 检查参数类型
-                if (!sameParameterType(ithArg.evalType, ithParType)) {
-                    die("Type Check: CallExpression", ctx.symbol + " : No. " + (i + 1) + " argument is not correct Type");
-                }
-                if (containsGeneric(ithParType)) {
-                    // 是泛型就建表、查表
-                    GenericType gType = (GenericType) getInnermostElementType(ithParType);
-                    Type matchType = matchGenericType(ithArg.evalType, ithParType);
-                    genericHelper.computeIfAbsent(gType, k -> matchType);
-                    if (!genericHelper.get(gType).equals(matchType)) {
-                        die("Type Check: CallExpression", "Wrong generic Type! The Types of " + gType + " is different!");
+                    // 这个参数可能是函数
+                    if (((ithArg instanceof Identifier && ((Identifier) ithArg).isProc)
+                            || ithArg instanceof LambdaExpression)
+                            && ithParType.toString().equals("Proc")) {
+                        continue; // 如果这个实参是函数，且形参是Proc，就别往下走了：在这里批准了。
+                    }
+
+                    // 检查参数类型
+                    if (!sameParameterType(ithArg.evalType, ithParType)) {
+                        // 参数类型匹配不上
+                        continue tryproc;
+                    }
+                    if (containsGeneric(ithParType)) {
+                        // 是泛型就建表、查表
+                        GenericType gType = (GenericType) getInnermostElementType(ithParType);
+                        Type matchType = matchGenericType(ithArg.evalType, ithParType);
+                        genericHelper.computeIfAbsent(gType, k -> matchType);
+                        if (!genericHelper.get(gType).equals(matchType)) {
+                            // 同一泛型对应的类型不一样
+                            continue tryproc;
+                        }
                     }
                 }
+                // 填写返回值
+                Type retType = proc.type;
+                if (containsGeneric(retType)) {
+                    GenericType gType = (GenericType) getInnermostElementType(retType);
+                    Type corriType = genericHelper.get(gType);
+                    ctx.evalType = replceGenericType(retType, corriType);
+                } else {
+                    ctx.evalType = retType;
+                }
+
+                // 到这说明找到了
+                ctx.callee.symbol = proc;
+                found = true;
+                break;
             }
-            // 填写返回值
-            Type retType = ctx.symbol.type;
-            if (containsGeneric(retType)) {
-                GenericType gType = (GenericType) getInnermostElementType(retType);
-                Type corriType = genericHelper.get(gType);
-                ctx.evalType = replceGenericType(retType, corriType);
-            } else {
-                ctx.evalType = retType;
-            }
-            genericHelper.clear();
-        } else {
-            die("Type Check: CallExpression", "Wrong arguments number of " + ctx.symbol);
         }
+        if (!found)
+            die("Type Check: CallExpression", "Can't find proper " + ctx.callee.name + " to call");
     }
 
     @Override
@@ -109,6 +123,7 @@ public class TypeCheck extends ASTBaseListener {
 
     @Override
     public void exitIdentifier(Identifier ctx) {
+        if (ctx.isProc) return;
         if (null == ctx.symbol) {
             die("Type Check: Identifier", "Identifier " + ctx.name + " not found!");
         }
