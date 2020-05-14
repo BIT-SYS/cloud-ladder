@@ -54,13 +54,17 @@ public class TypeCheck extends ASTBaseListener {
         }
 
         int give = ctx.arguments.size();
-        List<Type> signature = ((ProcedureSymbol) ctx.symbol).signature;
+        ProcedureSymbol proc = ((ProcedureSymbol) ctx.symbol);
+        List<Type> signature = proc.signature;
         int need = signature.size() - 1; // 减去的是返回值的类型
-        if (need == give || give == need - 1 && ((ProcedureSymbol) ctx.symbol).isMethod()) {
-            int offset = need == give ? 0 : 1; // 0 是直接调用函数，1 是调用方法
+        if (need == give) {
+            if (ctx.isMethodCall != proc.isMethod()) {
+                die("Type Check: CallExpression", proc + (proc.isMethod()?" is a method":" is not a method"));
+            }
             for (int i = 0; i < give; i++) {
+                // 比较
                 ExpressionNode ithArg = ctx.arguments.get(i);
-                Type ithParType = signature.get(i + offset);
+                Type ithParType = signature.get(i);
 
                 // 这个参数可能是函数
                 if (((ithArg instanceof Identifier && ctx.scope.resolve(((Identifier) ithArg).name) instanceof ProcedureSymbol)
@@ -68,8 +72,10 @@ public class TypeCheck extends ASTBaseListener {
                         && ithParType.toString().equals("Proc")) {
                     continue; // 如果这个实参是函数，且形参是Proc，就别往下走了：在这里批准了。
                 }
+
+                // 检查参数类型
                 if (!sameParameterType(ithArg.evalType, ithParType)) {
-                    die("Type Check: CallExpression", ctx.symbol + " : No. " + (i + 1 + offset) + " argument is not correct Type");
+                    die("Type Check: CallExpression", ctx.symbol + " : No. " + (i + 1) + " argument is not correct Type");
                 }
                 if (containsGeneric(ithParType)) {
                     // 是泛型就建表、查表
@@ -81,50 +87,8 @@ public class TypeCheck extends ASTBaseListener {
                     }
                 }
             }
-
-            if (0 == offset) {
-                // 检查返回值
-                Type retType = ctx.symbol.type;
-                if (containsGeneric(retType)) {
-                    GenericType gType = (GenericType) getInnermostElementType(retType);
-                    Type corriType = genericHelper.get(gType);
-                    ctx.evalType = replceGenericType(retType, corriType);
-                } else {
-                    ctx.evalType = retType;
-                }
-                genericHelper.clear();
-            }
-        } else {
-            die("Type Check: CallExpression", "There are " + (need > give ? "more" : "fewer") + " arguments applied to " + ctx.symbol);
-        }
-
-    }
-
-    @Override
-    public void exitMemberExpression(MemberExpression ctx) {
-        if (debugTypeCheck) {
-            System.out.println("exit mem" + ctx.property.symbol + "\n\n");
-        }
-        // 原来 MemberExpression 竟然是包括方法调用……
-        ExpressionNode callee = ctx.property;
-        assert callee.symbol instanceof ProcedureSymbol;
-        ProcedureSymbol procedure = (ProcedureSymbol) callee.symbol;
-        if (procedure.isMethod()) {
-            List<Type> signature = procedure.signature;
-            Type selfType = signature.get(0);
-            if (!sameParameterType(ctx.object.evalType, selfType)) {
-                die("Type Check: MemberExpression",
-                        "Procedure " + procedure.name + " is not a method of " + ctx.object.evalType);
-            }
-            if (containsGeneric(selfType)) {
-                GenericType gType = (GenericType) getInnermostElementType(selfType);
-                Type matchType = matchGenericType(ctx.object.evalType, selfType);
-                genericHelper.computeIfAbsent(gType, k -> matchType); // 有可能self的类型是第一次出现的TypeX
-                if (!genericHelper.get(gType).equals(matchType)) {
-                    die("Type Check: MemberExpression", "Procedure " + procedure.name + " have wrong GenericType");
-                }
-            }
-            Type retType = procedure.type;
+            // 填写返回值
+            Type retType = ctx.symbol.type;
             if (containsGeneric(retType)) {
                 GenericType gType = (GenericType) getInnermostElementType(retType);
                 Type corriType = genericHelper.get(gType);
@@ -134,8 +98,13 @@ public class TypeCheck extends ASTBaseListener {
             }
             genericHelper.clear();
         } else {
-            die("Type Check: MemberExpression", "Procedure " + procedure.name + " is not a method");
+            die("Type Check: CallExpression", "Wrong arguments number of " + ctx.symbol);
         }
+    }
+
+    @Override
+    public void exitMemberExpression(MemberExpression ctx) {
+        die("Type Check: MemberExpression", "You can't be here ᛠᛡᛢᛣᛤᛥᛦᛧᛨᛩᛪ᛫᛬᛭ᛮᛯ");
     }
 
     @Override
