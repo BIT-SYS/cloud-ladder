@@ -8,8 +8,8 @@ public class JumpIfNotTrueIR extends IRNode {
     return IROperator.JumpIfNotTrue;
   }
   JumpIfNotTrueIR(){
-
   }
+
   public JumpIfNotTrueIR(Value condition, Label to) {
     this.condition = condition;
     this.to = to;
@@ -17,6 +17,6 @@ public class JumpIfNotTrueIR extends IRNode {
 
   @Override
   public String toString() {
-    return String.format("%s if true != %s goto %s",labels,condition, to);
+    return String.format("if true != %s goto %s",condition, to);
   }
 }

@@ -36,9 +36,9 @@ public class BuildListIR extends IRNode {
   @Override
   public String toString() {
     if (start == null) {
-     return String.format("%s %s = %s:[]", labels, result, type);
+     return String.format("%s = %s:[]", result, type);
     } else {
-      return String.format("%s %s = %s:[%s ... %s]",labels,result,type,start,end);
+      return String.format("%s = %s:[%s ... %s]",result,type,start,end);
     }
   }
 }

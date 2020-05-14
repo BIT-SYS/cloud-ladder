@@ -23,9 +23,16 @@ public class IfBlock extends Node implements HaveConditionAndBlock {
     ExpressionNode reduced_condition = condition.gen(before, label);
     ir.emitLabel(label);
     int blockAfter = newLabel();
-    ir.emit(new JumpIfNotTrueIR(new Value(reduced_condition), ir.getLabel(blockAfter)));
+
+    JumpIfNotTrueIR jumpIfNotTrueIR = new JumpIfNotTrueIR(new Value(reduced_condition), ir.getLabel(blockAfter));
+    jumpIfNotTrueIR.setDebugInfo(reduced_condition.getLineNumber(),reduced_condition.getSourceCode());
+    ir.emit(jumpIfNotTrueIR);
+
     statements.gen(label, after);
-    ir.emit(new JumpIR(ir.getLabel(after)));
+
+    JumpIR jumpIR = new JumpIR(ir.getLabel(after));
+    jumpIR.setDebugInfo(reduced_condition.getLineNumber(),reduced_condition.getSourceCode());
+    ir.emit(jumpIR);
     ir.emitLabel(blockAfter);
     return null;
   }

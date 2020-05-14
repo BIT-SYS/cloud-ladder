@@ -2,6 +2,7 @@ package ir;
 
 
 import ast.ExpressionNode;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 public class BinaryExprIR extends QuadrupleNode {
   private IROperator op;
@@ -11,8 +12,8 @@ public class BinaryExprIR extends QuadrupleNode {
     return op;
   }
 
-  public BinaryExprIR(String op, ExpressionNode arg1, ExpressionNode arg2, ExpressionNode result) {
-    super(new Value(arg1), new Value(arg2), new Value(result));
+  public BinaryExprIR(String op, ExpressionNode arg1, ExpressionNode arg2, ExpressionNode result, ParserRuleContext ctx) {
+    super(new Value(arg1), new Value(arg2), new Value(result), 0,null);
     switch (op) {
       case "+":
         this.op = IROperator.AddExpr;
@@ -59,8 +60,11 @@ public class BinaryExprIR extends QuadrupleNode {
     }
   }
 
+  public BinaryExprIR(String op, ExpressionNode arg1, ExpressionNode arg2, ExpressionNode result ) {
+    this(op,arg1,arg2,result,null);
+  }
   @Override
   public String toString() {
-    return String.format("%s %s = %s %s %s",labels, result, arg1, op, arg2);
+    return String.format("%s = %s %s %s",result, arg1, op, arg2);
   }
 }

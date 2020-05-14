@@ -9,7 +9,7 @@ public class LazyExecutionEndIR extends IRNode {
 
   @Override
   public String toString() {
-    return String.format("%s Lazy Execution End", labels);
+    return String.format("Lazy Execution End");
   }
 
 }

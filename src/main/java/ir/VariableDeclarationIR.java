@@ -21,6 +21,6 @@ public class VariableDeclarationIR extends TripleNode {
 
   @Override
   public String toString() {
-    return String.format("%s %s = %s", labels,arg2, arg1);
+    return String.format("%s = %s", arg2, arg1);
   }
 }

@@ -15,7 +15,11 @@ public class IndexExpression extends BinaryExpression {
     ExpressionNode l = left.reduce();
     ExpressionNode r = right.reduce();
     Temp t = new Temp();
-    ir.emit(new CallExprIR("get",l,t,new ArrayList<ExpressionNode>(){{add(r);}}));
+    CallExprIR callExprIR = new CallExprIR("get", l, t, new ArrayList<ExpressionNode>() {{
+      add(r);
+    }});
+    Utils.setDebugInfo(callExprIR,this);
+    ir.emit(callExprIR);
     return t;
   }
 

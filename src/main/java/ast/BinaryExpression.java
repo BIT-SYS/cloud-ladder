@@ -19,6 +19,7 @@ public class BinaryExpression extends ExpressionNode {
     if (reducedExpr instanceof BinaryExpression) {
       BinaryExpression be = (BinaryExpression) reducedExpr;
       BinaryExprIR beir = new BinaryExprIR(be.op, be.left, be.right, t);
+      beir.setDebugInfo(getLineNumber(), getSourceCode());
       ir.emit(beir);
     }
     return t;
@@ -30,7 +31,9 @@ public class BinaryExpression extends ExpressionNode {
     ExpressionNode l = left.reduce();
     ExpressionNode r = right.reduce();
     Temp t = new Temp();
-    ir.emit(new BinaryExprIR(op,l,r,t));
+    BinaryExprIR beir = new BinaryExprIR(op, l, r, t);
+    beir.setDebugInfo(getLineNumber(), getSourceCode());
+    ir.emit(beir);
     return t;
   }
 

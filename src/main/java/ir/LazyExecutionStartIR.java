@@ -22,11 +22,12 @@ public class LazyExecutionStartIR extends IRNode {
   List<Value> parameters;
   Type retType;
 
-  public LazyExecutionStartIR(String name, Type ret,List<Value> parameters){
+  public LazyExecutionStartIR(String name, Type ret, List<Value> parameters) {
     this.name = name;
     this.parameters = parameters;
     this.retType = ret;
   }
+
   @Override
   public IROperator getOp() {
     return IROperator.LazyExecutionStart;
@@ -34,6 +35,6 @@ public class LazyExecutionStartIR extends IRNode {
 
   @Override
   public String toString() {
-    return String.format("%s Lazy Execution Start: %s %s -> %s", labels,name,parameters, retType);
+    return String.format("Lazy Execution Start: %s %s -> %s", name, parameters, retType);
   }
 }

@@ -2,6 +2,7 @@ package ast;
 
 import ir.Value;
 import ir.VariableDeclarationIR;
+import org.antlr.v4.runtime.ParserRuleContext;
 import symboltable.Symbol;
 
 import java.util.ArrayList;
@@ -12,15 +13,18 @@ public class VariableDeclaration extends Node {
   public Identifier id;
   public ExpressionNode expr;
 
+  VariableDeclaration(ParserRuleContext ctx) {
+    super(ctx);
+  }
+
   @Override
   public ExpressionNode gen(int before, int after) {
-//    System.out.println(id);
-//    System.out.println(id.toString());
     // ! ERROR: warning: TODO
 //    Symbol s = scope.resolve(id.toString());
     // code below print: ===>< null null
 //    System.out.println(String.format("===>< %s %s\n", evalType, symbol));
     VariableDeclarationIR vdir = new VariableDeclarationIR(new Value(id.gen()),new Value(expr.gen()));
+    Utils.setDebugInfo(vdir,this);
     ir.emit(vdir);
     return null;
   }

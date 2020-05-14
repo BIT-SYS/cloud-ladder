@@ -29,14 +29,14 @@ public class CallExprIR extends IRNode {
   @Override
   public String toString() {
     if (caller != null && result != null) {
-      return String.format("%s %s = %s.%s(%s)", labels,result, caller, callee, args);
+      return String.format("%s = %s.%s(%s)",result, caller, callee, args);
     } else if (result != null) {
-      return String.format("%s %s = %s(%s)", labels, result,callee,args);
+      return String.format("%s = %s(%s)", result,callee,args);
     }
     else if (caller != null) {
-      return String.format("%s %s.%s(%s)", labels, caller, callee, args);
+      return String.format("%s.%s(%s)", caller, callee, args);
     } else {
-      return String.format("%s %s(%s)", labels, callee, args);
+      return String.format("%s(%s)", callee, args);
     }
   }
 }

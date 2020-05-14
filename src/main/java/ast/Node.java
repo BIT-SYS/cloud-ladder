@@ -1,29 +1,45 @@
 package ast;
 
 import ir.IR;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.Interval;
 import symboltable.Scope;
 import symboltable.Symbol;
 import symboltable.Type;
 
 import java.util.List;
 
-/**
- * Base AST.Node.
- */
-//interface AST.Node {
-//  List<AST.Node> getChildren();
-//}
 
-public abstract class Node {
+interface DebugInfo {
+  public String getSourceCode();
+  public Integer getLineNumber();
+}
+
+interface GenerateIR {
+  public int newLabel();
+  public ExpressionNode gen(int before, int after);
+}
+
+interface Listener {
+  List<Node> getChildren();
+}
+
+public abstract class Node implements  GenerateIR,Listener, DebugInfo {
   // AST.ScopePointer
   public Scope scope;
   public Symbol symbol;
   public Type evalType;
+  public ParserRuleContext ctx;
   static public IR ir;
 
-  //
   public int newLabel() {
     return ++Label.label;
+  }
+
+  Node(){};
+  Node(ParserRuleContext ctx) {
+    this.ctx = ctx;
   }
 
   public ExpressionNode gen(int before, int after) {
@@ -31,5 +47,16 @@ public abstract class Node {
     return null;
   }
 
-  abstract List<Node> getChildren();
+  @Override
+  public String getSourceCode() {
+    int a = ctx.start.getStartIndex();
+    int b = ctx.stop.getStopIndex();
+    CharStream cs = ctx.start.getInputStream();
+    return cs.getText(new Interval(a, b));
+  }
+
+  @Override
+  public Integer getLineNumber() {
+    return ctx.start.getLine();
+  }
 }
