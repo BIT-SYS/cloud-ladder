@@ -86,6 +86,9 @@ public class ASTBaseListener {
 	public void enterRangeListInitializer(RangeListInitializer node) {}
 	public void exitRangeListInitializer(RangeListInitializer node) {}
 
+	public void enterUtils(Utils node) {}
+	public void exitUtils(Utils node) {}
+
 	public void enterValuesListInitializer(ValuesListInitializer node) {}
 	public void exitValuesListInitializer(ValuesListInitializer node) {}
 
