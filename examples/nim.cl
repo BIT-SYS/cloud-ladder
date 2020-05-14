@@ -15,5 +15,5 @@ while true {
             counter = counter + 1
         }
     }
-    print(counter.toString)
+    print(counter)
 }

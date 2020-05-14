@@ -31,6 +31,11 @@ public class ASTOlderTester {
         @Override
         public void exitCallExpression(CallExpression ctx) {
             System.out.println("exit call" + ctx.symbol);
+            for (ExpressionNode expr :
+                    ctx.arguments) {
+                System.out.println(expr.toString());
+            }
+            System.out.println("\n\n");
         }
 
         @Override

@@ -10,6 +10,7 @@ public class CallExpression extends ExpressionNode {
   // identifier or AST.MemberExpression
   public FunctionIdentifier callee;
   public List<ExpressionNode> arguments;
+  public boolean isMethodCall = false;
 
 
   @Override

@@ -179,16 +179,26 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitMember(CLParserParser.MemberContext ctx) {
-    MemberExpression me = new MemberExpression();
-    me.object = (ExpressionNode) visit(ctx.expression());
     if (ctx.IDENTIFIER() != null) {
       // member is AST.Identifier
+      MemberExpression me = new MemberExpression();
+      me.object = (ExpressionNode) visit(ctx.expression());
       me.property = new Identifier(ctx.IDENTIFIER().getText());
+      return me;
     } else {
       // member is Cal
-      me.property = (ExpressionNode) visit(ctx.procedureCall());
+      CLParserParser.ProcedureCallContext pctx = ctx.procedureCall();
+      CallExpression ce = new CallExpression();
+      ce.isMethodCall = true;
+      ce.callee = new FunctionIdentifier(pctx.IDENTIFIER().getText());
+      ce.arguments = new ArrayList<ExpressionNode>() {{
+        add((ExpressionNode) visit(ctx.expression()));
+      }};
+      if (null != pctx.expressionList()) {
+        pctx.expressionList().expression().stream().map(e -> (ExpressionNode) visit(e)).forEachOrdered(ce.arguments::add);
+      }
+      return ce;
     }
-    return me;
   }
 
 

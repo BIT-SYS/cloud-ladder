@@ -1,5 +1,7 @@
 package symboltable;
 
+import java.util.LinkedList;
+
 public interface Scope {
     String getScopeName();
 
@@ -22,4 +24,14 @@ public interface Scope {
      * 只看当前scope有没有（用于检查重定义）
      */
     Symbol resolveWithin(String name);
+
+    /**
+     * 确定有没有某个函数
+     */
+    boolean hasProcedure(String name);
+
+    /**
+     * 返回所有同名函数
+     */
+    LinkedList<ProcedureSymbol> resolveProcedures(String name);
 }
