@@ -17,7 +17,7 @@ public class PredefinedScope extends BaseScope {
         //todo
         define(mkproc(this, "filter", "List<TypeA>", mkprmtr("List<TypeA>", "self"), mkprmtr("Proc")));
         define(mkproc(this, "map", "List<TypeA>", mkprmtr("List<TypeA>", "self"), mkprmtr("Proc")));
-        define(mkproc(this, "forEach", "List<TypeB>", mkprmtr("List<TypeA>", "self"), mkprmtr("Proc")));
+        define(mkproc(this, "forEach", "Number", mkprmtr("List<TypeA>", "self"), mkprmtr("Proc")));
         define(mkproc(this, "reduce", "Number", mkprmtr("Proc"), mkprmtr("List<TypeA>"), mkprmtr("TypeA")));
     }
 
