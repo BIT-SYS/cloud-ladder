@@ -14,6 +14,6 @@ public class JumpIR extends JumpIfNotTrueIR {
 
   @Override
   public String toString() {
-    return String.format("%s goto %s", labels, to);
+    return String.format("goto %s", to);
   }
 }

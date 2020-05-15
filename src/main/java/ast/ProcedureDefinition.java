@@ -18,12 +18,18 @@ public class ProcedureDefinition extends Node {
 
   @Override
   public ExpressionNode gen(int before, int after) {
-    ir.emit(new LazyExecutionStartIR(id.toString(), this.evalType, parameters.parameters.stream().map(Value::new).collect(Collectors.toList())));
+    LazyExecutionStartIR lazyExecutionStartIR = new LazyExecutionStartIR(id.toString(), this.evalType, parameters.parameters.stream().map(Value::new).collect(Collectors.toList()));
+    Utils.setDebugInfo(lazyExecutionStartIR,this);
+    ir.emit(lazyExecutionStartIR);
 
     body.gen(0, 0);
 
-    ir.emit(new ReturnIR());
-    ir.emit(new LazyExecutionEndIR());
+    ReturnIR returnIR = new ReturnIR();
+    Utils.setDebugInfo(returnIR,this);
+    ir.emit(returnIR);
+    LazyExecutionEndIR lazyExecutionEndIR = new LazyExecutionEndIR();
+    Utils.setDebugInfo(lazyExecutionEndIR,this);
+    ir.emit(lazyExecutionEndIR);
     return null;
   }
 

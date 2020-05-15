@@ -17,7 +17,7 @@ public class ProcSignature {
     return next_ir;
   }
 
-  public interpreter.Value external (Interpreter context) {
+  public interpreter.Value external(Interpreter context) {
     System.err.println("you should override this function");
     return null;
   }
@@ -56,10 +56,8 @@ public class ProcSignature {
 
   @Override
   public String toString() {
-    return "ProcSignature{" +
-            "proc_name='" + proc_name + '\'' +
-            ", args=" + args +
-            ", next_ir=" + next_ir +
-            '}';
+    return proc_name +
+            "(" + args +
+            ')';
   }
 }

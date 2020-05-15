@@ -20,12 +20,23 @@ public class IfElseBlock extends Node {
       if (n instanceof HaveConditionAndBlock) {
         HaveConditionAndBlock n1 = (HaveConditionAndBlock) n;
         ExpressionNode condition = n1.getCondition().gen(0, 0);
+        // fix ctx
+        condition.ctx = n1.getCondition().ctx;
+
         JumpIfNotTrueIR j = new JumpIfNotTrueIR(new Value(condition), ir.getLabel(middle));
+        if (n1 instanceof ElseBlock) {
+          j.setDebugInfo(condition.getLineNumber(), "else");
+        } else {
+          j.setDebugInfo(condition.getLineNumber(),condition.getSourceCode());
+        }
         ir.emit(j);
         ir.emit(StackOperationIR.PushStack());
         n1.getBlock().gen(before, after);
         ir.emit(StackOperationIR.PopStack());
-        ir.emit(new JumpIR(ir.getLabel(last)));
+
+        JumpIR jumpIR = new JumpIR(ir.getLabel(last));
+        jumpIR.setDebugInfo(this.ctx.stop.getLine(), this.getSourceCodeLastLine());
+        ir.emit(jumpIR);
       } else {
         System.err.println("ERROR AST");
       }

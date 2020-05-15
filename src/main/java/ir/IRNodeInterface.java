@@ -1,5 +1,8 @@
 package ir;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+
+
 public interface IRNodeInterface {
 
   public void register();

@@ -19,7 +19,7 @@ public class ElseBlock extends Node implements HaveConditionAndBlock {
   }
 
   @Override
-  List<Node> getChildren() {
+  public List<Node> getChildren() {
     return new ArrayList<Node>() {{
       add(statements);
     }};
@@ -27,7 +27,9 @@ public class ElseBlock extends Node implements HaveConditionAndBlock {
 
   @Override
   public ExpressionNode getCondition() {
-    return new Literal("true", new SimpleType("Boolean"));
+    Literal literal = new Literal("true", new SimpleType("Boolean"));
+    literal.ctx = this.ctx;
+    return literal;
   }
 
   @Override

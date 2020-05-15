@@ -13,7 +13,9 @@ public class Continue extends Node {
 
   @Override
   public ExpressionNode gen(int before, int after) {
-    ir.emit(new ContinueIR(ir.getLabel(before)));
+    ContinueIR continueIR = new ContinueIR(ir.getLabel(before));
+    continueIR.setDebugInfo(getLineNumber(),getSourceCode());
+    ir.emit(continueIR);
     return null;
   }
 }

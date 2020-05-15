@@ -13,7 +13,9 @@ public class Break extends Node {
 
   @Override
   public ExpressionNode gen(int before, int after) {
-    ir.emit(new BreakIR(ir.getLabel(after)));
+    BreakIR breakIR = new BreakIR(ir.getLabel(after));
+    breakIR.setDebugInfo(getLineNumber(),getSourceCode());
+    ir.emit(breakIR);
     return null;
   }
 }

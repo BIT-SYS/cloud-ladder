@@ -4,12 +4,22 @@ import symboltable.CompositeType;
 import symboltable.SimpleType;
 import symboltable.Type;
 
+import java.util.ArrayList;
+
 import static util.Type.getType;
 
 
 public class Value {
   Type type;
   Object value;
+
+  public String getValueString() {
+    return value.toString();
+  }
+
+  public static Value valueOf(int i) {
+    return Value.valueOf(Float.valueOf(i));
+  }
 
   Object buildValue(Type t, String raw_value){
     if (t.equals(new SimpleType("Boolean"))) {
@@ -36,8 +46,7 @@ public class Value {
     } else if (t instanceof CompositeType) {
         if(((CompositeType) t).container.equals("List")) {
           // ???
-//          Object v =  buildValue(((CompositeType) t).element, raw_value)
-
+          return new ArrayList<Value>();
         } else {
           throw new RuntimeException("Invalid Type");
         }
@@ -45,7 +54,6 @@ public class Value {
       throw new RuntimeException("Invalid Type");
     }
     /// ???
-    return null;
   }
 
   public Value(Type t, Object v) {
@@ -88,6 +96,10 @@ public class Value {
     return new Value(new SimpleType("Boolean"), a);
   }
 
+  static public Value newArray(Type type) {
+    return new Value(type, new ArrayList<Value>());
+  }
+
   public Value add(Value v,Interpreter context) {
     if (type instanceof SimpleType) {
       if (((SimpleType) type).name.equals("Number")) {
@@ -117,12 +129,22 @@ public class Value {
 
   public Value div(Value v) {
     if (type.equals(getType("Number"))) {
-      if (v.getFloat() == 0) {
+      if ((v.getFloat() - 0) < 1e-7) {
         throw new RuntimeException("? error #DIV/0!");
       }
       return Value.valueOf(getFloat() / v.getFloat());
     }
     throw new RuntimeException("type error when div.");
+  }
+
+  public Value mod(Value v) {
+    if (type.equals(getType("Number"))) {
+      if ((v.getFloat() - 0) < 1e-7) {
+        throw new RuntimeException("? error #MOD/0!");
+      }
+      return Value.valueOf(getFloat() % v.getFloat());
+    }
+    throw new RuntimeException("type error when mod.");
   }
 
   public Value equal(Value v) {
@@ -137,6 +159,19 @@ public class Value {
       }
     }
     return Value.valueOf(false);
+  }
+
+  public Value greaterThan(Value v) {
+    if (type.equals(getType("Number"))) {
+      return Value.valueOf(getFloat() > v.getFloat());
+    }
+    throw new RuntimeException("type error when mod.");
+  }
+  public Value greaterEqualThan(Value v) {
+    if (type.equals(getType("Number"))) {
+      return Value.valueOf(getFloat() >= v.getFloat());
+    }
+    throw new RuntimeException("type error when mod.");
   }
 
   @Override

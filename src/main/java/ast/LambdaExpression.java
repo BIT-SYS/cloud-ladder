@@ -18,13 +18,20 @@ public class LambdaExpression extends ExpressionNode {
   public ExpressionNode reduce() {
     // TODO retType ???
     Temp t = new Temp();
-    ir.emit(new LazyExecutionStartIR(t.toString(), this.evalType , parameters.parameters.stream().map(Value::new).collect(Collectors.toList())));
+    LazyExecutionStartIR lazyExecutionStartIR = new LazyExecutionStartIR(t.toString(), this.evalType, parameters.parameters.stream().map(Value::new).collect(Collectors.toList()));
+    Utils.setDebugInfo(lazyExecutionStartIR,this);
+    ir.emit(lazyExecutionStartIR);
     int before = newLabel();
     int after = newLabel();
     ir.emitLabel(before);
+
     body.gen(before, after);
+
     ir.emitLabel(after);
-    ir.emit(new LazyExecutionEndIR());
+
+    LazyExecutionEndIR lazyExecutionEndIR = new LazyExecutionEndIR();
+    Utils.setDebugInfo(lazyExecutionEndIR, this);
+    ir.emit(lazyExecutionEndIR);
     return t;
   }
 

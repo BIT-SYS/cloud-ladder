@@ -26,17 +26,26 @@ public class ForBlock extends Node {
     Temp len = new Temp();
     ir.emit(StackOperationIR.PushStack());
     // get expr len
-    ir.emit(new CallExprIR("size", expr , len, new ArrayList<>()));
+    CallExprIR callExprIR = new CallExprIR("size", expr, len, new ArrayList<>());
+    callExprIR.setDebugInfo(for_expr.getLineNumber(),for_expr.getSourceCode());
+    ir.emit(callExprIR);
 
-    ir.emit(new VariableDeclarationIR(new Value(t), Value.Literal("0", new SimpleType("Number"))));
+    VariableDeclarationIR number = new VariableDeclarationIR(new Value(t), Value.Literal("0", new SimpleType("Number")));
+    number.setDebugInfo(for_id.getLineNumber(),for_id.getSourceCode());
+    ir.emit(number);
     ir.emitLabel(before);
     // if false then jump
-    ir.emit(new CallExprIR("get", expr, for_id, new ArrayList<ExpressionNode>() {{
+    CallExprIR callExprIR1 = new CallExprIR("get", expr, for_id, new ArrayList<ExpressionNode>() {{
       add(t);
-    }}));
+    }});
+    callExprIR1.setDebugInfo(for_expr.getLineNumber(),getSourceCode());
+    ir.emit(callExprIR1);
+
     LogicExpression condition = new LogicExpression(t, len, "<");
     ExpressionNode condition_reduced = condition.gen(0, 0);
-    ir.emit(new JumpIfNotTrueIR(new Value(condition_reduced), ir.getLabel(after)));
+    JumpIfNotTrueIR jumpIfNotTrueIR = new JumpIfNotTrueIR(new Value(condition_reduced), ir.getLabel(after));
+    jumpIfNotTrueIR.setDebugInfo(for_expr.getLineNumber(),for_expr.getSourceCode());
+    ir.emit(jumpIfNotTrueIR);
 
     ir.emit(StackOperationIR.PushStack());
     // execuete
@@ -48,8 +57,15 @@ public class ForBlock extends Node {
     // +1 and jump
     ArithmeticExpression b = new ArithmeticExpression(t, new Literal("1", new SimpleType("Number")), "+");
     ExpressionNode b_reduced = b.gen(0, 0);
-    ir.emit(new AssignIR(t, b_reduced));
-    ir.emit(new JumpIR(ir.getLabel(before)));
+
+    AssignIR assignIR = new AssignIR(t, b_reduced);
+    assignIR.setDebugInfo(for_expr.getLineNumber(),for_expr.getSourceCode());
+    ir.emit(assignIR);
+
+    JumpIR jumpIR = new JumpIR(ir.getLabel(before));
+    jumpIR.setDebugInfo(for_expr.getLineNumber(),for_expr.getSourceCode());
+    ir.emit(jumpIR);
+
     ir.emit(StackOperationIR.PopStack());
     return null;
   }

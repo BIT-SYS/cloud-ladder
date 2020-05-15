@@ -2,6 +2,8 @@ package ast;
 
 import grammar.CLParserBaseVisitor;
 import grammar.CLParserParser;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.misc.Interval;
 import symboltable.SimpleType;
 
 import java.lang.reflect.Method;
@@ -16,7 +18,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitVariableDecl(CLParserParser.VariableDeclContext ctx) {
-    VariableDeclaration vd = new VariableDeclaration();
+    VariableDeclaration vd = new VariableDeclaration(ctx);
     String name = ctx.IDENTIFIER().getText();
     String type = ctx.typeType().getText();
     Identifier id = new Identifier(name);
@@ -28,27 +30,35 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitIntegerLiteral(CLParserParser.IntegerLiteralContext ctx) {
-    return new Literal(ctx.getText(), new SimpleType("Number"));
+    Literal number = new Literal(ctx.getText(), new SimpleType("Number"));
+    number.ctx = ctx;
+    return number;
   }
 
   @Override
   public Node visitFloatLiteral(CLParserParser.FloatLiteralContext ctx) {
-    return new Literal(ctx.getText(), new SimpleType("Number"));
+    Literal number = new Literal(ctx.getText(), new SimpleType("Number"));
+    number.ctx = ctx;
+    return number;
   }
 
   @Override
   public Node visitString(CLParserParser.StringContext ctx) {
-    return new Literal(ctx.getText(), new SimpleType("String"));
+    Literal string = new Literal(ctx.getText(), new SimpleType("String"));
+    string.ctx = ctx;
+    return string;
   }
 
   @Override
   public Node visitBool(CLParserParser.BoolContext ctx) {
-    return new Literal(ctx.getText(), new SimpleType("Boolean"));
+    Literal aBoolean = new Literal(ctx.getText(), new SimpleType("Boolean"));
+    aBoolean.ctx = ctx;
+    return aBoolean;
   }
 
   @Override
   public Node visitRangeListInitializer(CLParserParser.RangeListInitializerContext ctx) {
-    RangeListInitializer rli = new RangeListInitializer();
+    RangeListInitializer rli = new RangeListInitializer(ctx);
     rli.start = (ExpressionNode) visit(ctx.expression(0));
     rli.end = (ExpressionNode) visit(ctx.expression(1));
     rli.exclusiveEnd = !ctx.op.getText().equals("..");
@@ -57,13 +67,15 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitIndex(CLParserParser.IndexContext ctx) {
-    return new IndexExpression((ExpressionNode) visit(ctx.expression(0)), (ExpressionNode) visit(ctx.expression(1)), "[]");
+    IndexExpression indexExpression = new IndexExpression((ExpressionNode) visit(ctx.expression(0)), (ExpressionNode) visit(ctx.expression(1)), "[]");
+    indexExpression.ctx = ctx;
+    return indexExpression;
   }
 
   @Override
   public Node visitValuesListInitializer(CLParserParser.ValuesListInitializerContext ctx) {
     ValuesListInitializer vli = new ValuesListInitializer();
-
+    vli.ctx = ctx;
     vli.values = ctx.expression().stream().map(e -> (ExpressionNode) visit(e)).collect(Collectors.toCollection(ArrayList::new));
 
     return vli;
@@ -71,7 +83,9 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitAssign(CLParserParser.AssignContext ctx) {
-    return new Assign(ctx.assignment().IDENTIFIER().getText(), (ExpressionNode) visit(ctx.assignment().expression()));
+    Assign assign = new Assign(ctx.assignment().IDENTIFIER().getText(), (ExpressionNode) visit(ctx.assignment().expression()));
+    assign.ctx = ctx;
+    return assign;
   }
 
 
@@ -84,6 +98,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   public Node visitBlock(CLParserParser.BlockContext ctx) {
 
     Block bl = new Block();
+    bl.ctx = ctx;
     ctx.statement().forEach(
             n -> {
 //              System.out.println(n.getText());
@@ -99,14 +114,20 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   @Override
   public Node visitIfBlock(CLParserParser.IfBlockContext ctx) {
     IfElseBlock ieb = new IfElseBlock();
+    ieb.ctx = ctx;
     IfBlock ib = new IfBlock((Block) visit(ctx.block(0)));
+    ib.ctx = ctx.block(0);
     ib.condition = (ExpressionNode) visit(ctx.expression(0));
     ieb.ifelses.add(ib);
 
     int number_of_elif = ctx.ELIF().size();
     int number_of_else = ctx.ELSE() == null ? 0 : 1;
 
-    List<ElifBlock> lib = ctx.block().subList(1, 1 + number_of_elif).stream().map(b -> new ElifBlock((Block) visit(b))).collect(
+    List<ElifBlock> lib = ctx.block().subList(1, 1 + number_of_elif).stream().map(b -> {
+      ElifBlock elifBlock = new ElifBlock((Block) visit(b));
+      elifBlock.ctx = b;
+      return elifBlock;
+    }).collect(
             Collectors.toCollection(ArrayList::new)
     );
     IntStream.range(0, lib.size()).forEach(i -> lib.get(i).condition = (ExpressionNode) visit(ctx.expression(i + 1)));
@@ -114,7 +135,9 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     ieb.ifelses.addAll(lib);
 
     if (number_of_else > 0) {
-      ElseBlock eb = new ElseBlock((Block) visit(ctx.block(ctx.block().size() - 1)));
+      CLParserParser.BlockContext block = ctx.block(ctx.block().size() - 1);
+      ElseBlock eb = new ElseBlock((Block) visit(block));
+      eb.ctx = block;
       ieb.ifelses.add(eb);
     }
 
@@ -124,6 +147,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   @Override
   public Node visitWhileBlock(CLParserParser.WhileBlockContext ctx) {
     WhileBlock wb = new WhileBlock((Block) visit(ctx.block()));
+    wb.ctx = ctx;
     wb.condition = (ExpressionNode) visit(ctx.expression());
     return wb;
   }
@@ -132,6 +156,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   @Override
   public Node visitForBlock(CLParserParser.ForBlockContext ctx) {
     ForBlock fb = new ForBlock((Block) visit(ctx.block()));
+    fb.ctx = ctx;
     fb.for_id = new Identifier(ctx.IDENTIFIER().getText());
     fb.for_expr = (ExpressionNode) visit(ctx.expression());
     if (ctx.typeType() != null)
@@ -143,6 +168,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   public Node visitProcedureDeclaration(CLParserParser.ProcedureDeclarationContext ctx) {
 
     ProcedureDefinition pd = new ProcedureDefinition();
+    pd.ctx = ctx;
     pd.id = new Identifier(ctx.IDENTIFIER().getText());
     pd.returnType = ctx.typeType().getText();
     pd.parameters = new ParameterList(ctx.parameterList().parameter().stream()
@@ -162,6 +188,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   public Node visitParameter(CLParserParser.ParameterContext ctx) {
 
     Parameter p = new Parameter();
+    p.ctx = ctx;
     p.type = ctx.typeType().getText();
     p.id = new Identifier(ctx.IDENTIFIER().getText());
     return p;
@@ -174,7 +201,9 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitId(CLParserParser.IdContext ctx) {
-    return new Identifier(ctx);
+    Identifier identifier = new Identifier(ctx);
+    identifier.ctx = ctx;
+    return identifier;
   }
 
   @Override
@@ -182,6 +211,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     if (ctx.IDENTIFIER() != null) {
       // member is AST.Identifier
       MemberExpression me = new MemberExpression();
+      me.ctx = ctx;
       me.object = (ExpressionNode) visit(ctx.expression());
       me.property = new Identifier(ctx.IDENTIFIER().getText());
       return me;
@@ -189,6 +219,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
       // member is Cal
       CLParserParser.ProcedureCallContext pctx = ctx.procedureCall();
       CallExpression ce = new CallExpression();
+      ce.ctx = ctx;
       ce.isMethodCall = true;
       ce.callee = new FunctionIdentifier(pctx.IDENTIFIER().getText());
       ce.arguments = new ArrayList<ExpressionNode>() {{
@@ -210,6 +241,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   @Override
   public Node visitProcedureCall(CLParserParser.ProcedureCallContext ctx) {
     CallExpression ce = new CallExpression();
+    ce.ctx = ctx;
     ce.callee = new FunctionIdentifier(ctx.IDENTIFIER().getText());
     if (ctx.expressionList() != null)
       ce.arguments = ctx.expressionList().expression().stream().map(this::visit).map(e -> (ExpressionNode) e).collect(Collectors.toCollection(ArrayList::new));
@@ -221,6 +253,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   @Override
   public Node visitLambdaParameter(CLParserParser.LambdaParameterContext ctx) {
     Parameter p = new Parameter();
+    p.ctx = ctx;
     p.id = new Identifier(ctx.IDENTIFIER().getText());
     p.type = ctx.typeType().getText();
 
@@ -230,12 +263,15 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
   @Override
   public Node visitLambdaParameterList(CLParserParser.LambdaParameterListContext ctx) {
-    return new ParameterList(ctx.lambdaParameter().stream().map(p -> (Parameter) visit(p)).collect(Collectors.toCollection(ArrayList::new)));
+    ParameterList parameterList = new ParameterList(ctx.lambdaParameter().stream().map(p -> (Parameter) visit(p)).collect(Collectors.toCollection(ArrayList::new)));
+    parameterList.ctx = ctx;
+    return parameterList;
   }
 
   @Override
   public Node visitLambda(CLParserParser.LambdaContext ctx) {
     LambdaExpression le = new LambdaExpression();
+    le.ctx = ctx;
     le.retType = ctx.typeType().getText();
     le.parameters = (ParameterList) visit(ctx.lambdaParameterList());
     le.body = (Block) visit(ctx.block());
@@ -246,7 +282,9 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
   public Node visitAddSub(CLParserParser.AddSubContext ctx) {
     ExpressionNode left = visitAndGetExpresionNode(ctx.expression(0));
     ExpressionNode right = visitAndGetExpresionNode(ctx.expression(1));
-    return new ArithmeticExpression(left, right, ctx.bop.getText());
+    ArithmeticExpression arithmeticExpression = new ArithmeticExpression(left, right, ctx.bop.getText());
+    arithmeticExpression.ctx = ctx;
+    return arithmeticExpression;
 
   }
 
@@ -259,38 +297,50 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     ExpressionNode left = visitAndGetExpresionNode(ctx.expression(0));
     ExpressionNode right = visitAndGetExpresionNode(ctx.expression(1));
 //    System.out.println(left.toString() + right);
-    return new ArithmeticExpression(left, right, ctx.bop.getText());
+    ArithmeticExpression arithmeticExpression = new ArithmeticExpression(left, right, ctx.bop.getText());
+    arithmeticExpression.ctx = ctx;
+    return arithmeticExpression;
   }
 
   @Override
   public Node visitPartialEqual(CLParserParser.PartialEqualContext ctx) {
     ExpressionNode left = visitAndGetExpresionNode(ctx.expression(0));
     ExpressionNode right = visitAndGetExpresionNode(ctx.expression(1));
-    return new LogicExpression(left, right, ctx.bop.getText());
+    LogicExpression logicExpression = new LogicExpression(left, right, ctx.bop.getText());
+    logicExpression.ctx = ctx;
+    return logicExpression;
   }
 
   @Override
   public Node visitCompare(CLParserParser.CompareContext ctx) {
     ExpressionNode left = visitAndGetExpresionNode(ctx.expression(0));
     ExpressionNode right = visitAndGetExpresionNode(ctx.expression(1));
-    return new LogicExpression(left, right, ctx.bop.getText());
+    LogicExpression logicExpression = new LogicExpression(left, right, ctx.bop.getText());
+    logicExpression.ctx = ctx;
+    return logicExpression;
   }
 
   @Override
   public Node visitBreak(CLParserParser.BreakContext ctx) {
-    return new Break();
+    Break aBreak = new Break();
+    aBreak.ctx = ctx;
+    return aBreak;
   }
 
   @Override
   public Node visitContinue(CLParserParser.ContinueContext ctx) {
-    return new Continue();
+    Continue aContinue = new Continue();
+    aContinue.ctx = ctx;
+    return aContinue;
   }
 
   @Override
   public Node visitLogic(CLParserParser.LogicContext ctx) {
     ExpressionNode left = visitAndGetExpresionNode(ctx.expression(0));
     ExpressionNode right = visitAndGetExpresionNode(ctx.expression(1));
-    return new LogicExpression(left, right, ctx.bop.getText());
+    LogicExpression logicExpression = new LogicExpression(left, right, ctx.bop.getText());
+    logicExpression.ctx = ctx;
+    return logicExpression;
   }
 
   @Override
@@ -308,6 +358,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     );
 
     Program p = new Program(bl);
+    p.ctx = ctx;
 //    Gson g = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 //    System.out.println(g.toJson(p));
     ASTWalker astWalker = new ASTWalker();

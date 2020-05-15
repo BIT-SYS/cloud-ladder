@@ -16,7 +16,7 @@ public class Assign extends ExpressionNode {
 
   @Override
   public ExpressionNode gen(int before, int after) {
-    ir.emit(new AssignIR(lvalue.gen(), rvalue.gen()));
+    ir.emit(new AssignIR(lvalue.gen(), rvalue.gen(), getLineNumber(), getSourceCode()));
     return null;
   }
 

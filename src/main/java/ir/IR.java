@@ -74,7 +74,9 @@ public class IR {
       }
       String leading_spaces = String.join("", Collections.nCopies(indentLevel, "  "));
       ret.append(leading_spaces);
+      ret.append(ir.toStringBeforeHook());
       ret.append(ir.toString());
+      ret.append(ir.toStringAfterHook());
       ret.append("\n");
 
       switch (ir.getOp()){
