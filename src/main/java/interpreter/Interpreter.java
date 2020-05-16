@@ -256,6 +256,12 @@ public class Interpreter {
               for (int i = start; i < end; i++) {
                 ar.add(Value.valueOf(i));
               }
+            } else if (buildListIR.has_values()) {
+              List<Value> ar = (List<Value>) a.value;
+              for (int i = buildListIR.values.size()-1;i>=0;i--) {
+                ir.Value v = buildListIR.values.get(i);
+                ar.add(0, resolve(v));
+              }
             }
             resolveResult(buildListIR.result, a);
             break;

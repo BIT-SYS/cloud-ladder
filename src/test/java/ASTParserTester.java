@@ -79,6 +79,6 @@ public class ASTParserTester {
 
   public static void main(String[] args) throws Exception {
 //    tryToBuildIR("examples/expr.cl");
-    tryToInterprete("examples/2-control-3-while.cl", true);
+    tryToInterprete("examples/4-list-3.cl", true);
   }
 }
