@@ -13,7 +13,7 @@ while true {
         }
         a = a + i
     }
-    if i >= 10 {
+    if j >= 10 {
         break
     }
 }

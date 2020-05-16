@@ -124,7 +124,8 @@ public class Interpreter {
     while (current_ir != null) {
       if (debug) {
         System.out.println("=========================");
-        System.out.println(current_ir);
+        System.out.print(current_ir);
+        System.out.println(current_ir.toStringAfterHook());
       }
       if (lazy_execution) {
         if (current_ir.getOp() == IROperator.LazyExecutionEnd)
@@ -274,10 +275,22 @@ public class Interpreter {
             current_scope = new Scope(current_scope);
             break;
           case PopStack:
-            current_scope = current_scope.prev_scope;
+            StackOperationIR stackOperationIR = (StackOperationIR) current_ir;
+            int depth = stackOperationIR.depth;
+            while (depth > 0) {
+              current_scope = current_scope.prev_scope;
+              depth -=1;
+            }
             break;
           case Jump:
-            break;
+            System.out.println("==Jump==");
+            JumpIR jumpIR = (JumpIR) current_ir;
+            System.out.println(jumpIR.to.iRNode.toStringAfterHook());
+            System.out.println("==Jump==");
+
+            current_ir = jumpIR.to.iRNode;
+            printDebugInfo();
+            continue;
           case Break:
             break;
           case Continue:

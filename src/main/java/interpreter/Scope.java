@@ -5,6 +5,8 @@ import symboltable.Type;
 import java.util.HashMap;
 
 public class Scope {
+
+  int depth = 0;
   Scope prev_scope;
 
   // Name: value
@@ -17,6 +19,7 @@ public class Scope {
   public Scope(Scope prev_scope) {
     scope = new HashMap<>();
     this.prev_scope = prev_scope;
+    depth = prev_scope.depth + 1;
   }
 
   Value resolve_local(String name) {
@@ -54,6 +57,6 @@ public class Scope {
 
   @Override
   public String toString() {
-    return String.valueOf(scope);
+    return String.format("%s %s",depth, scope );
   }
 }
