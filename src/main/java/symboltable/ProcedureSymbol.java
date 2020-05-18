@@ -25,6 +25,7 @@ public class ProcedureSymbol extends Symbol implements Scope {
 
     @Override
     public void define(Symbol sym) {
+        assert !(sym instanceof ProcedureSymbol);
         parameters.put(sym.name, sym);
         sym.scope = this;
         signature.add(signature.size() - 1, sym.type);
