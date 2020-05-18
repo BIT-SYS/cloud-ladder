@@ -2,6 +2,8 @@ package interpreter;
 
 import interpreter.builtIn.BuiltInPrint;
 import interpreter.builtIn.BuiltInToString;
+import interpreter.builtIn.image.BuiltInGetString;
+import interpreter.builtIn.image.BuiltInImRead;
 import ir.*;
 import symboltable.CompositeType;
 import util.Type;
@@ -112,6 +114,8 @@ public class Interpreter {
       add(new BuiltInToString());
       add(new BuiltInPrint());
       add(new BuiltInToString("List<Number>"));
+      add(new BuiltInImRead());
+      add(new BuiltInGetString()); //todo 需要区分么？
     }};
     ps.forEach(p -> current_scope.insert(p.getSignature(), new Value(p)));
   }

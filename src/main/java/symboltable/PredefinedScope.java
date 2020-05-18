@@ -20,6 +20,9 @@ public class PredefinedScope extends BaseScope {
         define(mkproc(this, "map", "List<TypeA>", mkprmtr("List<TypeA>", "self"), mkprmtr("Proc")));
         define(mkproc(this, "forEach", "?", mkprmtr("List<TypeA>", "self"), mkprmtr("Proc")));
         define(mkproc(this, "reduce", "Number", mkprmtr("Proc"), mkprmtr("List<TypeA>"), mkprmtr("TypeA")));
+
+        define(mkproc(this, "im_read", "Image", mkprmtr("String")));
+        define(mkproc(this, "getString", "String", mkprmtr("Image", "self")));
     }
 
     @Override

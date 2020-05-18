@@ -10,3 +10,5 @@ out
 /src/main/gen/
 /src/main/antlr/
 CLLexer.tokens
+*.jpg
+bdat
