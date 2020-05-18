@@ -1,5 +1,6 @@
 package interpreter;
 
+import interpreter.builtIn.BuiltInInput;
 import interpreter.builtIn.BuiltInPrint;
 import interpreter.builtIn.BuiltInToString;
 import interpreter.builtIn.image.BuiltInGetString;
@@ -114,6 +115,8 @@ public class Interpreter {
       add(new BuiltInToString());
       add(new BuiltInPrint());
       add(new BuiltInToString("List<Number>"));
+      add(new BuiltInPrint("Number"));
+      add(new BuiltInInput());
       add(new BuiltInImRead());
       add(new BuiltInGetString()); //todo 需要区分么？
     }};
