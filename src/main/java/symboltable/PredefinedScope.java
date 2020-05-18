@@ -1,7 +1,9 @@
 package symboltable;
 
-import static util.Symbol.mkprmtr;
-import static util.Symbol.mkproc;
+import interpreter.builtIn.image.BuiltInGetString;
+import interpreter.builtIn.image.BuiltInImRead;
+
+import static util.Symbol.*;
 
 public class PredefinedScope extends BaseScope {
     public PredefinedScope(Scope enclosingScope) {
@@ -21,8 +23,8 @@ public class PredefinedScope extends BaseScope {
         define(mkproc(this, "forEach", "?", mkprmtr("List<TypeA>", "self"), mkprmtr("Proc")));
         define(mkproc(this, "reduce", "Number", mkprmtr("Proc"), mkprmtr("List<TypeA>"), mkprmtr("TypeA")));
 
-        define(mkproc(this, "im_read", "Image", mkprmtr("String")));
-        define(mkproc(this, "getString", "String", mkprmtr("Image", "self")));
+        define(builtin(this, new BuiltInImRead(), new SimpleType("Image")));
+        define(builtin(this, new BuiltInGetString(), new SimpleType("String")));
     }
 
     @Override

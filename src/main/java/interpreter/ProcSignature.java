@@ -38,6 +38,14 @@ public class ProcSignature {
     return String.format("%s[%s]", proc_name, _v);
   }
 
+  public List<Value> getArgs() {
+    return args;
+  }
+
+  public String getName() {
+    return proc_name;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj) return true;
