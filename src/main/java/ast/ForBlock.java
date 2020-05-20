@@ -21,52 +21,70 @@ public class ForBlock extends Node {
   public ExpressionNode gen(int before, int after) {
     before = newLabel();
     after = newLabel();
+    int afterAll = newLabel();
     ExpressionNode expr = for_expr.gen(0, 0);
-    Temp t = new Temp();
+    Identifier list = new Identifier("@for");
+    Identifier i = new Identifier("@i");
     Temp len = new Temp();
-    ir.emit(StackOperationIR.PushStack());
-    // get expr len
-    CallExprIR callExprIR = new CallExprIR("size", expr, len, new ArrayList<>());
-    callExprIR.setDebugInfo(for_expr.getLineNumber(),for_expr.getSourceCode());
-    ir.emit(callExprIR);
+    // @for = List[...]
+    ir.emit(new VariableDeclarationIR(new Value(list), new Value(expr)));
 
-    VariableDeclarationIR number = new VariableDeclarationIR(new Value(t), Value.Literal("0", new SimpleType("Number")));
-    number.setDebugInfo(for_id.getLineNumber(),for_id.getSourceCode());
+    // push stack
+    ir.emit(StackOperationIR.PushStack("special"));
+
+    VariableDeclarationIR number = new VariableDeclarationIR(new Value(i), Value.Literal("0", new SimpleType("Number")));
+    number.setDebugInfo(ctx.start.getLine(), this.getSourceCodeFirstLine());
+    // @i = 0
     ir.emit(number);
     ir.emitLabel(before);
-    // if false then jump
-    CallExprIR callExprIR1 = new CallExprIR("get", expr, for_id, new ArrayList<ExpressionNode>() {{
-      add(t);
-    }});
-    callExprIR1.setDebugInfo(for_expr.getLineNumber(),getSourceCode());
-    ir.emit(callExprIR1);
 
-    LogicExpression condition = new LogicExpression(t, len, "<");
+    CallExprIR callExprIR = new CallExprIR(new FunctionIdentifier("size"), list, len, new ArrayList<>());
+    callExprIR.setDebugInfo(for_expr.getLineNumber(),for_expr.getSourceCode());
+    // temp_len = @for.size()
+    ir.emit(callExprIR);
+
+    LogicExpression condition = new LogicExpression(i, len, "<");
+    condition.ctx = this.ctx;
     ExpressionNode condition_reduced = condition.gen(0, 0);
     JumpIfNotTrueIR jumpIfNotTrueIR = new JumpIfNotTrueIR(new Value(condition_reduced), ir.getLabel(after));
     jumpIfNotTrueIR.setDebugInfo(for_expr.getLineNumber(),for_expr.getSourceCode());
+    // if i < temp_len exit loop
     ir.emit(jumpIfNotTrueIR);
 
+    // if false then jump
+    CallExprIR callExprIR1 = new CallExprIR(new FunctionIdentifier("get"), list, for_id, new ArrayList<ExpressionNode>() {{
+      add(i);
+    }});
+    callExprIR1.setDebugInfo(for_expr.getLineNumber(),getSourceCode());
+    // x = @for.get(@i)
+    ir.emit(callExprIR1);
+
+    // push stack
     ir.emit(StackOperationIR.PushStack());
     // execuete
-    statements.gen(before, after);
+    statements.gen(before, afterAll);
 
-    ir.emitLabel(after);
+    // pop stack
     ir.emit(StackOperationIR.PopStack());
 
-    // +1 and jump
-    ArithmeticExpression b = new ArithmeticExpression(t, new Literal("1", new SimpleType("Number")), "+");
+    ArithmeticExpression b = new ArithmeticExpression(i, new Literal("1", new SimpleType("Number")), "+");
+    b.ctx = this.ctx;
     ExpressionNode b_reduced = b.gen(0, 0);
 
-    AssignIR assignIR = new AssignIR(t, b_reduced);
+    AssignIR assignIR = new AssignIR(i, b_reduced);
     assignIR.setDebugInfo(for_expr.getLineNumber(),for_expr.getSourceCode());
+    // @i = @i + 1
     ir.emit(assignIR);
 
     JumpIR jumpIR = new JumpIR(ir.getLabel(before));
     jumpIR.setDebugInfo(for_expr.getLineNumber(),for_expr.getSourceCode());
+    // jump back
     ir.emit(jumpIR);
 
+    ir.emitLabel(after);
+    // pop stack
     ir.emit(StackOperationIR.PopStack());
+    ir.emitLabel(afterAll);
     return null;
   }
 

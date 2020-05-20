@@ -8,6 +8,6 @@ public class ContinueIR extends JumpIR {
 
   @Override
   public IROperator getOp() {
-    return IROperator.Continue;
+    return IROperator.Jump;
   }
 }

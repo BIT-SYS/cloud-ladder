@@ -108,19 +108,20 @@ public class Interpreter {
     prepare();
     injection_external();
     current_scope = new Scope(current_scope);
+    current_scope.printAllScope();
   }
 
   void injection_external() {
     List<ProcSignature> ps = new ArrayList<ProcSignature>() {{
       add(new BuiltInToString());
       add(new BuiltInPrint());
-      add(new BuiltInToString("List<Number>"));
-      add(new BuiltInPrint("Number"));
       add(new BuiltInInput());
       add(new BuiltInImRead());
       add(new BuiltInGetString()); //todo 需要区分么？
+      add(new BuiltInSize());
+      add(new BuiltInGet());
     }};
-    ps.forEach(p -> current_scope.insert(p.getSignature(), new Value(p)));
+    ps.forEach(p -> current_scope.insert(p, new Value(p)));
   }
 
   public Object execute(IR ir_list) {
@@ -131,7 +132,8 @@ public class Interpreter {
     while (current_ir != null) {
       if (debug) {
         System.out.println("=========================");
-        System.out.println(current_ir);
+        System.out.print(current_ir);
+        System.out.println(current_ir.toStringAfterHook());
       }
       if (lazy_execution) {
         if (current_ir.getOp() == IROperator.LazyExecutionEnd)
@@ -151,9 +153,15 @@ public class Interpreter {
             break;
           case LazyExecutionStart:
             LazyExecutionStartIR lazyExecutionStartIR = (LazyExecutionStartIR) current_ir;
-            ProcSignature procSignature = new ProcSignature(lazyExecutionStartIR.getName(), lazyExecutionStartIR.getParameters(), lazyExecutionStartIR.getNext());
+            ProcSignature procSignature = new ProcSignature(lazyExecutionStartIR.getResult(), lazyExecutionStartIR.getParameters(), lazyExecutionStartIR.getNext());
             Value v_les = new Value(procSignature);
-            current_scope.insert(procSignature.getSignature(), v_les);
+            if (lazyExecutionStartIR.getResult().is_temp) {
+//              current_stack.push(v_les);
+              resolveResult(lazyExecutionStartIR.getResult(), v_les);
+            } else {
+              current_scope.insert(procSignature, v_les);
+            }
+
             lazy_execution = true;
             break;
           case LazyExecutionEnd:
@@ -212,12 +220,16 @@ public class Interpreter {
               case NotEqualExpr:
                 break;
               case LessThanExpr:
+                result = left_v.lessThan(right_v);
+                resolveResult(binaryExprIR.result, result);
                 break;
               case GreaterThanExpr:
                 result = left_v.greaterThan(right_v);
                 resolveResult(binaryExprIR.result, result);
                 break;
               case LessEqualThanExpr:
+                result = left_v.lessEqualThan(right_v);
+                resolveResult(binaryExprIR.result, result);
                 break;
               case GreaterEqualThanExpr:
                 result = left_v.greaterEqualThan(right_v);
@@ -229,8 +241,10 @@ public class Interpreter {
           case NoOperation:
             break;
           case CallExpr:
+            current_scope.printAllScope();
             CallExprIR callExprIR = (CallExprIR) current_ir;
-            List<ir.Value> args = callExprIR.args;
+            // copy list to avoid overwrite
+            List<ir.Value> args = new ArrayList<>(callExprIR.args);
             if (callExprIR.caller != null) {
               args.add(0, callExprIR.caller);
             }
@@ -241,8 +255,7 @@ public class Interpreter {
               }
             });
             ProcSignature procSignature_index = new ProcSignature(callExprIR.callee, args, null);
-            String signature = procSignature_index.getSignature();
-            ProcSignature dest_proc = (ProcSignature) current_scope.resolve(signature).value;
+            ProcSignature dest_proc = (ProcSignature) current_scope.resolve(procSignature_index).value;
 
             current_ir = call(dest_proc, procSignature_index, callExprIR.result, current_ir.getNext());
             continue;
@@ -262,6 +275,14 @@ public class Interpreter {
               for (int i = start; i < end; i++) {
                 ar.add(Value.valueOf(i));
               }
+            } else if (buildListIR.has_values()) {
+              List<Value> ar = (List<Value>) a.value;
+              for (int i = buildListIR.values.size()-1;i>=0;i--) {
+                ir.Value v = buildListIR.values.get(i);
+                ar.add(0, resolve(v));
+              }
+            } else {
+              System.err.println("BuildListIR has error");
             }
             resolveResult(buildListIR.result, a);
             break;
@@ -281,10 +302,22 @@ public class Interpreter {
             current_scope = new Scope(current_scope);
             break;
           case PopStack:
-            current_scope = current_scope.prev_scope;
+            StackOperationIR stackOperationIR = (StackOperationIR) current_ir;
+            int depth = stackOperationIR.depth;
+            while (depth > 0) {
+              current_scope = current_scope.prev_scope;
+              depth -=1;
+            }
             break;
           case Jump:
-            break;
+            System.out.println("==Jump==");
+            JumpIR jumpIR = (JumpIR) current_ir;
+            System.out.println(jumpIR.to.iRNode.toStringAfterHook());
+            System.out.println("==Jump==");
+
+            current_ir = jumpIR.to.iRNode;
+            printDebugInfo();
+            continue;
           case Break:
             break;
           case Continue:
