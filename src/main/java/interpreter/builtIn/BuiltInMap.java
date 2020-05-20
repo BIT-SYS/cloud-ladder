@@ -2,11 +2,9 @@ package interpreter.builtIn;
 
 import interpreter.ExternalProcedureTemplate;
 import interpreter.Interpreter;
-import interpreter.ProcSignature;
 import ir.Value;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class BuiltInMap extends ExternalProcedureTemplate {
   public BuiltInMap() {

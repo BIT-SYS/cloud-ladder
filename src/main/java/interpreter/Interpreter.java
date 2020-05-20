@@ -1,18 +1,12 @@
 package interpreter;
 
-import interpreter.builtIn.BuiltInInput;
-import interpreter.builtIn.BuiltInPrint;
-import interpreter.builtIn.BuiltInToString;
+import interpreter.builtIn.*;
 import interpreter.builtIn.image.BuiltInGetString;
 import interpreter.builtIn.image.BuiltInImRead;
 import ir.*;
-import symboltable.CompositeType;
-import util.Type;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Interpreter {
 

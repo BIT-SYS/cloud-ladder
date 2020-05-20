@@ -1,7 +1,9 @@
 package symboltable;
 
+import interpreter.builtIn.BuiltInGet;
 import interpreter.builtIn.BuiltInInput;
 import interpreter.builtIn.BuiltInPrint;
+import interpreter.builtIn.BuiltInSize;
 import interpreter.builtIn.image.BuiltInGetString;
 import interpreter.builtIn.image.BuiltInImRead;
 
@@ -18,7 +20,6 @@ public class PredefinedScope extends BaseScope {
 
         //todo
         define(mkproc(this, "filter", "List<TypeA>", mkprmtr("List<TypeA>", "self"), mkprmtr("Proc")));
-        define(mkproc(this, "map", "List<TypeA>", mkprmtr("List<TypeA>", "self"), mkprmtr("Proc")));
         define(mkproc(this, "forEach", "?", mkprmtr("List<TypeA>", "self"), mkprmtr("Proc")));
         define(mkproc(this, "reduce", "Number", mkprmtr("Proc"), mkprmtr("List<TypeA>"), mkprmtr("TypeA")));
 
@@ -26,7 +27,8 @@ public class PredefinedScope extends BaseScope {
         define(builtin(this, new BuiltInGetString(), new SimpleType("String")));
         define(builtin(this, new BuiltInInput(), new SimpleType("String")));
         define(builtin(this, new BuiltInPrint(), new SimpleType("String")));
-        define(builtin(this, new BuiltInPrint("Number"), new SimpleType("String")));
+        define(builtin(this, new BuiltInGet(), new GenericType("TypeA")));
+        define(builtin(this, new BuiltInSize(), new SimpleType("Number")));
     }
 
     @Override

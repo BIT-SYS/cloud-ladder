@@ -43,7 +43,7 @@ public class ProcSignature {
   }
 
   public String getName() {
-    return proc_name;
+    return proc_name.value;
   }
 
   @Override
