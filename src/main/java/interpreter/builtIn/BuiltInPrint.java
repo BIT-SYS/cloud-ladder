@@ -11,14 +11,14 @@ import java.util.List;
 public class BuiltInPrint extends ExternalProcedureTemplate {
   public BuiltInPrint() {
     super("print", new ArrayList<Value>() {{
-      add(Value.Symbol("v", new SimpleType("String")));
+      add(Value.Symbol("v", util.Type.getType("TypeA")));
     }});
   }
 
   @Override
   public interpreter.Value external(Interpreter context) {
     interpreter.Value v = context.current_scope.resolve("v");
-    System.out.println(v.getString());
-    return interpreter.Value.valueOf(v.getString());
+    System.out.println("\u001b[32m" + v.getValueString()+"\u001b[0m");
+    return interpreter.Value.valueOf(v.getValueString());
   }
 }

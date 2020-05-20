@@ -159,6 +159,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     fb.ctx = ctx;
     fb.for_id = new Identifier(ctx.IDENTIFIER().getText());
     fb.for_expr = (ExpressionNode) visit(ctx.expression());
+    fb.for_expr.ctx = ctx.expression();
     if (ctx.typeType() != null)
       fb.iter_type = ctx.typeType().getText();
     return fb;

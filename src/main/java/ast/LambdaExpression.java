@@ -18,7 +18,7 @@ public class LambdaExpression extends ExpressionNode {
   public ExpressionNode reduce() {
     // TODO retType ???
     Temp t = new Temp();
-    LazyExecutionStartIR lazyExecutionStartIR = new LazyExecutionStartIR(t.toString(), this.evalType, parameters.parameters.stream().map(Value::new).collect(Collectors.toList()));
+    LazyExecutionStartIR lazyExecutionStartIR = new LazyExecutionStartIR(t, this.evalType, parameters.parameters.stream().map(Value::new).collect(Collectors.toList()));
     Utils.setDebugInfo(lazyExecutionStartIR,this);
     ir.emit(lazyExecutionStartIR);
     int before = newLabel();

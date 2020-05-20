@@ -3,8 +3,8 @@ proc add1(Number x) -> Number {
 }
 
 Number x = 1
-for x in [1..2] {
-    for Number x in [3..4] {
+for x in [1..3] {
+    for Number x in [3..5] {
         print(add1(x))
     }
 }

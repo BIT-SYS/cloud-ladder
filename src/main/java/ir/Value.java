@@ -30,6 +30,9 @@ public class Value {
   public static Value Symbol(String name, Type type) {
     return new Value(true, name, type);
   }
+  public static Value Symbol(String name, String type_name) {
+    return Symbol(name, util.Type.getType(type_name));
+  }
 
   public static Value Literal(String raw_value, Type type) {
     return new Value(false, raw_value, type);
@@ -41,6 +44,11 @@ public class Value {
 
   public static Value LiteralBoolean(String true_or_false) {
     return Value.Literal(true_or_false, new SimpleType("Boolean"));
+  }
+
+
+  public static Value Procedure(String func_name) {
+    return new Value(true,func_name,util.Type.getType("Proc"));
   }
 
   public Value(ExpressionNode exp) {
@@ -60,6 +68,11 @@ public class Value {
       this.is_symbol = true;
       this.type = i.evalType;
       this.value = i.name;
+    } else if (exp instanceof  FunctionIdentifier) {
+      FunctionIdentifier f = (FunctionIdentifier) exp;
+      this.is_symbol = true;
+      this.type = util.Type.getType("Proc");
+      this.value = f.name;
     } else if (exp instanceof Parameter) {
       Parameter p = (Parameter) exp;
       this.is_symbol = true;

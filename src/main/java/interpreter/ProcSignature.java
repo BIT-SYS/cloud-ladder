@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class ProcSignature {
 
-  String proc_name;
+  Value proc_name;
   List<Value> args;
   IRNodeInterface next_ir;
   Boolean external;
@@ -22,11 +22,11 @@ public class ProcSignature {
     return null;
   }
 
-  public ProcSignature(String name, List<Value> args, IRNodeInterface next_ir) {
+  public ProcSignature(Value name, List<Value> args, IRNodeInterface next_ir) {
     this(name, args, next_ir, false);
   }
 
-  public ProcSignature(String name, List<Value> args, IRNodeInterface next_ir, Boolean external) {
+  public ProcSignature(Value name, List<Value> args, IRNodeInterface next_ir, Boolean external) {
     this.proc_name = name;
     this.args = args;
     this.next_ir = next_ir;
