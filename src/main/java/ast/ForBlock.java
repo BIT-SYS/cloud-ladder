@@ -21,6 +21,7 @@ public class ForBlock extends Node {
   public ExpressionNode gen(int before, int after) {
     before = newLabel();
     after = newLabel();
+    int afterAll = newLabel();
     ExpressionNode expr = for_expr.gen(0, 0);
     Identifier list = new Identifier("@for");
     Identifier i = new Identifier("@i");
@@ -29,7 +30,7 @@ public class ForBlock extends Node {
     ir.emit(new VariableDeclarationIR(new Value(list), new Value(expr)));
 
     // push stack
-    ir.emit(StackOperationIR.PushStack());
+    ir.emit(StackOperationIR.PushStack("special"));
 
     VariableDeclarationIR number = new VariableDeclarationIR(new Value(i), Value.Literal("0", new SimpleType("Number")));
     number.setDebugInfo(ctx.start.getLine(), this.getSourceCodeFirstLine());
@@ -61,7 +62,7 @@ public class ForBlock extends Node {
     // push stack
     ir.emit(StackOperationIR.PushStack());
     // execuete
-    statements.gen(before, after);
+    statements.gen(before, afterAll);
 
     // pop stack
     ir.emit(StackOperationIR.PopStack());
@@ -83,6 +84,7 @@ public class ForBlock extends Node {
     ir.emitLabel(after);
     // pop stack
     ir.emit(StackOperationIR.PopStack());
+    ir.emitLabel(afterAll);
     return null;
   }
 
