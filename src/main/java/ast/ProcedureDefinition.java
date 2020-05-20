@@ -18,7 +18,7 @@ public class ProcedureDefinition extends Node {
 
   @Override
   public ExpressionNode gen(int before, int after) {
-    LazyExecutionStartIR lazyExecutionStartIR = new LazyExecutionStartIR(id.toString(), this.evalType, parameters.parameters.stream().map(Value::new).collect(Collectors.toList()));
+    LazyExecutionStartIR lazyExecutionStartIR = new LazyExecutionStartIR(id, this.evalType, parameters.parameters.stream().map(Value::new).collect(Collectors.toList()));
     Utils.setDebugInfo(lazyExecutionStartIR,this);
     ir.emit(lazyExecutionStartIR);
 

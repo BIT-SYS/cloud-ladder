@@ -1,12 +1,13 @@
 package ir;
 
+import ast.ExpressionNode;
 import symboltable.Type;
 
 import java.util.List;
 
 public class LazyExecutionStartIR extends IRNode {
-  public String getName() {
-    return name;
+  public Value getResult() {
+    return result;
   }
 
   public List<Value> getParameters() {
@@ -18,12 +19,19 @@ public class LazyExecutionStartIR extends IRNode {
     return super.getNext();
   }
 
-  String name;
+  Value result;
   List<Value> parameters;
   Type retType;
 
-  public LazyExecutionStartIR(String name, Type ret, List<Value> parameters) {
-    this.name = name;
+  // Procedure
+//  public LazyExecutionStartIR(String name, Type ret, List<Value> parameters) {
+//    this.parameters = parameters;
+//    this.retType = ret;
+//  }
+
+  // lambda
+  public LazyExecutionStartIR(ExpressionNode result, Type ret, List<Value> parameters) {
+    this.result = new Value(result);
     this.parameters = parameters;
     this.retType = ret;
   }
@@ -35,6 +43,6 @@ public class LazyExecutionStartIR extends IRNode {
 
   @Override
   public String toString() {
-    return String.format("Lazy Execution Start: %s %s -> %s", name, parameters, retType);
+    return String.format("Lazy Execution Start: %s %s -> %s", result, parameters, retType);
   }
 }

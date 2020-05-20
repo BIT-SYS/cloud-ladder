@@ -5,6 +5,7 @@ import symboltable.SimpleType;
 import symboltable.Type;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static util.Type.getType;
 
@@ -21,35 +22,35 @@ public class Value {
     return Value.valueOf(Float.valueOf(i));
   }
 
-  Object buildValue(Type t, String raw_value){
+  Object buildValue(Type t, String raw_value) {
     if (t.equals(new SimpleType("Boolean"))) {
-        return Boolean.valueOf(raw_value);
+      return Boolean.valueOf(raw_value);
     } else if (t.equals(new SimpleType("String"))) {
-        return raw_value;
+      return raw_value;
     } else if (t.equals(new SimpleType("Number"))) {
-      raw_value = raw_value.replace("_","");
+      raw_value = raw_value.replace("_", "");
       if (raw_value.startsWith("0x") || raw_value.startsWith("0X")) {
         raw_value = raw_value.substring(2);
-        Long l= Long.parseLong(raw_value, 16);
+        Long l = Long.parseLong(raw_value, 16);
         return Float.valueOf(l);
       } else if (raw_value.startsWith("0b")) {
         raw_value = raw_value.substring(2);
-        Long l= Long.parseLong(raw_value, 2);
+        Long l = Long.parseLong(raw_value, 2);
         return Float.valueOf(l);
       } else if (raw_value.startsWith("0") && raw_value.length() >= 2 && !raw_value.startsWith("00") && !raw_value.contains(".")) {
         // oct
-        Long l= Long.parseLong(raw_value, 8);
+        Long l = Long.parseLong(raw_value, 8);
         return Float.valueOf(l);
       } else {
         return Float.valueOf(raw_value);
       }
     } else if (t instanceof CompositeType) {
-        if(((CompositeType) t).container.equals("List")) {
-          // ???
-          return new ArrayList<Value>();
-        } else {
-          throw new RuntimeException("Invalid Type");
-        }
+      if (((CompositeType) t).container.equals("List")) {
+        // ???
+        return new ArrayList<Value>();
+      } else {
+        throw new RuntimeException("Invalid Type");
+      }
     } else {
       throw new RuntimeException("Invalid Type");
     }
@@ -61,7 +62,7 @@ public class Value {
     value = v;
   }
 
-  public Value( ProcSignature p) {
+  public Value(ProcSignature p) {
     type = new SimpleType("Proc");
     value = p;
   }
@@ -73,15 +74,19 @@ public class Value {
 
   // must be String simple type.
   public String getString() {
-    return (String)value;
+    return (String) value;
   }
 
   public Float getFloat() {
-    return (Float)value;
+    return (Float) value;
   }
 
   public Boolean getBoolean() {
     return (Boolean) value;
+  }
+
+  public List<Value> getList() {
+    return (List<Value>) value;
   }
 
   static public Value valueOf(Float a) {
@@ -100,7 +105,7 @@ public class Value {
     return new Value(type, new ArrayList<Value>());
   }
 
-  public Value add(Value v,Interpreter context) {
+  public Value add(Value v, Interpreter context) {
     if (type instanceof SimpleType) {
       if (((SimpleType) type).name.equals("Number")) {
         return Value.valueOf(this.getFloat() + v.getFloat());
@@ -167,16 +172,29 @@ public class Value {
     }
     throw new RuntimeException("type error when mod.");
   }
+
   public Value greaterEqualThan(Value v) {
     if (type.equals(getType("Number"))) {
       return Value.valueOf(getFloat() >= v.getFloat());
     }
     throw new RuntimeException("type error when mod.");
   }
+  public Value lessThan(Value v) {
+    if (type.equals(getType("Number"))) {
+      return Value.valueOf(getFloat() < v.getFloat());
+    }
+    throw new RuntimeException("type error when mod.");
+  }
 
+  public Value lessEqualThan(Value v) {
+    if (type.equals(getType("Number"))) {
+      return Value.valueOf(getFloat() <= v.getFloat());
+    }
+    throw new RuntimeException("type error when mod.");
+  }
   @Override
   public String toString() {
-    return  type +
+    return type +
             ":" + value;
   }
 }

@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public class CallExprIR extends IRNode {
 
   public Value caller;
-  public String callee;
+  public Value callee;
   public Value result;
   public List<Value> args;
 
@@ -18,8 +18,8 @@ public class CallExprIR extends IRNode {
     return IROperator.CallExpr;
   }
 
-  public CallExprIR(String callee, ExpressionNode caller, ExpressionNode result, List<ExpressionNode> args) {
-    this.callee = callee;
+  public CallExprIR(ExpressionNode callee, ExpressionNode caller, ExpressionNode result, List<ExpressionNode> args) {
+    this.callee = new Value(callee);
     this.caller = caller != null ? new Value(caller): null;
     this.result = result != null ? new Value(result) : null;
     args = (args == null) ? new ArrayList<>() : args;

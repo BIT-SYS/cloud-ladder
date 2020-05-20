@@ -7,6 +7,6 @@ public class BreakIR extends JumpIR{
 
   @Override
   public IROperator getOp() {
-    return IROperator.Break;
+    return IROperator.Jump;
   }
 }

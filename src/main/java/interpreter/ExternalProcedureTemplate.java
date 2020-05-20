@@ -8,6 +8,6 @@ import java.util.List;
 
 public class ExternalProcedureTemplate extends ProcSignature {
   public ExternalProcedureTemplate(String name, List<Value> args) {
-    super(name, args, new ReturnIR(), true);
+    super(Value.Procedure(name), args, new ReturnIR(), true);
   }
 }

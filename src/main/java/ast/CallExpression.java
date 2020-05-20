@@ -21,7 +21,7 @@ public class CallExpression extends ExpressionNode {
   public ExpressionNode reduce(ExpressionNode caller) {
     List<ExpressionNode> args = arguments.stream().map(ExpressionNode::reduce).collect(Collectors.toCollection(ArrayList::new));
     Temp t = new Temp();
-    CallExprIR ceir = new CallExprIR(callee.toString(), caller, t, args);
+    CallExprIR ceir = new CallExprIR(callee, caller, t, args);
     ceir.setDebugInfo(getLineNumber(),getSourceCode());
     ir.emit(ceir);
     return t;
