@@ -1,3 +1,4 @@
+useBaiduForImage("$$token$$")
 String text = im_read("examples/images/guess.bmp").getString()
 
 print("text is " + text)

@@ -1,10 +1,7 @@
 package interpreter;
 
 import interpreter.builtIn.*;
-import interpreter.builtIn.image.BuiltInGetAnime;
-import interpreter.builtIn.image.BuiltInGetString;
-import interpreter.builtIn.image.BuiltInImRead;
-import interpreter.builtIn.image.BuiltInSave;
+import interpreter.builtIn.image.*;
 import ir.*;
 
 import java.util.ArrayList;
@@ -118,6 +115,7 @@ public class Interpreter {
       add(new BuiltInGet());
       add(new BuiltInGetAnime());
       add(new BuiltInSave());
+      add(new BuiltInUseBaiduForImage());
     }};
     ps.forEach(p -> current_scope.insert(p, new Value(p)));
   }

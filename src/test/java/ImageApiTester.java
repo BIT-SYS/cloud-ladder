@@ -16,6 +16,11 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class ImageApiTester {
     public static void main(String[] args) throws IOException {
@@ -36,7 +41,15 @@ public class ImageApiTester {
     }
 
     public static void testImageApi(String inputFile) throws IOException {
-        CharStream input = CharStreams.fromFileName(inputFile);
+        // 替换token
+        Path path = Paths.get(inputFile);
+
+        Charset charset = StandardCharsets.UTF_8;
+        String content = new String(Files.readAllBytes(path), charset);
+        String new_content = content.replaceAll("\\$\\$token\\$\\$",
+                Files.readAllLines(Paths.get("bdat")).get(0));
+
+        CharStream input = CharStreams.fromString(new_content);
         CLParserLexer lexer = new CLParserLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CLParserParser parser = new CLParserParser(tokens);
