@@ -1,6 +1,5 @@
 package interpreter;
 
-import ir.IRNodeInterface;
 import ir.ReturnIR;
 import ir.Value;
 

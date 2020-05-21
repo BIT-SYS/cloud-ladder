@@ -3,7 +3,6 @@ package interpreter.builtIn;
 import interpreter.ExternalProcedureTemplate;
 import interpreter.Interpreter;
 import ir.Value;
-import symboltable.SimpleType;
 import util.Type;
 
 import java.util.ArrayList;

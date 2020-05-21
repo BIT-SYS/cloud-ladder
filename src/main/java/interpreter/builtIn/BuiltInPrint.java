@@ -3,10 +3,8 @@ package interpreter.builtIn;
 import interpreter.ExternalProcedureTemplate;
 import interpreter.Interpreter;
 import ir.Value;
-import symboltable.SimpleType;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class BuiltInPrint extends ExternalProcedureTemplate {
   public BuiltInPrint() {
