@@ -17,7 +17,7 @@ import java.io.IOException;
 public class TypeCheckTester {
     public static void main(String[] args) throws Exception {
         // 单独测试某个文件
-        CharStream input = CharStreams.fromFileName("examples/test-type-simple.cl");
+        CharStream input = CharStreams.fromFileName("examples/0-basic-1-test-type-simple.cl");
         CLParserLexer lexer = new CLParserLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CLParserParser parser = new CLParserParser(tokens);

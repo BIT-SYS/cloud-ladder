@@ -44,6 +44,9 @@ public class Value {
       } else {
         return Float.valueOf(raw_value);
       }
+    } else if (t.equals(new SimpleType("Image"))) {
+      // 应该不会走到这里吧？
+      throw new RuntimeException("上 buildValue 里补上 Type 为 Image 的代码");
     } else if (t instanceof CompositeType) {
       if (((CompositeType) t).container.equals("List")) {
         // ???
@@ -89,12 +92,23 @@ public class Value {
     return (List<Value>) value;
   }
 
+
+  public byte[] getBytes() {
+    return (byte[]) value;
+  }
+
   static public Value valueOf(Float a) {
     return new Value(new SimpleType("Number"), a);
   }
 
   static public Value valueOf(String a) {
     return new Value(new SimpleType("String"), a);
+  }
+
+  static public Value valueOf(byte[] im) {
+    //todo Audio...
+    assert null != im;
+    return new Value(new SimpleType("Image"), im);
   }
 
   static public Value valueOf(Boolean a) {
@@ -179,6 +193,7 @@ public class Value {
     }
     throw new RuntimeException("type error when mod.");
   }
+
   public Value lessThan(Value v) {
     if (type.equals(getType("Number"))) {
       return Value.valueOf(getFloat() < v.getFloat());
@@ -192,6 +207,7 @@ public class Value {
     }
     throw new RuntimeException("type error when mod.");
   }
+
   @Override
   public String toString() {
     return type +

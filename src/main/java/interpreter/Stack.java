@@ -1,7 +1,5 @@
 package interpreter;
 
-import java.util.List;
-
 public class Stack {
   java.util.Stack<Value> stack;
 

@@ -1,8 +1,8 @@
 package symboltable;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
+
+import static util.Error.die;
 
 public class BaseScope implements Scope {
     Scope enclosingScope; // null if global (outermost) scope
@@ -25,7 +25,17 @@ public class BaseScope implements Scope {
     @Override
     public void define(Symbol sym) {
         if (sym instanceof ProcedureSymbol) {
-            symbols.put(sym.name + ((ProcedureSymbol) sym).signature, sym);
+            List<Type> signature = ((ProcedureSymbol) sym).signature;
+            if (hasProcedure(sym.name)) {
+                for (ProcedureSymbol proc : resolveProcedures(sym.name)) {
+                    if (Arrays.equals(
+                            Arrays.copyOfRange(signature.toArray(), 0, signature.size() - 1), // 去掉返回类型
+                            Arrays.copyOfRange(proc.signature.toArray(), 0, proc.signature.size() - 1))) {
+                        die("BaseScope: define", "You can't overload a procedure with the same parameter types!");
+                    }
+                }
+            }
+            symbols.put(sym.name + signature, sym);
         } else {
             symbols.put(sym.name, sym);
         }

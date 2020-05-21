@@ -1,14 +1,12 @@
 package interpreter;
 
 import interpreter.builtIn.*;
+import interpreter.builtIn.image.BuiltInGetString;
+import interpreter.builtIn.image.BuiltInImRead;
 import ir.*;
-import symboltable.CompositeType;
-import util.Type;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Interpreter {
 
@@ -111,6 +109,9 @@ public class Interpreter {
     List<ProcSignature> ps = new ArrayList<ProcSignature>() {{
       add(new BuiltInPrint());
       add(new BuiltInToString());
+      add(new BuiltInInput());
+      add(new BuiltInImRead());
+      add(new BuiltInGetString()); //todo 需要区分么？
       add(new BuiltInSize());
       add(new BuiltInGet());
     }};

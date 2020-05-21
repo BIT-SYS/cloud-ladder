@@ -6,6 +6,11 @@ proc word_count(String string) -> Number {
     42
 }
 
+// 打开注释检查相同参数类型的重载有没有报错
+// proc word_count(String string) -> String {
+//     "42"
+// }
+
 Number how_many_foot = word_count(cat)
 
 proc foot(String self) -> Number {

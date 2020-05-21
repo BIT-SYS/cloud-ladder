@@ -25,6 +25,7 @@ public class ProcedureSymbol extends Symbol implements Scope {
 
     @Override
     public void define(Symbol sym) {
+        assert !(sym instanceof ProcedureSymbol);
         parameters.put(sym.name, sym);
         sym.scope = this;
         signature.add(signature.size() - 1, sym.type);
@@ -58,12 +59,13 @@ public class ProcedureSymbol extends Symbol implements Scope {
     }
 
     public boolean isMethod() {
-        return null != parameters.get("self"); // todo 检查是不是只有第一个参数叫self
+        Iterator<Map.Entry<String, Symbol>> it = parameters.entrySet().iterator();
+        return it.hasNext() && it.next().getKey().equals("self");
     }
 
     public String toString() {
         String[] temp = super.toString().split(":");
-        return "proc " + temp[0] + " " + parameters.values() + ":" + temp[1];
+        return isMethod() ? "method " : "proc " + temp[0] + " " + parameters.values() + ":" + temp[1];
     }
 
     @Override
