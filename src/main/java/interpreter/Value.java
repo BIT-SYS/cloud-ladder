@@ -172,6 +172,8 @@ public class Value {
       if (type.equals(getType("Number"))) {
         // epsilon == 1e-7
         return Value.valueOf(Math.abs((getFloat() - v.getFloat())) < 1e-7);
+      } else if (type.equals(new SimpleType("String"))) {
+        return Value.valueOf(getString().equals(v.getString()));
       } else {
         return Value.valueOf(value == v.value);
       }

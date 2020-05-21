@@ -56,7 +56,7 @@ public class BuiltInGetString extends ExternalProcedureTemplate {
 
             JsonElement words = jsonElement.getAsJsonObject().get("words_result");
 
-            assert words.isJsonObject() && words.isJsonArray();
+            assert words.isJsonArray();
             for (JsonElement word :
                     words.getAsJsonArray()) {
                 sb.append(word.getAsJsonObject().get("words").getAsString());
