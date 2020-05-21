@@ -14,16 +14,16 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
 
-public class BuiltInGetString extends ExternalProcedureTemplate {
-    public BuiltInGetString() {
-        super("getString", new ArrayList<Value>() {{
+public class BuiltInGetAnime extends ExternalProcedureTemplate {
+    public BuiltInGetAnime() {
+        super("getAnime", new ArrayList<Value>() {{
             add(Value.Symbol("self", new SimpleType("Image")));
         }});
     }
 
     @Override
     public interpreter.Value external(Interpreter context) {
-        // test: print(im_read("guess.bmp").getString())
+        // test: im_read("xxx.jpg").getAnime().save("aaa.jpg")
         interpreter.Value self = context.current_scope.resolve("self");
         String image = Base64.getEncoder().encodeToString(self.getBytes());
 
@@ -36,8 +36,7 @@ public class BuiltInGetString extends ExternalProcedureTemplate {
         Request request = null;
         try {
             request = new Request.Builder()
-                    .url("https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token="
-                            //todo 换一种给access_token的方式
+                    .url("https://aip.baidubce.com/rest/2.0/image-process/v1/selfie_anime?access_token="
                             + Files.readAllLines(new File("bdat").toPath()).get(0))
                     .post(body)
                     .build();
@@ -45,28 +44,19 @@ public class BuiltInGetString extends ExternalProcedureTemplate {
             e.printStackTrace();
         }
         StringBuilder sb = new StringBuilder();
-
+        String string = null;
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
-            String string = response.body().string();
-
-            JsonElement jsonElement = JsonParser.parseString(string);
-            assert jsonElement.isJsonObject() && !jsonElement.isJsonArray();
-
-            JsonElement words = jsonElement.getAsJsonObject().get("words_result");
-
-            assert words.isJsonObject() && words.isJsonArray();
-            for (JsonElement word :
-                    words.getAsJsonArray()) {
-                sb.append(word.getAsJsonObject().get("words").getAsString());
-            }
+            string = response.body().string();
 
         } catch (IOException e) {
             System.err.println("兄啊是不是你的网不行？");
             e.printStackTrace();
         }
 
-        return interpreter.Value.valueOf(sb.toString());
+        JsonElement jsonElement = JsonParser.parseString(string);
+        assert jsonElement.isJsonObject() && !jsonElement.isJsonArray();
+        return interpreter.Value.valueOf(Base64.getDecoder().decode(jsonElement.getAsJsonObject().get("image").getAsString()));
     }
 }

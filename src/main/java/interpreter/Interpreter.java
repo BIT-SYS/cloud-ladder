@@ -1,8 +1,10 @@
 package interpreter;
 
 import interpreter.builtIn.*;
+import interpreter.builtIn.image.BuiltInGetAnime;
 import interpreter.builtIn.image.BuiltInGetString;
 import interpreter.builtIn.image.BuiltInImRead;
+import interpreter.builtIn.image.BuiltInSave;
 import ir.*;
 
 import java.util.ArrayList;
@@ -114,6 +116,8 @@ public class Interpreter {
       add(new BuiltInGetString()); //todo 需要区分么？
       add(new BuiltInSize());
       add(new BuiltInGet());
+      add(new BuiltInGetAnime());
+      add(new BuiltInSave());
     }};
     ps.forEach(p -> current_scope.insert(p, new Value(p)));
   }

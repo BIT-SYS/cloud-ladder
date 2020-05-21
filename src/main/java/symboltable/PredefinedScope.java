@@ -4,8 +4,10 @@ import interpreter.builtIn.BuiltInGet;
 import interpreter.builtIn.BuiltInInput;
 import interpreter.builtIn.BuiltInPrint;
 import interpreter.builtIn.BuiltInSize;
+import interpreter.builtIn.image.BuiltInGetAnime;
 import interpreter.builtIn.image.BuiltInGetString;
 import interpreter.builtIn.image.BuiltInImRead;
+import interpreter.builtIn.image.BuiltInSave;
 
 import static util.Symbol.*;
 
@@ -29,6 +31,8 @@ public class PredefinedScope extends BaseScope {
         define(builtin(this, new BuiltInPrint(), new SimpleType("String")));
         define(builtin(this, new BuiltInGet(), new GenericType("TypeA")));
         define(builtin(this, new BuiltInSize(), new SimpleType("Number")));
+        define(builtin(this, new BuiltInGetAnime(), new SimpleType("Image")));
+        define(builtin(this, new BuiltInSave(), new SimpleType("Boolean")));
     }
 
     @Override
