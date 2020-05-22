@@ -306,10 +306,13 @@ public class Interpreter {
             }
             break;
           case Jump:
-            System.out.println("==Jump==");
+            if (debug)
+              System.out.println("==Jump==");
             JumpIR jumpIR = (JumpIR) current_ir;
-            System.out.println(jumpIR.to.iRNode.toStringAfterHook());
-            System.out.println("==Jump==");
+            if (debug)
+              System.out.println(jumpIR.to.iRNode.toStringAfterHook());
+            if (debug)
+              System.out.println("==Jump==");
 
             current_ir = jumpIR.to.iRNode;
             printDebugInfo();

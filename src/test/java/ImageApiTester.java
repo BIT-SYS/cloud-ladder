@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import grammar.CLParserLexer;
 import grammar.CLParserParser;
+import interpreter.Interpreter;
 import ir.IR;
 import ir.NoOperationIR;
 import org.antlr.v4.runtime.CharStream;
@@ -88,7 +89,7 @@ public class ImageApiTester {
 
         IR ir = Node.ir;
         interpreter.Interpreter i = new interpreter.Interpreter();
-        i.debug = false;
+        Interpreter.debug = false;
         i.execute(ir);
     }
 }
