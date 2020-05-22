@@ -11,4 +11,4 @@ out
 /src/main/antlr/
 CLLexer.tokens
 *.jpg
-bdat
+secret.json

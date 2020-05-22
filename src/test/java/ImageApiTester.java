@@ -4,6 +4,8 @@ import ast.Node;
 import ast.Program;
 import check.SymbolCheck;
 import check.TypeCheck;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import grammar.CLParserLexer;
 import grammar.CLParserParser;
 import ir.IR;
@@ -14,7 +16,9 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -40,14 +44,23 @@ public class ImageApiTester {
         }
     }
 
+    private static String token = null;
+
+    private static String readToken() throws IOException {
+        if (null == token) {
+            JsonElement jsonElement = JsonParser.parseReader(new BufferedReader(new FileReader("secret.json")));
+            token = jsonElement.getAsJsonObject().get("baidu_token").getAsString();
+        }
+        return token;
+    }
+
     public static void testImageApi(String inputFile) throws IOException {
         // 替换token
         Path path = Paths.get(inputFile);
 
         Charset charset = StandardCharsets.UTF_8;
         String content = new String(Files.readAllBytes(path), charset);
-        String new_content = content.replaceAll("\\$\\$token\\$\\$",
-                Files.readAllLines(Paths.get("bdat")).get(0));
+        String new_content = content.replaceAll("\\$\\$token\\$\\$", readToken());
 
         CharStream input = CharStreams.fromString(new_content);
         CLParserLexer lexer = new CLParserLexer(input);
