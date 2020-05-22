@@ -116,6 +116,7 @@ public class Interpreter {
       add(new BuiltInGetAnime());
       add(new BuiltInSave());
       add(new BuiltInUseBaiduForImage());
+      add(new BuiltInDetect());
     }};
     ps.forEach(p -> current_scope.insert(p, new Value(p)));
   }

@@ -31,6 +31,7 @@ public class PredefinedScope extends BaseScope {
         define(builtin(this, new BuiltInGetAnime(), new SimpleType("Image")));
         define(builtin(this, new BuiltInSave(), new SimpleType("Boolean")));
         define(builtin(this, new BuiltInUseBaiduForImage(), new SimpleType("Boolean")));
+        define(builtin(this, new BuiltInDetect(), new SimpleType("String")));
     }
 
     @Override
