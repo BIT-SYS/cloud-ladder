@@ -54,8 +54,13 @@ public class Interpreter {
 
   // resolve type, won't change context.
   symboltable.Type resolveType(ir.Value v) {
+    return resolveType(v,0);
+  }
+
+  // resolve type, won't change context.
+  symboltable.Type resolveType(ir.Value v, int i) {
     if (v.is_symbol && v.is_temp) {
-      return current_stack.peek().type;
+      return current_stack.get(i).type;
     } else if (v.is_symbol) {
       return current_scope.resolve(v.value).type;
     } else {
@@ -101,7 +106,7 @@ public class Interpreter {
     prepare();
     injection_external();
     current_scope = new Scope(current_scope);
-    current_scope.printAllScope();
+    // current_scope.printAllScope();
   }
 
   void injection_external() {
@@ -245,12 +250,16 @@ public class Interpreter {
             if (callExprIR.caller != null) {
               args.add(0, callExprIR.caller);
             }
-            // TODO 多个临时值会有冲突
-            args.forEach(v -> {
+            int temp_count = 0;
+            for(int i = args.size()-1; i>=0;i--) {
+              ir.Value v = args.get(i);
               if (v.type == null) {
-                v.type = resolveType(v);
+                v.type = resolveType(v, temp_count);
               }
-            });
+              if(v.is_temp) {
+                temp_count ++;
+              }
+            }
             ProcSignature procSignature_index = new ProcSignature(callExprIR.callee, args, null);
             ProcSignature dest_proc = (ProcSignature) current_scope.resolve(procSignature_index).value;
 

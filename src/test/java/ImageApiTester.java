@@ -85,7 +85,7 @@ public class ImageApiTester {
         p.gen(before, after);
         Node.ir.emitLabel(after);
         Node.ir.emit(new NoOperationIR());
-        System.out.println(Node.ir);
+//        System.out.println(Node.ir);
 
         IR ir = Node.ir;
         interpreter.Interpreter i = new interpreter.Interpreter();

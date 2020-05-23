@@ -19,6 +19,8 @@ public class Stack {
     return stack.peek();
   }
 
+  public Value get(int i) {return stack.get(stack.size() - 1 - i);}
+
   @Override
   public String toString() {
     return stack.toString();
