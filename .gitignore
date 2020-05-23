@@ -10,5 +10,4 @@ out
 /src/main/gen/
 /src/main/antlr/
 CLLexer.tokens
-*.jpg
 secret.json

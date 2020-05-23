@@ -24,6 +24,7 @@ public class BuiltInGetAnime extends ExternalProcedureTemplate {
     public interpreter.Value external(Interpreter context) {
         // test: im_read("xxx.jpg").getAnime().save("aaa.jpg")
         interpreter.Value self = context.current_scope.resolve("self");
+        assert null != self.getBytes();
         String image = Base64.getEncoder().encodeToString(self.getBytes());
 
         ApiState api = ApiState.getSingleton();
