@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class BuiltInImRead extends ExternalProcedureTemplate {
     public BuiltInImRead() {
-        super("im_read", new ArrayList<Value>() {{
+        super("ImageRead", new ArrayList<Value>() {{
             add(Value.Symbol("path", new SimpleType("String")));
         }});
     }
