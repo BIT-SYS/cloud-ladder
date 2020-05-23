@@ -184,8 +184,9 @@ public class Interpreter {
           case LessEqualThanExpr:
           case GreaterEqualThanExpr:
             BinaryExprIR binaryExprIR = (BinaryExprIR) current_ir;
-            Value left_v = resolve(binaryExprIR.arg1);
+            // right_v should be the first one to be resolved.
             Value right_v = resolve(binaryExprIR.arg2);
+            Value left_v = resolve(binaryExprIR.arg1);
             Value result;
 
             switch (binaryExprIR.getOp()) {
