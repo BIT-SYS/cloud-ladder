@@ -11,14 +11,14 @@ public class BuiltInGet extends ExternalProcedureTemplate {
   public BuiltInGet() {
     super("get", new ArrayList
             <Value>(){{
-      add(Value.Symbol("l", util.Type.getType("List<TypeA>")));
+      add(Value.Symbol("self", util.Type.getType("List<TypeA>")));
       add(Value.Symbol("index", util.Type.getType("Number")));
     }});
   }
 
   @Override
   public interpreter.Value external(Interpreter context) {
-    interpreter.Value l = context.current_scope.resolve("l");
+    interpreter.Value l = context.current_scope.resolve("self");
     interpreter.Value i = context.current_scope.resolve("index");
     int index = Math.round(i.getFloat());
     List<interpreter.Value> _l= l.getList();

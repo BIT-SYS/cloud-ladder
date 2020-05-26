@@ -5,7 +5,9 @@ while true {
         break
     }
     Number counter = 0
-    List<Number> a = input().split().map(|String x| -> Number {x.toNumber()})
+    // map之后再实现
+    // List<Number> a = input().split().map(|String x| -> Number {x.toNumber()})
+    List<Number> a = [1..100]
 
     // 只是例子，你要想叫fold也行，变成.fold也行，
     // 另外你看看你定义的匿名函数语法是不是这样用
