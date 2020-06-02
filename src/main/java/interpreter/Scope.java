@@ -120,6 +120,7 @@ public class Scope {
 
 
   public void printAllScope() {
+    if (!Interpreter.debug) return;
     if(prev_scope == null) {
       System.out.println(String.format("%d V:%s P:%s", depth, scope, procScope));
     }

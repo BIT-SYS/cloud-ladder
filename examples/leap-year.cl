@@ -10,8 +10,9 @@ for Number year in [1..till_now] {
   }
 }
 
+// map之后再实现
 // same as above, but in a functional way
-[1..till_now]
-    .filter(is_leap_year)
-    .map(|Number year| -> String {year.toString()})
-    .forEach(|String y| -> String {print(y + " is leap year!\n")})
+// [1..till_now]
+//     .filter(is_leap_year)
+//     .map(|Number year| -> String {year.toString()})
+//     .forEach(|String y| -> String {print(y + " is leap year!\n")})

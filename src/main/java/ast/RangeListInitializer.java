@@ -20,7 +20,7 @@ public class RangeListInitializer extends ExpressionNode {
   public ExpressionNode reduce() {
     ExpressionNode _start = start.gen();
     ExpressionNode _end = end.gen();
-    System.out.println(evalType);
+//    System.out.println(evalType);
     Temp t = new Temp();
     BuildListIR buildListIR = new BuildListIR(t, evalType, _start, _end);
     Utils.setDebugInfo(buildListIR,this);
