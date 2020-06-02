@@ -1,27 +1,35 @@
 useBaiduForImage("$$token$$")
-String text = im_read("examples/images/guess.bmp").getString()
+String text = ImageRead("examples/images/glass.bmp").getString()
 
 print("text is " + text)
 
-if "猜猜我写的是什么字" == text {
+if "我能吞下玻璃而不伤身体" == text {
     print("ok!")
 } else {
     print("no...")
 }
 
-print("Car is " + im_read("examples/images/car.jpg").detect("car"))
-print("Animal is " + im_read("examples/images/animal.jpg").detect("animal"))
-print("Plant is " + im_read("examples/images/plant.jpg").detect("plant"))
+Image carImg = ImageRead("examples/images/car.jpg")
+Image animalImg = ImageRead("examples/images/animal.jpg")
+Image plantImg = ImageRead("examples/images/plant.jpg")
 
-List<Image> images = [im_read("examples/images/car.jpg"), im_read("examples/images/animal.jpg"), im_read("examples/images/plant.jpg")]
+print("==flat:")
+
+print("Car is " + carImg.detect("car"))
+print("Animal is " + animalImg.detect("animal"))
+print("Plant is " + plantImg.detect("plant"))
+
+print("==for & list:")
+
+List<Image> images = [carImg, animalImg, plantImg]
 List<String> cats = ["car", "animal", "plant"]
-print(cats.get(0) + " is " + (images.get(0)).detect((cats.get(0))))
+
 Number i = 0
 for i in [0..3] {
     print(cats.get(i) + " is " + (images.get(i)).detect((cats.get(i))))
 }
 
-Image people = im_read("examples/images/woman.jpg")
+Image people = ImageRead("examples/images/woman.jpg")
 Image animePeople = people.getAnime()
 if animePeople.save("examples/images/anime.jpg") {
     print("anime saved")
