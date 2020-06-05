@@ -6,17 +6,13 @@ import check.SymbolCheck;
 import check.TypeCheck;
 import grammar.CLParserLexer;
 import grammar.CLParserParser;
-import interpreter.Value;
 import ir.IR;
 import ir.NoOperationIR;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;

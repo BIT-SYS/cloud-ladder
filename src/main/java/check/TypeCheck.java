@@ -101,7 +101,7 @@ public class TypeCheck extends ASTBaseListener {
                 if (containsGeneric(retType)) {
                     GenericType gType = (GenericType) getInnermostElementType(retType);
                     Type corriType = genericHelper.get(gType);
-                    ctx.evalType = replceGenericType(retType, corriType);
+                    ctx.evalType = replaceGenericType(retType, corriType);
                 } else {
                     ctx.evalType = retType;
                 }
