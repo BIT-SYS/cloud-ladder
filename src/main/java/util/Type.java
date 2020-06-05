@@ -54,7 +54,7 @@ public class Type {
         return null;
     }
 
-    public static symboltable.Type replceGenericType(symboltable.Type typeWithGenetic, symboltable.Type coreType) {
+    public static symboltable.Type replaceGenericType(symboltable.Type typeWithGenetic, symboltable.Type coreType) {
         assert containsGeneric(typeWithGenetic) && !containsGeneric(coreType);
         String typeStr = typeWithGenetic.toString();
         int l = typeStr.indexOf("Type");
