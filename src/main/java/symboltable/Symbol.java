@@ -4,6 +4,7 @@ public class Symbol {
     public String name;
     public Type type;
     Scope scope;
+
     public Symbol(String name) {
         this.name = name;
     }
@@ -20,5 +21,4 @@ public class Symbol {
     public String toString() {
         return getName() + ": " + type;
     }
-
 }

@@ -5,74 +5,24 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches:
-      - develop
-      - ast
-      - IR
-  pull_request:
-    branches:
-      - develop
 
 jobs:
-  grammar-test:
-    
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - name: setup environment for antlr
-      run: |
-        sudo curl https://www.antlr.org/download/antlr-4.8-complete.jar -o /usr/local/lib/antlr-complete.jar
-        whereis bash
-        sudo tee -a /usr/bin/grun > /dev/null << 'EOF'
-        \#!/bin/bash
-        java -cp .:/usr/local/lib/antlr-complete.jar org.antlr.v4.gui.TestRig "$@"
-        EOF
-        sudo chmod 777 /usr/bin/grun
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew  
-    - name: Test grammar with gradle
-      run: ./gradlew testGrammar --scan
-
-  auto-gen-test:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    #- name: Set up JDK 1.8
-      #uses: actions/setup-java@v1
-      #with:
-        #java-version: 1.8
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew  
-    - name: Test auto gen with gradle
-      run: ./gradlew testASTListener --scan
-
   unit-test:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: create secret.json
-      env:
-        BD_TOKEN: ${{secrets.baidu_token}}
-      run: |
-        echo '{"baidu_token": "' > secret.json
-        echo $BD_TOKEN >> secret.json
-        echo '"}' >> secret.json
-    - name: Test with Gradle
-      run: ./gradlew test --scan
-      
-
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: create secret.json
+        env:
+          BD_TOKEN: ${{secrets.baidu_token}}
+        run: |
+          echo '{"baidu_token": "' > secret.json
+          echo $BD_TOKEN >> secret.json
+          echo '"}' >> secret.json
+      - name: Test with Gradle
+        run: ./gradlew test --scan
