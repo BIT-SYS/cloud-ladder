@@ -1,10 +1,9 @@
 List<String> string_list = ["Cats's", "foot", "iron", "claw"]
 HashMap<String, HashMap<String, Number>> map_test = Hashmap() // 暂时先这样试一下CompositeType能不能搞对
 
-String cat = string_list[0]
-
 proc word_count(String string) -> Number {
-    42
+    true or false
+    40 + 2
 }
 
 // 打开注释检查相同参数类型的重载有没有报错

@@ -152,20 +152,50 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     }
     // literal end
 
-    @Override
-    public Node visitInt(CLParserParser.IntContext ctx) {
-        return super.visitInt(ctx);
+    // bop start
+    private Node visitBOp(ParserRuleContext ctx, String op, int l, int r) {
+        Apply bop = new Apply(ctx);
+        bop.addChild(new Identifier(op));
+        bop.addChild(visit(ctx.children.get(l)));
+        bop.addChild(visit(ctx.children.get(r)));
+        return bop;
     }
 
     @Override
-    public Node visitFloat(CLParserParser.FloatContext ctx) {
-        return super.visitFloat(ctx);
+    public Node visitMulDivMod(CLParserParser.MulDivModContext ctx) {
+        return visitBOp(ctx, ctx.bop.getText(), 0, 2);
     }
 
     @Override
-    public Node visitChar(CLParserParser.CharContext ctx) {
-        return super.visitChar(ctx);
+    public Node visitAddSub(CLParserParser.AddSubContext ctx) {
+        return visitBOp(ctx, ctx.bop.getText(), 0, 2);
     }
+
+    @Override
+    public Node visitExp(CLParserParser.ExpContext ctx) {
+        return visitBOp(ctx, ctx.bop.getText(), 0, 2);
+    }
+
+    @Override
+    public Node visitPartialEqual(CLParserParser.PartialEqualContext ctx) {
+        return visitBOp(ctx, ctx.bop.getText(), 0, 2);
+    }
+
+    @Override
+    public Node visitCompare(CLParserParser.CompareContext ctx) {
+        return visitBOp(ctx, ctx.bop.getText(), 0, 2);
+    }
+
+    @Override
+    public Node visitLogic(CLParserParser.LogicContext ctx) {
+        return visitBOp(ctx, ctx.bop.getText(), 0, 2);
+    }
+
+    @Override
+    public Node visitIndex(CLParserParser.IndexContext ctx) {
+        return visitBOp(ctx, "!!", 0, 2);
+    }
+    // bop end
 
     @Override
     public Node visitIfBlock(CLParserParser.IfBlockContext ctx) {
@@ -218,18 +248,8 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     }
 
     @Override
-    public Node visitAddSub(CLParserParser.AddSubContext ctx) {
-        return super.visitAddSub(ctx);
-    }
-
-    @Override
     public Node visitPrefix(CLParserParser.PrefixContext ctx) {
         return super.visitPrefix(ctx);
-    }
-
-    @Override
-    public Node visitIndex(CLParserParser.IndexContext ctx) {
-        return super.visitIndex(ctx);
     }
 
     @Override
@@ -238,48 +258,13 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     }
 
     @Override
-    public Node visitMulDivMod(CLParserParser.MulDivModContext ctx) {
-        return super.visitMulDivMod(ctx);
-    }
-
-    @Override
-    public Node visitPartialEqual(CLParserParser.PartialEqualContext ctx) {
-        return super.visitPartialEqual(ctx);
-    }
-
-    @Override
-    public Node visitLit(CLParserParser.LitContext ctx) {
-        return super.visitLit(ctx);
-    }
-
-    @Override
-    public Node visitMember(CLParserParser.MemberContext ctx) {
-        return super.visitMember(ctx);
-    }
-
-    @Override
     public Node visitLam(CLParserParser.LamContext ctx) {
         return super.visitLam(ctx);
     }
 
     @Override
-    public Node visitCompare(CLParserParser.CompareContext ctx) {
-        return super.visitCompare(ctx);
-    }
-
-    @Override
     public Node visitId(CLParserParser.IdContext ctx) {
         return new Identifier(ctx.getText());
-    }
-
-    @Override
-    public Node visitExp(CLParserParser.ExpContext ctx) {
-        return super.visitExp(ctx);
-    }
-
-    @Override
-    public Node visitLogic(CLParserParser.LogicContext ctx) {
-        return super.visitLogic(ctx);
     }
 
     @Override
