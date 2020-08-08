@@ -41,7 +41,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     @Override
     public Node visitParameterList(CLParserParser.ParameterListContext ctx) {
         ParamList paramList = new ParamList(ctx);
-        ctx.parameter().forEach(p -> paramList.addChild(visit(p)));
+        ctx.parameter().stream().map(this::visit).forEach(paramList::addChild);
         return paramList;
     }
     // proc end
@@ -87,7 +87,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     @Override
     public Node visitCompositeType(CLParserParser.CompositeTypeContext ctx) {
         TypeApply ta = new TypeApply(ctx);
-        ctx.typeType().forEach(t -> ta.addChild(visit(t)));
+        ctx.typeType().stream().map(this::visit).forEach(ta::addChild);
         return ta;
     }
     // type end
@@ -114,7 +114,9 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     // sugar start
     @Override
     public Node visitValuesListInitializer(CLParserParser.ValuesListInitializerContext ctx) {
-        return new ListNode(null);
+        ListNode list = new ListNode(null);
+        ctx.expression().stream().map(this::visit).forEach(list::addChild);
+        return list;
     }
 
     @Override
