@@ -1,4 +1,4 @@
-package ast;
+package ast.node;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 abstract public class Node {
-    ParserRuleContext actx; // 避免和antlr visitor里new Node(){{addChild(visit(ctx.xxx))}}的ctx搞混
+    public ParserRuleContext actx; // 避免和antlr visitor里new Node(){{addChild(visit(ctx.xxx))}}的ctx搞混
     List<Node> children;
 
     public Node(ParserRuleContext ctx) {

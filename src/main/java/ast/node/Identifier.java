@@ -1,4 +1,4 @@
-package ast;
+package ast.node;
 
 
 public class Identifier extends Expression {

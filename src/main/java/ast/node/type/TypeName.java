@@ -1,4 +1,4 @@
-package ast.type;
+package ast.node.type;
 
 import grammar.CLParserParser;
 

@@ -1,4 +1,4 @@
-import ast.Node;
+import ast.node.Node;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.IOException;

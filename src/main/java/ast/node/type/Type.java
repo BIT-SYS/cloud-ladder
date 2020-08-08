@@ -1,6 +1,6 @@
-package ast.type;
+package ast.node.type;
 
-import ast.Node;
+import ast.node.Node;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 abstract public class Type extends Node {

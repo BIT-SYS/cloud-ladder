@@ -1,7 +1,8 @@
 package ast;
 
-import ast.type.TypeApply;
-import ast.type.TypeName;
+import ast.node.*;
+import ast.node.type.TypeApply;
+import ast.node.type.TypeName;
 import grammar.CLParserBaseVisitor;
 import grammar.CLParserParser;
 import org.antlr.v4.runtime.ParserRuleContext;

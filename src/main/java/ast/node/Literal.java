@@ -1,9 +1,9 @@
-package ast;
+package ast.node;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class Literal extends Expression {
-    String text;
+    public String text;
 
     public Literal(ParserRuleContext ctx) {
         super(ctx);
