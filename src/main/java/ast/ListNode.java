@@ -2,8 +2,8 @@ package ast;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
-public class List extends Expression {
-    public List(ParserRuleContext ctx) {
+public class ListNode extends Expression {
+    public ListNode(ParserRuleContext ctx) {
         super(ctx);
     }
 

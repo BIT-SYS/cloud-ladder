@@ -3,18 +3,17 @@ package ast;
 import ast.type.Type;
 import grammar.CLParserBaseVisitor;
 import grammar.CLParserParser;
+import org.antlr.v4.runtime.ParserRuleContext;
+
+import java.util.List;
 
 // 返回AST节点的Visitor
 public class ASTParser extends CLParserBaseVisitor<Node> {
-    @Override
-    public Node visitTypeType(CLParserParser.TypeTypeContext ctx) {
-        return new Type(ctx);
-    }
 
-    @Override
-    public Node visitProgram(CLParserParser.ProgramContext ctx) {
+    private Node visitBlockLike(ParserRuleContext ctx, List<CLParserParser.StatementContext> statements) {
+        // Java限制起来传入参数必须要实现statement方法貌似比较麻烦
         Block bl = new Block(ctx);
-        ctx.statement().forEach(
+        statements.forEach(
                 (n) -> {
                     if (n == null)
                         return;
@@ -24,6 +23,16 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
                 }
         );
         return bl;
+    }
+
+    @Override
+    public Node visitTypeType(CLParserParser.TypeTypeContext ctx) {
+        return new Type(ctx);
+    }
+
+    @Override
+    public Node visitProgram(CLParserParser.ProgramContext ctx) {
+        return visitBlockLike(ctx, ctx.statement());
     }
 
     @Override
@@ -63,17 +72,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
     @Override
     public Node visitBlock(CLParserParser.BlockContext ctx) {
-        Block bl = new Block(ctx);
-        ctx.statement().forEach(
-                (n) -> {
-                    if (n == null)
-                        return;
-                    Node v = visit(n);
-                    if (v != null)
-                        bl.addChild(v);
-                }
-        );
-        return bl;
+        return visitBlockLike(ctx, ctx.statement());
     }
 
     @Override
@@ -215,7 +214,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
     @Override
     public Node visitValuesListInitializer(CLParserParser.ValuesListInitializerContext ctx) {
-        return new List(null);
+        return new ListNode(null);
     }
 
     @Override
