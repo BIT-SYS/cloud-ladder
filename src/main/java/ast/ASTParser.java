@@ -7,7 +7,9 @@ import grammar.CLParserBaseVisitor;
 import grammar.CLParserParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 // 返回AST节点的Visitor
 public class ASTParser extends CLParserBaseVisitor<Node> {
@@ -138,7 +140,6 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     @Override
     public Node visitFloatLiteral(CLParserParser.FloatLiteralContext ctx) {
         return visitLiteral(ctx, "Number");
-
     }
 
     @Override
@@ -198,6 +199,38 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     }
     // bop end
 
+    // call start
+    private Node visitProcCall(ParserRuleContext ctx, String id, List<Node> args) {
+        Apply call = new Apply(ctx);
+        call.addChild(new Identifier(id));
+        for (Node arg : args) {
+            call.addChild(arg);
+        }
+        return call;
+    }
+
+    @Override
+    public Node visitProcedureCall(CLParserParser.ProcedureCallContext ctx) {
+        List<Node> args;
+        if (ctx.expressionList() == null) {
+            args = new ArrayList<>();
+        } else {
+            args = ctx.expressionList().expression().stream().map(this::visit).collect(Collectors.toList());
+        }
+        return visitProcCall(ctx, ctx.IDENTIFIER().getText(), args);
+    }
+
+    @Override
+    public Node visitMethod(CLParserParser.MethodContext ctx) {
+        List<Node> args = new ArrayList<>();
+        args.add(visit(ctx.expression()));
+        if (ctx.procedureCall().expressionList() != null) {
+            ctx.procedureCall().expressionList().expression().stream().map(this::visit).forEach(args::add);
+        }
+        return visitProcCall(ctx, ctx.procedureCall().IDENTIFIER().getText(), args);
+    }
+    // call end
+
     @Override
     public Node visitIfBlock(CLParserParser.IfBlockContext ctx) {
         return super.visitIfBlock(ctx);
@@ -254,11 +287,6 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     }
 
     @Override
-    public Node visitProcedure(CLParserParser.ProcedureContext ctx) {
-        return super.visitProcedure(ctx);
-    }
-
-    @Override
     public Node visitLam(CLParserParser.LamContext ctx) {
         return super.visitLam(ctx);
     }
@@ -286,10 +314,5 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     @Override
     public Node visitLambda(CLParserParser.LambdaContext ctx) {
         return super.visitLambda(ctx);
-    }
-
-    @Override
-    public Node visitProcedureCall(CLParserParser.ProcedureCallContext ctx) {
-        return super.visitProcedureCall(ctx);
     }
 }

@@ -69,7 +69,8 @@ emptyLines: NL+;
 // TODO 初始化列表/哈希表
 expression:
         literal                                                 # Lit
-	| expression NL? bop = '.' ( procedureCall | IDENTIFIER )  # member
+//	| expression NL? bop = '.' IDENTIFIER                     # member
+	| expression NL? '.'  procedureCall                       # method
         | listInitializer                                         # listInit
 	| procedureCall                                           # procedure
     | IDENTIFIER                                              # id
