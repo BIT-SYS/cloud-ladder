@@ -6,4 +6,9 @@ public class Expression extends Node {
     public Expression(ParserRuleContext ctx) {
         super(ctx);
     }
+
+    @Override
+    public String printNode() {
+        return "Expr";
+    }
 }

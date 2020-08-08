@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Node {
+abstract public class Node {
     ParserRuleContext actx; // 避免和antlr visitor里new Node(){{addChild(visit(ctx.xxx))}}的ctx搞混
     List<Node> children;
 
@@ -20,9 +20,7 @@ public class Node {
         children.add(a);
     }
 
-    public String printNode() {
-        return "Node";
-    }
+    abstract public String printNode();
 
     // lisp-style AST
     public String toStringTree() {

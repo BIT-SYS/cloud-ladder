@@ -7,4 +7,9 @@ public class Assign extends Node {
     public Assign(ParserRuleContext ctx) {
         super(ctx);
     }
+
+    @Override
+    public String printNode() {
+        return "Assign";
+    }
 }
