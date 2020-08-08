@@ -8,7 +8,7 @@ public class ProcDef extends Node {
     }
 
     @Override
-    public String printNode() {
+    public String toString() {
         return "ProcDef";
     }
 }

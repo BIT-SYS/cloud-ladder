@@ -8,7 +8,7 @@ public class VarDecl extends Node {
     }
 
     @Override
-    public String printNode() {
+    public String toString() {
         return "VarDecl"; //我知道getClass().getName()，但那不起作用
     }
 }

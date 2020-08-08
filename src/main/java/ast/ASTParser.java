@@ -120,6 +120,38 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     }
     // sugar end
 
+    // literal start
+    private Node visitLiteral(ParserRuleContext ctx, String type) {
+        Literal lit = new Literal(ctx);
+        TypeName typeName = new TypeName(type);
+        lit.addChild(typeName);
+        lit.text = ctx.getText();
+        return lit;
+    }
+
+    @Override
+    public Node visitIntegerLiteral(CLParserParser.IntegerLiteralContext ctx) {
+        return visitLiteral(ctx, "Number");
+    }
+
+    @Override
+    public Node visitFloatLiteral(CLParserParser.FloatLiteralContext ctx) {
+        return visitLiteral(ctx, "Number");
+
+    }
+
+    @Override
+    public Node visitString(CLParserParser.StringContext ctx) {
+        return visitLiteral(ctx, "String");
+
+    }
+
+    @Override
+    public Node visitBool(CLParserParser.BoolContext ctx) {
+        return visitLiteral(ctx, "Bool");
+    }
+    // literal end
+
     @Override
     public Node visitInt(CLParserParser.IntContext ctx) {
         return super.visitInt(ctx);
@@ -133,26 +165,6 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     @Override
     public Node visitChar(CLParserParser.CharContext ctx) {
         return super.visitChar(ctx);
-    }
-
-    @Override
-    public Node visitString(CLParserParser.StringContext ctx) {
-        return super.visitString(ctx);
-    }
-
-    @Override
-    public Node visitBool(CLParserParser.BoolContext ctx) {
-        return super.visitBool(ctx);
-    }
-
-    @Override
-    public Node visitIntegerLiteral(CLParserParser.IntegerLiteralContext ctx) {
-        return super.visitIntegerLiteral(ctx);
-    }
-
-    @Override
-    public Node visitFloatLiteral(CLParserParser.FloatLiteralContext ctx) {
-        return super.visitFloatLiteral(ctx);
     }
 
     @Override
@@ -257,7 +269,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
     @Override
     public Node visitId(CLParserParser.IdContext ctx) {
-        return new Identifier(ctx);
+        return new Identifier(ctx.getText());
     }
 
     @Override

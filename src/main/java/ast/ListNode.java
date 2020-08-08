@@ -8,7 +8,7 @@ public class ListNode extends Expression {
     }
 
     @Override
-    public String printNode() {
+    public String toString() {
         return "ListTODO";
     }
 }

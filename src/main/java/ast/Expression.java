@@ -8,7 +8,7 @@ public class Expression extends Node {
     }
 
     @Override
-    public String printNode() {
+    public String toString() {
         return "Expr";
     }
 }

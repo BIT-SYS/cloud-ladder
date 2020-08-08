@@ -9,7 +9,7 @@ public class Param extends Node {
     }
 
     @Override
-    public String printNode() {
+    public String toString() {
         return "Param";
     }
 }

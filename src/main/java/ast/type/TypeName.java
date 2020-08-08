@@ -8,8 +8,13 @@ public class TypeName extends Type {
         name = ctx.getText();
     }
 
+    public TypeName(String type) {
+        super(null);
+        name = type;
+    }
+
     @Override
-    public String printNode() {
+    public String toString() {
         return name;
     }
 }

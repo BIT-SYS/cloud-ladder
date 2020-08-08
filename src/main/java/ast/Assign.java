@@ -9,7 +9,7 @@ public class Assign extends Node {
     }
 
     @Override
-    public String printNode() {
+    public String toString() {
         return "Assign";
     }
 }

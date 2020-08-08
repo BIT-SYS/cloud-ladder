@@ -20,13 +20,13 @@ abstract public class Node {
         children.add(a);
     }
 
-    abstract public String printNode();
+    abstract public String toString();
 
     // lisp-style AST
     public String toStringTree() {
-        if (children == null || children.size() == 0) return printNode();
+        if (children == null || children.size() == 0) return toString();
         StringBuilder sb = new StringBuilder();
-        sb.append('(').append(printNode());
+        sb.append('(').append(toString());
         children.forEach(
                 node -> {
                     if (node == null) {

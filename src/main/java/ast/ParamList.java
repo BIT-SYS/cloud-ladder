@@ -8,7 +8,7 @@ public class ParamList extends Node {
     }
 
     @Override
-    public String printNode() {
+    public String toString() {
         return "Params";
     }
 }

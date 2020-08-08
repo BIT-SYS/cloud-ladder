@@ -9,7 +9,7 @@ public class TypeApply extends Type {
     }
 
     @Override
-    public String printNode() {
+    public String toString() {
         return name;
     }
 }
