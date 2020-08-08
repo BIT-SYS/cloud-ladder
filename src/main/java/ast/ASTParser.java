@@ -121,7 +121,10 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
     @Override
     public Node visitRangeListInitializer(CLParserParser.RangeListInitializerContext ctx) {
-        return super.visitRangeListInitializer(ctx);
+        Range range = new Range(null);
+        ctx.expression().stream().map(this::visit).forEach(range::addChild);
+        range.inclusive = ctx.op.getText().startsWith("=");
+        return range;
     }
     // sugar end
 
