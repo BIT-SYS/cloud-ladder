@@ -3,11 +3,8 @@ package ast;
 import grammar.CLParserParser;
 
 public class VarDecl extends Node {
-    String type;
-
     public VarDecl(CLParserParser.VariableDeclContext ctx) {
         super(ctx);
-        type = ctx.typeType().getText();
     }
 
     @Override

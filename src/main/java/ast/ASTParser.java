@@ -1,10 +1,16 @@
 package ast;
 
+import ast.type.Type;
 import grammar.CLParserBaseVisitor;
 import grammar.CLParserParser;
 
 // 返回AST节点的Visitor
 public class ASTParser extends CLParserBaseVisitor<Node> {
+    @Override
+    public Node visitTypeType(CLParserParser.TypeTypeContext ctx) {
+        return new Type(ctx);
+    }
+
     @Override
     public Node visitProgram(CLParserParser.ProgramContext ctx) {
         Block bl = new Block(ctx);
@@ -57,7 +63,17 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
     @Override
     public Node visitBlock(CLParserParser.BlockContext ctx) {
-        return super.visitBlock(ctx);
+        Block bl = new Block(ctx);
+        ctx.statement().forEach(
+                (n) -> {
+                    if (n == null)
+                        return;
+                    Node v = visit(n);
+                    if (v != null)
+                        bl.addChild(v);
+                }
+        );
+        return bl;
     }
 
     @Override
@@ -93,6 +109,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     @Override
     public Node visitVariableDecl(CLParserParser.VariableDeclContext ctx) {
         return new VarDecl(ctx) {{
+            addChild(visit(ctx.typeType())); // type
             addChild(new Identifier(ctx.IDENTIFIER().getText())); // id
             addChild(visit(ctx.expression())); // expr
         }};
