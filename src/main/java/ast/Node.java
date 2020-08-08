@@ -9,7 +9,6 @@ public class Node {
     ParserRuleContext actx; // 避免和antlr visitor里new Node(){{addChild(visit(ctx.xxx))}}的ctx搞混
     List<Node> children;
 
-    //    public Node() {};
     public Node(ParserRuleContext ctx) {
         actx = ctx;
     }
@@ -33,7 +32,7 @@ public class Node {
         children.forEach(
                 node -> {
                     if (node == null) {
-                        sb.append(' ').append("null");
+                        sb.append(' ').append("ImplementMe!!");
                     } else // TODO delete this if
                         sb.append(' ').append(node.toStringTree());
                 }

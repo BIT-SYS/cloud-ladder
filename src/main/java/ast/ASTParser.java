@@ -11,11 +11,44 @@ import java.util.List;
 // 返回AST节点的Visitor
 public class ASTParser extends CLParserBaseVisitor<Node> {
 
+    // proc start
+    @Override
+    public Node visitProcedureDecl(CLParserParser.ProcedureDeclContext ctx) {
+        return visit(ctx.procedureDeclaration());
+    }
+
+    @Override
+    public Node visitProcedureDeclaration(CLParserParser.ProcedureDeclarationContext ctx) {
+        return new ProcDef(ctx) {{
+            addChild(visit(ctx.typeType())); // type
+            addChild(new Identifier(ctx.IDENTIFIER().getText())); // id
+            addChild(visit(ctx.parameterList())); // params
+            addChild(visit(ctx.procedureBody().block())); // body
+        }};
+    }
+
+    @Override
+    public Node visitParameter(CLParserParser.ParameterContext ctx) {
+        return new Param(ctx) {{
+            addChild(visit(ctx.typeType()));
+            addChild(new Identifier(ctx.IDENTIFIER().getText()));
+        }};
+    }
+
+    @Override
+    public Node visitParameterList(CLParserParser.ParameterListContext ctx) {
+        ParamList paramList = new ParamList(ctx);
+        ctx.parameter().forEach(p -> paramList.addChild(visit(p)));
+        return paramList;
+    }
+    // proc end
+
+    // block start
     private Node visitBlockLike(ParserRuleContext ctx, List<CLParserParser.StatementContext> statements) {
         // Java限制起来传入参数必须要实现statement方法貌似比较麻烦
         Block bl = new Block(ctx);
         statements.forEach(
-                (n) -> {
+                n -> {
                     if (n == null)
                         return;
                     Node v = visit(n);
@@ -26,6 +59,18 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
         return bl;
     }
 
+    @Override
+    public Node visitProgram(CLParserParser.ProgramContext ctx) {
+        return visitBlockLike(ctx, ctx.statement());
+    }
+
+    @Override
+    public Node visitBlock(CLParserParser.BlockContext ctx) {
+        return visitBlockLike(ctx, ctx.statement());
+    }
+    // block end
+
+    // type start
     @Override
     public Node visitTypeType(CLParserParser.TypeTypeContext ctx) {
         return super.visitTypeType(ctx); // basic type or composite type
@@ -42,11 +87,38 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
         ctx.typeType().forEach(t -> ta.addChild(visit(t)));
         return ta;
     }
+    // type end
+
+    // var start
+    @Override
+    public Node visitVariableDecl(CLParserParser.VariableDeclContext ctx) {
+        return new VarDecl(ctx) {{
+            addChild(visit(ctx.typeType())); // type
+            addChild(new Identifier(ctx.IDENTIFIER().getText())); // id
+            addChild(visit(ctx.expression())); // expr
+        }};
+    }
 
     @Override
-    public Node visitProgram(CLParserParser.ProgramContext ctx) {
-        return visitBlockLike(ctx, ctx.statement());
+    public Node visitAssign(CLParserParser.AssignContext ctx) {
+        return new Assign(ctx) {{
+            addChild(visit(actx.children.get(0))); // VisitId
+            addChild(visit(actx.children.get(1))); // VisitExpr
+        }};
     }
+    // var end
+
+    // sugar start
+    @Override
+    public Node visitValuesListInitializer(CLParserParser.ValuesListInitializerContext ctx) {
+        return new ListNode(null);
+    }
+
+    @Override
+    public Node visitRangeListInitializer(CLParserParser.RangeListInitializerContext ctx) {
+        return super.visitRangeListInitializer(ctx);
+    }
+    // sugar end
 
     @Override
     public Node visitInt(CLParserParser.IntContext ctx) {
@@ -84,11 +156,6 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     }
 
     @Override
-    public Node visitBlock(CLParserParser.BlockContext ctx) {
-        return visitBlockLike(ctx, ctx.statement());
-    }
-
-    @Override
     public Node visitIfBlock(CLParserParser.IfBlockContext ctx) {
         return super.visitIfBlock(ctx);
     }
@@ -111,28 +178,6 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     @Override
     public Node visitContinue(CLParserParser.ContinueContext ctx) {
         return super.visitContinue(ctx);
-    }
-
-    @Override
-    public Node visitProcedureDecl(CLParserParser.ProcedureDeclContext ctx) {
-        return super.visitProcedureDecl(ctx);
-    }
-
-    @Override
-    public Node visitVariableDecl(CLParserParser.VariableDeclContext ctx) {
-        return new VarDecl(ctx) {{
-            addChild(visit(ctx.typeType())); // type
-            addChild(new Identifier(ctx.IDENTIFIER().getText())); // id
-            addChild(visit(ctx.expression())); // expr
-        }};
-    }
-
-    @Override
-    public Node visitAssign(CLParserParser.AssignContext ctx) {
-        return new Assign(ctx) {{
-            addChild(visit(actx.children.get(0))); // VisitId
-            addChild(visit(actx.children.get(1))); // VisitExpr
-        }};
     }
 
     @Override
@@ -226,16 +271,6 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     }
 
     @Override
-    public Node visitValuesListInitializer(CLParserParser.ValuesListInitializerContext ctx) {
-        return new ListNode(null);
-    }
-
-    @Override
-    public Node visitRangeListInitializer(CLParserParser.RangeListInitializerContext ctx) {
-        return super.visitRangeListInitializer(ctx);
-    }
-
-    @Override
     public Node visitExpressionList(CLParserParser.ExpressionListContext ctx) {
         return super.visitExpressionList(ctx);
     }
@@ -258,25 +293,5 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     @Override
     public Node visitProcedureCall(CLParserParser.ProcedureCallContext ctx) {
         return super.visitProcedureCall(ctx);
-    }
-
-    @Override
-    public Node visitProcedureDeclaration(CLParserParser.ProcedureDeclarationContext ctx) {
-        return super.visitProcedureDeclaration(ctx);
-    }
-
-    @Override
-    public Node visitProcedureBody(CLParserParser.ProcedureBodyContext ctx) {
-        return super.visitProcedureBody(ctx);
-    }
-
-    @Override
-    public Node visitParameter(CLParserParser.ParameterContext ctx) {
-        return super.visitParameter(ctx);
-    }
-
-    @Override
-    public Node visitParameterList(CLParserParser.ParameterListContext ctx) {
-        return super.visitParameterList(ctx);
     }
 }
