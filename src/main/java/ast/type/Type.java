@@ -1,18 +1,12 @@
 package ast.type;
 
 import ast.Node;
-import grammar.CLParserParser;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 public class Type extends Node {
     String name;
 
-    public Type(CLParserParser.TypeTypeContext ctx) {
+    public Type(ParserRuleContext ctx) {
         super(ctx);
-        name = ctx.getText();
-    }
-
-    @Override
-    public String printNode() {
-        return name;
     }
 }

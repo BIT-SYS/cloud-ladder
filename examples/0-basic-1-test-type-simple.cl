@@ -1,4 +1,5 @@
 List<String> string_list = ["Cats's", "foot", "iron", "claw"]
+HashMap<String, HashMap<String, Number>> map_test = Hashmap() // 暂时先这样试一下CompositeType能不能搞对
 
 String cat = string_list[0]
 
@@ -30,9 +31,9 @@ List<Number> fooot = [1..3]
 // 打开注释检查重定义变量有没有报错
 // List<Number> fooot = string_list.map(|String string| -> Number {word_count(string)})
 
-proc id(TypeA a) -> TypeA {
-    a
-}
-
-String aString = id("a")
-Number aNumber = id(fooot[1])
+// proc id(TypeA a) -> TypeA {
+//     a
+// }
+//
+// String aString = id("a")
+// Number aNumber = id(fooot[1])

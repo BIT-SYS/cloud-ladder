@@ -12,14 +12,17 @@ basicType:
 	BOOLEAN
 	| STRING
 	| NUMBER
-	| LIST '<' typeType '>'
-	| SET '<' typeType '>'
-	| HASHMAP '<' key = typeType ',' value = typeType '>'
 	| AUDIO
 	| VIDEO
 	| IMAGE;
 
-typeType: basicType | GENERICTYPE; //可能会有自定义类型
+compositeType:
+    LIST '<' typeType '>'
+    | SET '<' typeType '>'
+    | HASHMAP '<' key = typeType ',' value = typeType '>'
+    ;
+
+typeType: basicType | compositeType; //可能会有自定义类型
 
 // LITERAL
 

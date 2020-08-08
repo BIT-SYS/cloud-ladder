@@ -14,7 +14,6 @@ HASHMAP: 'HashMap';
 AUDIO: 'Audio';
 VIDEO: 'Video';
 IMAGE: 'Image';
-GENERICTYPE: 'Type' ('A'..'Z');
 
 IF: 'if';
 ELIF: 'elif';

@@ -1,6 +1,7 @@
 package ast;
 
-import ast.type.Type;
+import ast.type.TypeApply;
+import ast.type.TypeName;
 import grammar.CLParserBaseVisitor;
 import grammar.CLParserParser;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -27,7 +28,19 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
     @Override
     public Node visitTypeType(CLParserParser.TypeTypeContext ctx) {
-        return new Type(ctx);
+        return super.visitTypeType(ctx); // basic type or composite type
+    }
+
+    @Override
+    public Node visitBasicType(CLParserParser.BasicTypeContext ctx) {
+        return new TypeName(ctx);
+    }
+
+    @Override
+    public Node visitCompositeType(CLParserParser.CompositeTypeContext ctx) {
+        TypeApply ta = new TypeApply(ctx);
+        ctx.typeType().forEach(t -> ta.addChild(visit(t)));
+        return ta;
     }
 
     @Override
