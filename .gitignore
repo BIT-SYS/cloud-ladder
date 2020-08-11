@@ -11,3 +11,4 @@ out
 /src/main/antlr/
 CLLexer.tokens
 secret.json
+/src/main/java/ast/AstVisitor.java

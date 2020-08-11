@@ -1,5 +1,6 @@
 package ast.node;
 
+import ast.AstVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.ArrayList;
@@ -7,7 +8,7 @@ import java.util.List;
 
 abstract public class Node {
     public ParserRuleContext actx; // 避免和antlr visitor里new Node(){{addChild(visit(ctx.xxx))}}的ctx搞混
-    List<Node> children;
+    public List<Node> children;
 
     public Node(ParserRuleContext ctx) {
         actx = ctx;
@@ -37,5 +38,9 @@ abstract public class Node {
         );
         sb.append(')');
         return sb.toString();
+    }
+
+    public void accept(AstVisitor visitor) {
+        visitor.visit(this);
     }
 }
