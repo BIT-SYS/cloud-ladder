@@ -1,9 +1,10 @@
-package ast.node;
+package ast.node.flow;
 
+import ast.node.Node;
 import org.antlr.v4.runtime.ParserRuleContext;
 
-public class ForLoop extends Node {
-    public ForLoop(ParserRuleContext ctx) {
+public class For extends Node {
+    public For(ParserRuleContext ctx) {
         super(ctx);
     }
 

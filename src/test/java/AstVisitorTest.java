@@ -1,5 +1,6 @@
 import ast.AstVisitor;
 import ast.node.*;
+import ast.node.flow.*;
 import ast.node.type.Type;
 import ast.node.type.TypeApply;
 import ast.node.type.TypeName;
@@ -39,13 +40,28 @@ public class AstVisitorTest extends AstTester {
         }
 
         @Override
+        public void visit(Break node) {
+            realVisit(node);
+        }
+
+        @Override
+        public void visit(Continue node) {
+            realVisit(node);
+        }
+
+        @Override
         public void visit(Expression expression) {
             realVisit(expression);
         }
 
         @Override
-        public void visit(ForLoop forloop) {
+        public void visit(For forloop) {
             realVisit(forloop);
+        }
+
+        @Override
+        public void visit(Pass node) {
+            realVisit(node);
         }
 
         @Override
@@ -119,7 +135,7 @@ public class AstVisitorTest extends AstTester {
         }
 
         @Override
-        public void visit(WhileLoop whileloop) {
+        public void visit(While whileloop) {
             realVisit(whileloop);
         }
     }

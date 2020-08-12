@@ -36,9 +36,15 @@ tasks {
 
         doLast {
             val sb = StringBuilder()
-            sb.append("package ast;\n\nimport ast.node.*;\nimport ast.node.type.*;\n\npublic interface AstVisitor {\n")
-            File(nodes).walk().filter { it.isFile }.map { it.name.substringBefore(".java") }.forEach {
-                sb.append("    public void visit($it ${it.toLowerCase()});\n")
+            sb.append("package ast;\n\n")
+            val list = file(nodes).walk().toList()
+            val ast = file(nodes).parentFile
+            list.filter { it.isDirectory }.forEach {
+                sb.append("import ast.${it.toRelativeString(ast).replace(File.separatorChar, '.')}.*;\n")
+            }
+            sb.append("\npublic interface AstVisitor{\n")
+            list.filter { it.isFile }.map { it.name.substringBefore(".java") }.forEach {
+                sb.append("    public void visit($it node);\n")
             }
             sb.append('}')
             File(visitor).apply {

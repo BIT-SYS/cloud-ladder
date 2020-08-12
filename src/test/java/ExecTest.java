@@ -4,10 +4,11 @@ import java.io.File;
 import java.io.IOException;
 
 public class ExecTest {
-    static Tester tester = new AstVisitorTest();
+    static Tester tester = new AstTester();
 
     public static void main(String[] args) throws IOException {
-        tester.start("examples/0-basic-1-test-type-simple.cl");
+        tester.start("examples/2-control-3-while.cl");
+//        tester.start("examples/0-basic-1-test-type-simple.cl");
     }
 
     @Test

@@ -1,6 +1,7 @@
 package ast;
 
 import ast.node.*;
+import ast.node.flow.*;
 import ast.node.type.TypeApply;
 import ast.node.type.TypeName;
 import grammar.CLParserBaseVisitor;
@@ -244,7 +245,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     // flow
     @Override
     public Node visitForBlock(CLParserParser.ForBlockContext ctx) {
-        return new ForLoop(ctx) {{
+        return new For(ctx) {{
             addChild(new Identifier(ctx.IDENTIFIER().getText()));
             addChild(visit(ctx.expression()));
             addChild(visit(ctx.block()));
@@ -253,7 +254,7 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
     @Override
     public Node visitWhileBlock(CLParserParser.WhileBlockContext ctx) {
-        return new WhileLoop(ctx) {{
+        return new While(ctx) {{
             addChild(visit(ctx.expression()));
             addChild(visit(ctx.block()));
         }};
@@ -275,19 +276,19 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
         if (null != ctx.ELSE()) {
             outer.addChild(visit(ctx.block().get(ctx.block().size() - 1)));
         } else {
-            outer.addChild(null);
+            outer.addChild(new Pass(ctx));
         }
         return ifelse;
     }
 
     @Override
     public Node visitBreak(CLParserParser.BreakContext ctx) {
-        return super.visitBreak(ctx);
+        return new Break(ctx);
     }
 
     @Override
     public Node visitContinue(CLParserParser.ContinueContext ctx) {
-        return super.visitContinue(ctx);
+        return new Continue(ctx);
     }
     // flow end
 

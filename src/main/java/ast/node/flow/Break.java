@@ -1,0 +1,10 @@
+package ast.node.flow;
+
+import ast.node.Text;
+import org.antlr.v4.runtime.ParserRuleContext;
+
+public class Break extends Text {
+    public Break(ParserRuleContext ctx) {
+        super(ctx, "break");
+    }
+}

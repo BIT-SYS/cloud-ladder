@@ -1,9 +1,10 @@
-package ast.node;
+package ast.node.flow;
 
+import ast.node.Node;
 import org.antlr.v4.runtime.ParserRuleContext;
 
-public class WhileLoop extends Node {
-    public WhileLoop(ParserRuleContext ctx) {
+public class While extends Node {
+    public While(ParserRuleContext ctx) {
         super(ctx);
     }
 
