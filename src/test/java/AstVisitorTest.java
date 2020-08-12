@@ -15,71 +15,7 @@ public class AstVisitorTest extends AstTester {
     }
 
     static class TestAstVisitor implements AstVisitor {
-        @Override
-        public void visit(Apply apply) {
-            System.out.println("visiting " + apply.toString());
-            if (null == apply.children) return;
-            for (Node child : apply.children) {
-                if (null != child) visit(child);
-            }
-        }
-
-        @Override
-        public void visit(Assign assign) {
-            System.out.println("visiting " + assign.toString());
-            if (null == assign.children) return;
-            for (Node child : assign.children) {
-                if (null != child) visit(child);
-            }
-        }
-
-        @Override
-        public void visit(Block block) {
-            System.out.println("visiting " + block.toString());
-            if (null == block.children) return;
-            for (Node child : block.children) {
-                if (null != child) visit(child);
-            }
-        }
-
-        @Override
-        public void visit(Expression expression) {
-            System.out.println("visiting " + expression.toString());
-            if (null == expression.children) return;
-            for (Node child : expression.children) {
-                if (null != child) visit(child);
-            }
-        }
-
-        @Override
-        public void visit(Identifier identifier) {
-            System.out.println("visiting " + identifier.toString());
-            if (null == identifier.children) return;
-            for (Node child : identifier.children) {
-                if (null != child) visit(child);
-            }
-        }
-
-        @Override
-        public void visit(ListNode listnode) {
-            System.out.println("visiting " + listnode.toString());
-            if (null == listnode.children) return;
-            for (Node child : listnode.children) {
-                if (null != child) visit(child);
-            }
-        }
-
-        @Override
-        public void visit(Literal literal) {
-            System.out.println("visiting " + literal.toString());
-            if (null == literal.children) return;
-            for (Node child : literal.children) {
-                if (null != child) visit(child);
-            }
-        }
-
-        @Override
-        public void visit(Node node) {
+        private void realVisit(Node node) {
             System.out.println("visiting " + node.toString());
             if (null == node.children) return;
             for (Node child : node.children) {
@@ -88,75 +24,98 @@ public class AstVisitorTest extends AstTester {
         }
 
         @Override
+        public void visit(Apply apply) {
+            realVisit(apply);
+        }
+
+        @Override
+        public void visit(Assign assign) {
+            realVisit(assign);
+        }
+
+        @Override
+        public void visit(Block block) {
+            realVisit(block);
+        }
+
+        @Override
+        public void visit(Expression expression) {
+            realVisit(expression);
+        }
+
+        @Override
+        public void visit(ForLoop forloop) {
+            realVisit(forloop);
+        }
+
+        @Override
+        public void visit(Identifier identifier) {
+            realVisit(identifier);
+        }
+
+        @Override
+        public void visit(IfElse ifelse) {
+            realVisit(ifelse);
+        }
+
+        @Override
+        public void visit(ListNode listnode) {
+            realVisit(listnode);
+        }
+
+        @Override
+        public void visit(Literal literal) {
+            realVisit(literal);
+        }
+
+        @Override
+        public void visit(Node node) {
+            realVisit(node);
+        }
+
+        @Override
         public void visit(Param param) {
-            System.out.println("visiting " + param.toString());
-            if (null == param.children) return;
-            for (Node child : param.children) {
-                if (null != child) visit(child);
-            }
+            realVisit(param);
         }
 
         @Override
         public void visit(ParamList paramlist) {
-            System.out.println("visiting " + paramlist.toString());
-            if (null == paramlist.children) return;
-            for (Node child : paramlist.children) {
-                if (null != child) visit(child);
-            }
+            realVisit(paramlist);
         }
 
         @Override
         public void visit(ProcDef procdef) {
-            System.out.println("visiting " + procdef.toString());
-            if (null == procdef.children) return;
-            for (Node child : procdef.children) {
-                if (null != child) visit(child);
-            }
+            realVisit(procdef);
         }
 
         @Override
         public void visit(Range range) {
-            System.out.println("visiting " + range.toString());
-            if (null == range.children) return;
-            for (Node child : range.children) {
-                if (null != child) visit(child);
-            }
+            realVisit(range);
         }
 
         @Override
         public void visit(Type type) {
-            System.out.println("visiting " + type.toString());
-            if (null == type.children) return;
-            for (Node child : type.children) {
-                if (null != child) visit(child);
-            }
+            realVisit(type);
         }
 
         @Override
         public void visit(TypeApply typeapply) {
-            System.out.println("visiting " + typeapply.toString());
-            if (null == typeapply.children) return;
-            for (Node child : typeapply.children) {
-                if (null != child) visit(child);
-            }
+            realVisit(typeapply);
         }
 
         @Override
         public void visit(TypeName typename) {
-            System.out.println("visiting " + typename.toString());
-            if (null == typename.children) return;
-            for (Node child : typename.children) {
-                if (null != child) visit(child);
-            }
+            realVisit(typename);
         }
 
         @Override
         public void visit(VarDecl vardecl) {
-            System.out.println("visiting " + vardecl.toString());
-            if (null == vardecl.children) return;
-            for (Node child : vardecl.children) {
-                if (null != child) visit(child);
-            }
+            realVisit(vardecl);
+        }
+
+        @Override
+        public void visit(WhileLoop whileloop) {
+            realVisit(whileloop);
         }
     }
 }

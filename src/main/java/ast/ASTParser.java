@@ -104,9 +104,14 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
     @Override
     public Node visitAssign(CLParserParser.AssignContext ctx) {
+        return visit(ctx.assignment());
+    }
+
+    @Override
+    public Node visitAssignment(CLParserParser.AssignmentContext ctx) {
         return new Assign(ctx) {{
-            addChild(visit(actx.children.get(0))); // VisitId
-            addChild(visit(actx.children.get(1))); // VisitExpr
+            addChild(new Identifier(ctx.IDENTIFIER().getText())); // id
+            addChild(visit(ctx.expression())); // expr
         }};
     }
     // var end
@@ -236,19 +241,43 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     }
     // call end
 
-    @Override
-    public Node visitIfBlock(CLParserParser.IfBlockContext ctx) {
-        return super.visitIfBlock(ctx);
-    }
-
+    // flow
     @Override
     public Node visitForBlock(CLParserParser.ForBlockContext ctx) {
-        return super.visitForBlock(ctx);
+        return new ForLoop(ctx) {{
+            addChild(new Identifier(ctx.IDENTIFIER().getText()));
+            addChild(visit(ctx.expression()));
+            addChild(visit(ctx.block()));
+        }};
     }
 
     @Override
     public Node visitWhileBlock(CLParserParser.WhileBlockContext ctx) {
-        return super.visitWhileBlock(ctx);
+        return new WhileLoop(ctx) {{
+            addChild(visit(ctx.expression()));
+            addChild(visit(ctx.block()));
+        }};
+    }
+
+    @Override
+    public Node visitIfBlock(CLParserParser.IfBlockContext ctx) {
+        IfElse ifelse = new IfElse(ctx);
+        ifelse.addChild(visit(ctx.expression(0))); // condition
+        ifelse.addChild(visit(ctx.block(0))); // if body
+        IfElse outer = ifelse;
+        for (int i = 1; i <= ctx.ELIF().size(); i++) {
+            IfElse elif = new IfElse(ctx);
+            elif.addChild(visit(ctx.expression(i))); // condition
+            elif.addChild(visit(ctx.block(i))); // body
+            outer.addChild(elif);
+            outer = elif;
+        }
+        if (null != ctx.ELSE()) {
+            outer.addChild(visit(ctx.block().get(ctx.block().size() - 1)));
+        } else {
+            outer.addChild(null);
+        }
+        return ifelse;
     }
 
     @Override
@@ -260,25 +289,11 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     public Node visitContinue(CLParserParser.ContinueContext ctx) {
         return super.visitContinue(ctx);
     }
+    // flow end
 
     @Override
     public Node visitExpr(CLParserParser.ExprContext ctx) {
         return visit(ctx.expression());
-    }
-
-    @Override
-    public Node visitEmpty(CLParserParser.EmptyContext ctx) {
-        return super.visitEmpty(ctx);
-    }
-
-    @Override
-    public Node visitAssignment(CLParserParser.AssignmentContext ctx) {
-        return super.visitAssignment(ctx);
-    }
-
-    @Override
-    public Node visitEmptyLines(CLParserParser.EmptyLinesContext ctx) {
-        return super.visitEmptyLines(ctx);
     }
 
     @Override
