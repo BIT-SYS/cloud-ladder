@@ -81,12 +81,12 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
 
     @Override
     public Node visitBasicType(CLParserParser.BasicTypeContext ctx) {
-        return new TypeName(ctx);
+        return new TypeName(ctx, ctx.getText());
     }
 
     @Override
     public Node visitCompositeType(CLParserParser.CompositeTypeContext ctx) {
-        TypeApply ta = new TypeApply(ctx);
+        TypeApply ta = new TypeApply(ctx, ctx.children.get(0).getText());
         ctx.typeType().stream().map(this::visit).forEach(ta::addChild);
         return ta;
     }
@@ -136,9 +136,9 @@ public class ASTParser extends CLParserBaseVisitor<Node> {
     // literal start
     private Node visitLiteral(ParserRuleContext ctx, String type) {
         Literal lit = new Literal(ctx);
-        TypeName typeName = new TypeName(type);
+        TypeName typeName = new TypeName(null, type);
         lit.addChild(typeName);
-        lit.text = ctx.getText();
+        lit.addChild(new Text(null, ctx.getText()));
         return lit;
     }
 

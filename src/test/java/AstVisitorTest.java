@@ -94,6 +94,11 @@ public class AstVisitorTest extends AstTester {
         }
 
         @Override
+        public void visit(Text text) {
+            realVisit(text);
+        }
+
+        @Override
         public void visit(Type type) {
             realVisit(type);
         }
