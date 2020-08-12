@@ -11,6 +11,6 @@ public class Identifier extends Expression {
 
     @Override
     public String toString() {
-        return "ID:" + name;
+        return name;
     }
 }

@@ -9,6 +9,6 @@ public class ProcDef extends Node {
 
     @Override
     public String toString() {
-        return "ProcDef";
+        return "proc-def";
     }
 }

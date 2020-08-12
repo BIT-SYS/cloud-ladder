@@ -11,6 +11,6 @@ public class Literal extends Expression {
 
     @Override
     public String toString() {
-        return "Lit:" + text;
+        return "lit:" + text;
     }
 }

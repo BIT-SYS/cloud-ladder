@@ -9,6 +9,6 @@ public class ListNode extends Expression {
 
     @Override
     public String toString() {
-        return "ValueListInit";
+        return "value-list-init";
     }
 }

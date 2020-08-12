@@ -9,6 +9,6 @@ public class Expression extends Node {
 
     @Override
     public String toString() {
-        return "Expr";
+        return "expr";
     }
 }

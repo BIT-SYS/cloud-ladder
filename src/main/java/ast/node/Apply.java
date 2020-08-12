@@ -11,6 +11,6 @@ public class Apply extends Expression {
 
     @Override
     public String toString() {
-        return "Apply";
+        return "apply";
     }
 }

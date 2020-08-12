@@ -10,6 +10,6 @@ public class Assign extends Node {
 
     @Override
     public String toString() {
-        return "Assign";
+        return "assign";
     }
 }

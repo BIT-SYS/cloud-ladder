@@ -11,6 +11,6 @@ public class Range extends Expression {
 
     @Override
     public String toString() {
-        return inclusive ? "InclusiveRange" : "ExclusiveRange";
+        return inclusive ? "inclusive-range" : "exclusive-range";
     }
 }

@@ -10,6 +10,6 @@ public class Param extends Node {
 
     @Override
     public String toString() {
-        return "Param";
+        return "param";
     }
 }

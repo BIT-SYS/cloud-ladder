@@ -9,6 +9,6 @@ public class Block extends Node {
 
     @Override
     public String toString() {
-        return "Block";
+        return "block";
     }
 }

@@ -9,6 +9,6 @@ public class ParamList extends Node {
 
     @Override
     public String toString() {
-        return "Params";
+        return "params";
     }
 }
