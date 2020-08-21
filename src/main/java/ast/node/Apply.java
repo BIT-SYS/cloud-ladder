@@ -1,5 +1,6 @@
 package ast.node;
 
+import ast.AstVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 // 更加广义的apply，不是函数也可以
@@ -12,5 +13,10 @@ public class Apply extends Expression {
     @Override
     public String toString() {
         return "apply";
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        visitor.visit(this);
     }
 }

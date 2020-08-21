@@ -43,8 +43,8 @@ tasks {
                 sb.append("import ast.${it.toRelativeString(ast).replace(File.separatorChar, '.')}.*;\n")
             }
             sb.append("\npublic interface AstVisitor{\n")
-            list.filter { it.isFile }.map { it.name.substringBefore(".java") }.forEach {
-                sb.append("    public void visit($it node);\n")
+            list.filter { it.isFile }.map { it.name.substringBefore(".java") }.filterNot { it == "Node" }.forEach {
+                sb.append("    void visit($it node);\n")
             }
             sb.append('}')
             File(visitor).apply {

@@ -1,6 +1,8 @@
 package ast.node;
 
 
+import ast.AstVisitor;
+
 public class Identifier extends Expression {
     String name;
 
@@ -12,5 +14,10 @@ public class Identifier extends Expression {
     @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        visitor.visit(this);
     }
 }

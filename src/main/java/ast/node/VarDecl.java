@@ -1,5 +1,6 @@
 package ast.node;
 
+import ast.AstVisitor;
 import grammar.CLParserParser;
 
 public class VarDecl extends Node {
@@ -10,5 +11,10 @@ public class VarDecl extends Node {
     @Override
     public String toString() {
         return "var-decl"; //我知道getClass().getName()，但那不起作用
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        visitor.visit(this);
     }
 }

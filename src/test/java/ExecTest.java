@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class ExecTest {
-    static Tester tester = new AstTester();
+    static Tester tester = new AstVisitorTest();
 
     public static void main(String[] args) throws IOException {
         tester.start("examples/2-control-3-while.cl");

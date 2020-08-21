@@ -40,7 +40,5 @@ abstract public class Node {
         return sb.toString();
     }
 
-    public void accept(AstVisitor visitor) {
-        visitor.visit(this);
-    }
+    abstract public void accept(AstVisitor visitor);
 }

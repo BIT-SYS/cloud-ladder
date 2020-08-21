@@ -16,7 +16,7 @@ public class SymTabBuilder implements AstVisitor {
     int whileCounter = 0;
 
     private void visitChildren(Node node) {
-        node.children.forEach(this::visit);
+        node.children.forEach(n -> n.accept(this));
     }
 
     @Override
@@ -133,11 +133,6 @@ public class SymTabBuilder implements AstVisitor {
 
     @Override
     public void visit(Literal node) {
-
-    }
-
-    @Override
-    public void visit(Node node) {
 
     }
 

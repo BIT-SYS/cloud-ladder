@@ -1,5 +1,6 @@
 package ast.node;
 
+import ast.AstVisitor;
 import grammar.CLParserParser;
 
 public class ProcDef extends Node {
@@ -10,5 +11,10 @@ public class ProcDef extends Node {
     @Override
     public String toString() {
         return "proc-def";
+    }
+
+    @Override
+    public void accept(AstVisitor visitor) {
+        visitor.visit(this);
     }
 }
