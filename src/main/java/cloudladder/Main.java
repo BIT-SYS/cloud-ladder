@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
-        Path p = Paths.get("e://ideaprojects/cloudladder/");
+        Path p = Paths.get("e://cloudLadder/cloud-ladder/");
         p = p.resolve("cloudladder");
 
         System.out.println("CLVM running at " + p.toAbsolutePath());
