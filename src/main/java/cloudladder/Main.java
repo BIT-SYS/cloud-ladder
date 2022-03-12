@@ -23,6 +23,6 @@ public class Main {
 //        vm.execute("example/plant_recognition.cl");
 //        vm.execute("example/discrete_prob_example.cl");
 //        vm.execute("example/batch_plant_recognition.cl");
-        vm.execute("example/dfs.cl");
+        vm.execute("tests/hard_test3.cl");
     }
 }
