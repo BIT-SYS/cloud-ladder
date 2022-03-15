@@ -69,3 +69,49 @@ let sum = function(x, y) {
 // 函数调用跟大多数语言都一样
 let result = sum(1, x)
 ```
+
+## 表达式
+```
+// 这些跟通常类C语言没区别
+let x = a + b;
+let x = a - b;
+let x = a * b;
+let x = a / b;
+let x = a % b;
+let x = a && b;
+let x = a || b;
+let x = a == b;
+let x = a != b;
+let x = a < b;
+let x = a <= b;
+let x = a > b;
+let x = a >= b;
+let x = -a;
+let x = !a;
+
+// 字典取值，类似JS
+let x = a.b;
+// 数组或字典取值
+let x = a[b];
+// 函数调用
+let x = a(b);
+```
+
+### 管道表达式
+与Linux Shell的管道表达式类似
+```
+let x = 0;
+// 等价于print(x)
+x | print;
+x | print();
+
+// 等价于Image.show(x)
+x | Image.show;
+x | Image.show();
+
+function ge(x, t) { return t >= x; }
+
+// 等价于ge(x, 10)
+// 即总是把左边的数作为右边函数调用的第一个参数
+x | ge(10)
+```

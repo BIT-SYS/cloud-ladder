@@ -5,8 +5,6 @@ import cloudladder.core.runtime.data.CLFunction;
 import cloudladder.core.runtime.data.CLUserFunction;
 import cloudladder.core.runtime.data.CLReference;
 import cloudladder.core.runtime.env.CLRtEnvironment;
-import cloudladder.core.runtime.env.CLRtScope;
-import cloudladder.core.runtime.env.CLRtStackFrame;
 
 import java.util.ArrayList;
 

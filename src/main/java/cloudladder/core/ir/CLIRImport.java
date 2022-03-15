@@ -1,22 +1,14 @@
 package cloudladder.core.ir;
 
-import cloudladder.core.compiler.CLCompiler;
 import cloudladder.core.misc.CLUtilIRList;
 import cloudladder.core.runtime.data.CLData;
 import cloudladder.core.runtime.data.CLObject;
 import cloudladder.core.runtime.data.CLReference;
 import cloudladder.core.runtime.env.CLRtEnvironment;
-import cloudladder.core.runtime.env.CLRtScope;
-import cloudladder.core.runtime.env.CLRtStack;
-import cloudladder.core.runtime.env.CLRtStackFrame;
 import cloudladder.utils.CLMiscUtils;
-import cloudladder.utils.CLUtilFileUtils;
 import lombok.AllArgsConstructor;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 @AllArgsConstructor
 public class CLIRImport extends CLIR {

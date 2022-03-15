@@ -1,9 +1,6 @@
 package cloudladder.core.ir;
 
 import cloudladder.core.runtime.env.CLRtEnvironment;
-import cloudladder.core.runtime.env.CLRtScope;
-import cloudladder.core.runtime.env.CLRtStack;
-import cloudladder.core.runtime.env.CLRtStackFrame;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
