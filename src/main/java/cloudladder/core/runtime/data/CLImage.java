@@ -3,13 +3,13 @@ package cloudladder.core.runtime.data;
 import ij.IJ;
 import ij.ImagePlus;
 import lombok.Getter;
+import okhttp3.*;
 
 import javax.imageio.ImageIO;
+import javax.print.attribute.standard.Media;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.*;
+import java.net.MulticastSocket;
 import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.util.Base64;
@@ -64,6 +64,23 @@ public class CLImage extends CLData {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public String postToUrl(String url, File file) throws IOException {
+        final MediaType MEDIA_TYPE = MediaType.parse("image/png");
+        final OkHttpClient client = new OkHttpClient();
+
+        RequestBody fileBody = RequestBody.create(MEDIA_TYPE, file);
+        RequestBody reqBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("image", "image.png", fileBody)
+                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(reqBody)
+                .build();
+        Response response = client.newCall(request).execute();
+        return response.body().string();
     }
 
     public String base64() {
