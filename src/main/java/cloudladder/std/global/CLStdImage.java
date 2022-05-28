@@ -5,8 +5,14 @@ import cloudladder.core.runtime.env.CLRtEnvironment;
 import cloudladder.core.runtime.env.CLRtScope;
 import cloudladder.std.CLBuiltinFuncAnnotation;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
+import java.util.Base64;
+import java.util.UUID;
 
 public class CLStdImage {
     @CLBuiltinFuncAnnotation(value={"path"}, name="new")
@@ -22,6 +28,22 @@ public class CLStdImage {
 
         image.setExts(env.getVariable("Image"));
         env.ret(image.wrap());
+    }
+
+    @CLBuiltinFuncAnnotation(value={"self"}, name="toCaptionText")
+    public static void __toCaptionText__(CLRtEnvironment env) throws IOException {
+        CLImage img = (CLImage) env.getVariable("self").getReferee();
+        File file = null;
+        if (img.isFromFile()) {
+            Path path = img.getPath();
+            file = new File(path.toString());
+        }
+        else {
+            file = File.createTempFile(UUID.randomUUID().toString(), ".png");
+            img.save(Path.of(file.getPath()));
+        }
+        CLString str = new CLString(img.postToUrl("http://127.0.0.1:5000/inference", file));
+        env.ret(str.wrap());
     }
 
     @CLBuiltinFuncAnnotation(value={"self"}, name="base64")

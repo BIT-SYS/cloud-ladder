@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
-        Path p = Paths.get("e://ideaprojects/cloudladder/");
+        Path p = Paths.get("C:/Users/wuzirui/Desktop/cloud-ladder");
         p = p.resolve("cloudladder");
 
         System.out.println("CLVM running at " + p.toAbsolutePath());
@@ -23,6 +23,6 @@ public class Main {
 //        vm.execute("example/plant_recognition.cl");
 //        vm.execute("example/discrete_prob_example.cl");
 //        vm.execute("example/batch_plant_recognition.cl");
-        vm.execute("example/dfs.cl");
+        vm.execute("example/im2text.cl");
     }
 }
