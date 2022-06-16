@@ -1,108 +1,163 @@
-grammar CLParser;
-import CLLexer;
+parser grammar CLParser;
 
-// options {
-// 	tokenVocab = CLLexer;
-// }
-
-// TYPE
-program: statement+;
-
-basicType:
-	BOOLEAN
-	| STRING
-	| NUMBER
-	| LIST '<' typeType '>'
-	| SET '<' typeType '>'
-	| HASHMAP '<' key = typeType ',' value = typeType '>'
-	| AUDIO
-	| VIDEO
-	| IMAGE;
-
-typeType: basicType | GENERICTYPE; //可能会有自定义类型
-
-// LITERAL
-
-literal:
-	integerLiteral  # int
-	| floatLiteral  # float // 其实这俩不用分
-	| CHAR_LITERAL  # char
-	| STRING_LITERAL # string
-	| BOOL_LITERAL # bool
-        ;
-
-integerLiteral:
-	DECIMAL_LITERAL
-	| HEX_LITERAL
-	| OCT_LITERAL
-	| BINARY_LITERAL;
-
-floatLiteral: FLOAT_LITERAL | HEX_FLOAT_LITERAL;
-
-// STATEMENT / BLOCK
-
-block: '{' NL* statement* NL* '}';
-
-statement:
-	IF expression NL? block (ELIF expression NL? block)* (ELSE NL? block)? # ifBlock //block还是controlStructureBody？
-	| FOR typeType? IDENTIFIER IN expression NL? block # forBlock //TODO
-	| WHILE expression NL? block # whileBlock
-	// | RETURN expression? ';' // 需要吗？
-	| BREAK NL # Break
-	| CONTINUE NL # Continue
-	| procedureDeclaration NL # procedureDecl
-	| typeType IDENTIFIER '=' expression NL  # variableDecl
-	| assignment NL # assign
-    | expression NL? # expr
-	| emptyLines # empty
-        ;
-
-assignment: IDENTIFIER '=' expression;
-
-emptyLines: NL+;
-
-// EXPRESSION
-
-// TODO 初始化列表/哈希表
-expression:
-        literal                                                 # Lit
-	| expression NL? bop = '.' ( procedureCall | IDENTIFIER )  # member
-        | listInitializer                                         # listInit
-	| procedureCall                                           # procedure
-    | IDENTIFIER                                              # id
-	| prefix = ('+' | '-' | 'not') expression                 # prefix
-	| expression bop = ('*' | '/' | '%') expression           # MulDivMod
-	| expression bop = ('+' | '-') expression                 # AddSub
-        | expression bop = '^' expression                         # Exp
-	| expression bop = ('<=' | '>=' | '>' | '<') expression   # Compare
-	| expression bop = ('==' | '!=') expression               # PartialEqual
-	| expression bop = ('and' | 'or'| 'xor') expression       # Logic
-        | lambda                                                  # lam
-        | expression'[' index=expression ']'                      # index
-        | '(' expression ')'                                        # parens
-        ;
-
-listInitializer: 
-        '[' (expression ',')* expression ']'            # valuesListInitializer
-        |'['expression op=('..'|'..=') expression  ']'  # rangeListInitializer
-        ;
-
-expressionList: expression (',' expression)*;
-
-// PROCEDURE
-
-lambdaParameter: typeType IDENTIFIER ;
-lambdaParameterList: lambdaParameter (',' lambdaParameter)*;
-lambda: '|' lambdaParameterList '|' '->' typeType block;
+options {
+    tokenVocab=CLLexer;
+}
 
 
-procedureCall: IDENTIFIER '(' expressionList ? ')';
+// expression
+expression
+    : primaryExpression                             # expPrimaryExpression
+    | Function LParen paramList? RParen compoundStatement   # expFunctionExpression
+    | expression LBrack expression RBrack           # expArrayAccess
+    | expression LParen argumentList? RParen        # expFunctionCall
+    | expression Dot Identifier                     # expFieldAccess
+    | op=(Sub | Exclamation) expression             # expUnaryExpression
+    | expression op=(Mul | Div | Mod) expression    # expBinaryExpression
+    | expression op=(Add | Sub) expression          # expBinaryExpression
+    | expression op=(LT | GT | LE | GE) expression  # expBinaryExpression
+    | expression op=(Equal | NotEqual) expression   # expBinaryExpression
+    | expression op=And expression                  # expBinaryExpression
+    | expression op=Or expression                   # expBinaryExpression
+    | expression op=(Pipe | Arrow) expression                    # expPipeAndArrow
+//    | expression Arrow expression                   # expArrow
+    ;
 
-procedureDeclaration:
-	PROC IDENTIFIER '(' parameterList ')' ARROW typeType procedureBody;
+argumentList
+    : exp+=expression (Comma exp+=expression)*
+    ;
 
-procedureBody: block; // '=' expression ?
+primaryExpression
+    : literal                                       # peLiteral
+    | arrayLiteral                                  # peArrayLiteral
+    | objLiteral                                    # peObjLiteral
+    | LParen expression RParen                      # peParenExpression
+    | Identifier                                    # peIdentifier
+    ;
 
-parameter: typeType IDENTIFIER ('=' expression)?;
+literal
+    : NumberLiteral                                 # peNumberLiteral
+    | BoolLiteral                                   # peBoolLiteral
+    | StringLiteral                                 # peStringLiteral
+    ;
 
-parameterList: parameter (',' parameter)*;
+arrayLiteral
+    : LBrack exp+=expression? (Comma exp+=expression)* Comma? RBrack
+    ;
+
+objLiteral
+    : LBrace item+=objItem? (Comma item+=objItem)* Comma? RBrace
+    ;
+
+objItem
+    : Identifier (Colon expression)?                # staticObjItem
+    | StringLiteral (Colon expression)              # stringObjItem
+    | LBrack expression RBrack Colon expression     # dynamicObjItem
+    ;
+
+// statements
+statement
+    : selectionStatement
+    | assignmentStatement Semi
+    | dataStatement Semi
+    | compoundStatement
+    | breakStatement Semi
+    | continueStatement Semi
+    | iterationStatement
+    | returnStatement
+    | expressionStatement Semi
+    ;
+
+expressionStatement
+    : expression
+    ;
+
+returnStatement
+    : Return expression Semi
+    ;
+
+breakStatement
+    : Break Identifier?
+    ;
+
+continueStatement
+    : Continue Identifier?
+    ;
+
+dataStatement
+    : Let dataStatementItemList
+    ;
+
+dataStatementItemList
+    : item+=dataStatementItem (Comma item+=dataStatementItem)*
+    ;
+
+dataStatementItem
+    : Identifier (Assign expression)?
+    ;
+
+compoundStatement
+    : LBrace (item+=statement)* RBrace
+    ;
+
+selectionStatement
+    : If LParen expression RParen statement (Else statement)?
+    ;
+
+assignmentStatement
+    : leftHandSideItem assignmentOperator expression
+    ;
+
+leftHandSideItem
+    : Identifier                                    # assIdentifier
+    | primaryExpression LBrack expression RBrack    # assignArray1
+    | leftHandSideItem LBrack expression RBrack     # assignArray2
+    | primaryExpression Dot Identifier              # assignField1
+    | leftHandSideItem Dot Identifier               # assignField2
+    ;
+
+assignmentOperator
+    : op=(Assign | AddAssign | SubAssign | MulAssign | DivAssign | ModAssign)
+    ;
+
+//arrayAccess
+//    : primaryExpression LBrack expression RBrack
+//    | leftHandSideItem LBrack expression RBrack
+//    ;
+//
+//fieldAccess
+//    : primaryExpression Dot Identifier
+//    ;
+
+iterationStatement
+    : (Identifier Colon)? While LParen expression RParen statement  # whileStatement
+    | (Identifier Colon)? For LParen assignmentStatement Semi expression Semi assignmentStatement RParen statement    # forStatement
+    | (Identifier Colon)? For LParen dataStatement Semi expression Semi assignmentStatement RParen statement # forDeclStatement
+    ;
+
+functionDefinition
+    : Function Identifier LParen paramList? RParen compoundStatement
+    ;
+
+paramList
+    : item+=Identifier (Comma item+=Identifier)*
+    ;
+
+importStatement
+    : Import path=StringLiteral (As as=Identifier)? Semi
+    ;
+
+exportStatement
+    : Export Identifier Assign expression
+    ;
+
+program
+    : item+=programItem*
+    ;
+
+programItem
+    : functionDefinition
+    | statement
+    | importStatement
+    | exportStatement
+    ;

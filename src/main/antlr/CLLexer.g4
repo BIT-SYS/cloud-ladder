@@ -1,113 +1,126 @@
 lexer grammar CLLexer;
 
-// Keywords
+// keywords
 
-// 这两个要区分么？
-BOOLEAN: 'Boolean';
-ENUM: 'Enum';
+//Boolean: 'boolean';
+//String: 'string';
+//Number: 'number';
+//Audio: 'audio';
+//Video: 'video';
+//Image: 'image';
 
-STRING: 'String';
-NUMBER: 'Number';
-LIST: 'List';
-SET: 'Set';
-HASHMAP: 'HashMap';
-AUDIO: 'Audio';
-VIDEO: 'Video';
-IMAGE: 'Image';
-GENERICTYPE: 'Type' ('A'..'Z');
+If: 'if';
+Else: 'else';
+While: 'while';
+For: 'for';
+Continue: 'continue';
+Break: 'break';
 
-IF: 'if';
-ELIF: 'elif';
-ELSE: 'else';
-WHILE: 'while';
-FOR: 'for';
-IN: 'in';
-CONTINUE: 'continue';
-BREAK: 'break';
+Function: 'function';
+Return: 'return';
+Let: 'let';
+Import: 'import';
+Export: 'export';
+From: 'from';
+As: 'as';
 
-PROC: 'fun' | 'proc';
+// literals
+NumberLiteral
+    : IntegerLiteral
+    | FloatLiteral
+    ;
 
-// Literals
+fragment
+IntegerLiteral
+    : '0'
+    | [1-9] [0-9]*
+    ;
 
-DECIMAL_LITERAL: ('0' | [1-9] (Digits? | '_'+ Digits)) [lL]?;
-HEX_LITERAL:
-	'0' [xX] [0-9a-fA-F] ([0-9a-fA-F_]* [0-9a-fA-F])? [lL]?;
-OCT_LITERAL: '0' '_'* [0-7] ([0-7_]* [0-7])? [lL]?;
-BINARY_LITERAL: '0' [bB] [01] ([01_]* [01])? [lL]?;
-
-FLOAT_LITERAL: (Digits '.' Digits | '.' Digits) ExponentPart? [fFdD]?
-	| Digits (ExponentPart [fFdD]? | [fFdD]);
-
-HEX_FLOAT_LITERAL:
-	'0' [xX] HexDigits? '.' HexDigits [pP] [+-]? Digits [fFdD]?;
-
-BOOL_LITERAL: 'true' | 'false';
-
-CHAR_LITERAL: '\'' (~['\\\r\n] | EscapeSequence) '\'';
-
-STRING_LITERAL: '"' (~["\\\r\n] | EscapeSequence)* '"';
+fragment
+FloatLiteral
+    : '0.' [0-9]*
+    | [1-9] [0-9]* '.' [0-9]*
+    ;
 
 
-// Separators
+BoolLiteral
+    : 'true'
+    | 'false'
+    ;
 
-LPAREN: '(';
-RPAREN: ')';
-LBRACE: '{';
-RBRACE: '}';
-LBRACK: '[';
-RBRACK: ']';
-SEMI: ';';
-COMMA: ',';
-DOT: '.';
 
-// Operators
+StringLiteral
+    : '"' StringCharacters? '"'
+    ;
 
-ASSIGN: '=';
+fragment
+StringCharacters
+    : StringCharacter+
+    ;
+
+fragment
+StringCharacter
+    : ~["\\\r\n]
+    | EscapeSequence
+    ;
+
+fragment
+EscapeSequence
+    : '\\' [btnfr"'\\]
+    ;
+
+
+// punctuations
+LParen: '(';
+RParen: ')';
+LBrace: '{';
+RBrace: '}';
+LBrack: '[';
+RBrack: ']';
+Semi: ';';
+Comma: ',';
+Dot: '.';
+Colon: ':';
+Arrow: '->';
+
+
+// operators
+Assign: '=';
+AddAssign: '+=';
+SubAssign: '-=';
+MulAssign: '*=';
+DivAssign: '/=';
+ModAssign: '%=';
 GT: '>';
 LT: '<';
-BANG: '!';
-EQUAL: '==';
+Equal: '==';
 LE: '<=';
 GE: '>=';
-NOTEQUAL: '!=';
-AND: 'and';
-OR: 'or';
-ADD: '+';
-SUB: '-';
-MUL: '*';
-DIV: '/';
-MOD: '%';
+NotEqual: '!=';
+And: '&&';
+Or: '||';
+Add: '+';
+Sub: '-';
+Mul: '*';
+Div: '/';
+Mod: '%';
+Exclamation: '!';
+Pipe: '|';
 
-ARROW: '->';
+
+
 
 // Whitespace and comments
-NL: '\n' | '\r' '\n'?;
-WS: [\u0020\u0009\u000C]+ -> channel(HIDDEN);
-MD_COMMENT: '///' ~[\r\n]* -> channel(HIDDEN);
-LINE_COMMENT: '//' ~[\r\n]* -> channel(HIDDEN);
+WS
+    : [ \t\r\n\u000C]+ -> skip
+    ;
 
-// Identifiers 小写开头？
-IDENTIFIER: Letter LetterOrDigit*;
+Comment
+    : '//' ~[\r\n]* -> skip
+    ;
 
-// Fragment rules
 
-fragment ExponentPart: [eE] [+-]? Digits;
-
-fragment EscapeSequence:
-	'\\' [btnfr"'\\]
-	| '\\' ([0-3]? [0-7])? [0-7]
-	| '\\' 'u'+ HexDigit HexDigit HexDigit HexDigit;
-
-fragment HexDigits: HexDigit ((HexDigit | '_')* HexDigit)?;
-
-fragment HexDigit: [0-9a-fA-F];
-
-fragment Digits: [0-9] ([0-9_]* [0-9])?;
-
-fragment LetterOrDigit: Letter | [0-9];
-
-fragment Letter:
-	[a-zA-Z$_] // these are the "java letters" below 0x7F
-	| ~[\u0000-\u007F\uD800-\uDBFF] // covers all characters above 0x7F which are not a surrogate
-	| [\uD800-\uDBFF] [\uDC00-\uDFFF]
-		; // covers UTF-16 surrogate pairs encodings for U+10000 to U+10FFFF
+// identifier
+Identifier
+    : [_a-zA-Z] [_a-zA-Z0-9]*
+    ;
