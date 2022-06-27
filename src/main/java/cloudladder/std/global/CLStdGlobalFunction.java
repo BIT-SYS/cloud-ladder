@@ -7,6 +7,8 @@ import cloudladder.core.runtime.env.CLRtScope;
 import cloudladder.std.CLBuiltinFuncAnnotation;
 import cloudladder.utils.CLDataUtils;
 
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -297,6 +299,8 @@ public class CLStdGlobalFunction {
             ret = "function";
         } else if (data instanceof CLImage) {
             ret = "image";
+        }else if (data instanceof CLAudio){
+            ret = "audio";
         } else if (data instanceof CLDiscreteProbability) {
             ret = "prob";
         }
@@ -374,7 +378,30 @@ public class CLStdGlobalFunction {
             env.ret(arr.wrap());
         }
     }
+    
+    @CLBuiltinFuncAnnotation(value={"p1"}, name="audio")
+    public static void __audio__(CLRtEnvironment env) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+        CLData p1 = env.getOwnVariable("p1").getReferee();
 
+        if (p1 instanceof CLString) {
+            Path p = env.getWd().resolve(((CLString) p1).getValue());
+            CLAudio audio = new CLAudio(p);
+            env.ret(audio.wrap());
+        } else if (p1 instanceof CLArray) {
+            CLArray arr = env.newArray();
+
+            for (CLReference ref : p1.getNumberRefers()) {
+                String value = ((CLString) ref.getReferee()).getValue();
+                Path path = env.getWd().resolve(value);
+
+                CLAudio audio = new CLAudio(path);
+                arr.addNumberRefer(audio.wrap());
+            }
+
+            env.ret(arr.wrap());
+        }
+    }
+    
     @CLBuiltinFuncAnnotation(value={"obj", "filename"}, name="save")
     public static void __save__(CLRtEnvironment env) {
         CLData data = env.getVariable("obj").getReferee();
@@ -387,6 +414,10 @@ public class CLStdGlobalFunction {
             image.save(path);
         } else if (data instanceof CLStream) {
             ((CLStream) data).save(path);
+        } else if (data instanceof CLAudio)
+        {
+            CLAudio audio = (CLAudio) data;
+            audio.save(path);
         }
     }
 
