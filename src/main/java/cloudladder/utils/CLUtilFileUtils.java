@@ -11,7 +11,7 @@ public class CLUtilFileUtils {
             if (file.exists()) {
                 FileInputStream inputStream = new FileInputStream(file);
                 byte[] b = inputStream.readAllBytes();
-                return new String(b);
+                return new String(b,"utf8");
             }
         } catch (Exception e) {
             e.printStackTrace();

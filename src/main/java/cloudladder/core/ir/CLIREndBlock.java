@@ -1,6 +1,7 @@
 package cloudladder.core.ir;
 
 import cloudladder.core.runtime.env.CLRtEnvironment;
+import cloudladder.core.runtime.env.CLRtScope;
 
 public class CLIREndBlock extends CLIR {
     @Override

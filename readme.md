@@ -24,10 +24,10 @@ Cloud Ladder 是一门面向云计算的教学语言。
 - [编译与测试](#编译与测试)
   * [Windows](#windows)
   * [*nix & MAC OS](#*nix-%26-mac-os)
+- [更新](#更新)
 - [相关文档](#相关文档)
 - [贡献者](#贡献者)
 - [许可证](#许可证)
-
 </details>
 
 
@@ -93,6 +93,13 @@ src/test/java/ImageApiTester.java
 ./gradlew testASTListener
 
 ```
+
+##更新
+在其中添加了CLText可以对docx文件，doc文件，txt文件进行读取与存储
+在测试文档之中使用了临时的CLAudio使用了可以播放多种声音的jl库，但是，经过商量决定使用javax库
+在CLRtEnvironment中更改了filecall时的正则表达式。
+在CLUtilFileUtils中加入了utf-8的规定避免了中文乱码。
+在build.gradle中增加了对应的库名称，规定了使用utf-8和java版本
 
 ## 相关文档
 
