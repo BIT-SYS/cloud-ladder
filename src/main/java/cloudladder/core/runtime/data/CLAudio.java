@@ -115,12 +115,12 @@ public class CLAudio extends CLData {
         return "";
     }
 
-    public String postToUrl(String url,File file) throws IOException {
+    public String postToUrl(String url,File file,String language) throws IOException {
         final OkHttpClient client = new OkHttpClient();
         RequestBody reqBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("lang", "zh-CN")
-                .addFormDataPart("file", "audio.wav",
+                .addFormDataPart("lang", language)
+                .addFormDataPart("audio", "audio.wav",
                         RequestBody.create(file,MediaType.parse("application/octet-stream")))
                 .build();
 
