@@ -82,9 +82,10 @@ public class CLStdAudio {
         self.continues();
         env.ret(self.wrap());
     }
-    @CLBuiltinFuncAnnotation(value={"self"}, name="toSpeechRecognition")
+    @CLBuiltinFuncAnnotation(value={"self","lang"}, name="toSpeechRecognition")
     public static void __toSpeechRecognition__(CLRtEnvironment env) throws IOException {
         CLAudio audio = (CLAudio) env.getVariable("self").getReferee();
+        CLString language = (CLString)env.getVariable("self").getReferee();
         File file = null;
         if (audio.isFromFile()) {
             Path path = audio.getPath();
@@ -94,7 +95,7 @@ public class CLStdAudio {
             file = File.createTempFile(UUID.randomUUID().toString(), ".wav");
             audio.save(Path.of(file.getPath()));
         }
-        CLString str = new CLString(audio.postToUrl("http://127.0.0.1:5000/inference", file));
+        CLString str = new CLString(audio.postToUrl("http://127.0.0.1:5000/inference", file, language.toString()));
         env.ret(str.wrap());
     }
     public static void run(CLRtEnvironment env) throws Exception {
