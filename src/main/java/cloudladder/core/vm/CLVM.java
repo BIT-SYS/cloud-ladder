@@ -27,6 +27,7 @@ public class CLVM {
         this.runInitScript("array");
         this.runInitScript("globalFunction");
         this.runInitScript("image");
+        this.runInitScript("audio");
         this.runInitScript("number");
         this.runInitScript("object");
         this.runInitScript("string");
