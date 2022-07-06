@@ -1,0 +1,119 @@
+package cloudladder.std.global;
+import java.io.File;
+import cloudladder.core.runtime.data.*;
+import cloudladder.core.runtime.env.CLRtEnvironment;
+import cloudladder.core.runtime.env.CLRtScope;
+import cloudladder.std.CLBuiltinFuncAnnotation;
+
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.util.UUID;
+
+public class CLStdAudio {
+    @CLBuiltinFuncAnnotation(value = {"path"}, name = "new")
+    public static void __new__(CLRtEnvironment env) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
+        CLData path = env.getVariable("path").getReferee();
+        if (!(path instanceof CLString)) {
+            // todo err
+        }
+
+        String str = ((CLString) path).getValue();
+        Path p = env.getWd().resolve(str);
+        CLAudio audio = new CLAudio(p);
+        audio.setExts(env.getVariable("Audio"));
+        env.ret(audio.wrap());
+    }
+    @CLBuiltinFuncAnnotation(value={"self"}, name="binary")
+    public static void __binary__(CLRtEnvironment env) {
+        CLAudio self = (CLAudio) env.getVariable("self").getReferee();
+        String s = self.binary();
+
+        CLString str = new CLString(s);
+        str.setExts(env.getVariable("String"));
+        env.ret(str.wrap());
+    }
+    @CLBuiltinFuncAnnotation(value={"self","start","end"},name="cutAudio")
+    public static void __cutAudio__(CLRtEnvironment env) throws UnsupportedAudioFileException, IOException{
+        CLData p1 = env.getVariable("start").getReferee();
+        CLData p2 = env.getVariable("end").getReferee();
+        int start = Integer.parseInt(((CLString)p1).getValue());
+        int end = Integer.parseInt(((CLString)p2).getValue());
+        CLAudio self = (CLAudio) env.getVariable("self").getReferee();
+        CLAudio ret = self.cutAudio(start,end);
+        ret.setExts(env.getVariable("Audio"));
+        env.ret(ret.wrap());
+    }
+    @CLBuiltinFuncAnnotation(value={"audio1","audio2"},name="mergeAudio")
+    public static void __mergeAudio__(CLRtEnvironment env) throws IOException {
+        CLAudio audio1 = (CLAudio) env.getVariable("audio1").getReferee();
+        CLAudio audio2 = (CLAudio) env.getVariable("audio2").getReferee();
+        CLAudio ret = audio1.mergeAudio(audio1,audio2);
+        ret.setExts(env.getVariable("Audio"));
+        env.ret(ret.wrap());
+    }
+    @CLBuiltinFuncAnnotation(value={"audio1","audio2"},name="mixAudio")
+    public static void __mixAudio__(CLRtEnvironment env) throws UnsupportedAudioFileException, IOException{
+        CLAudio audio1 = (CLAudio) env.getVariable("audio1").getReferee();
+        CLAudio audio2 = (CLAudio) env.getVariable("audio2").getReferee();
+        CLAudio ret = audio1.mixAudio(audio1,audio2);
+        ret.setExts(env.getVariable("Audio"));
+        env.ret(ret.wrap());
+    }
+    @CLBuiltinFuncAnnotation(value={"self"}, name="play")
+    public static void __play__(CLRtEnvironment env) throws LineUnavailableException {
+        CLAudio self = (CLAudio) env.getVariable("self").getReferee();
+        self.play();
+        env.ret(self.wrap());
+    }
+    @CLBuiltinFuncAnnotation(value={"self"}, name="stop")
+    public static void __stop__(CLRtEnvironment env)
+    {
+        CLAudio self = (CLAudio) env.getVariable("self").getReferee();
+        self.stop();
+        env.ret(self.wrap());
+    }
+    @CLBuiltinFuncAnnotation(value={"self"}, name="continues")
+    public static void __continues__(CLRtEnvironment env)
+    {
+        CLAudio self = (CLAudio) env.getVariable("self").getReferee();
+        self.continues();
+        env.ret(self.wrap());
+    }
+    @CLBuiltinFuncAnnotation(value={"self"}, name="toSpeechRecognition")
+    public static void __toSpeechRecognition__(CLRtEnvironment env) throws IOException {
+        CLAudio audio = (CLAudio) env.getVariable("self").getReferee();
+        File file = null;
+        if (audio.isFromFile()) {
+            Path path = audio.getPath();
+            file = new File(path.toString());
+        }
+        else {
+            file = File.createTempFile(UUID.randomUUID().toString(), ".wav");
+            audio.save(Path.of(file.getPath()));
+        }
+        CLString str = new CLString(audio.postToUrl("http://127.0.0.1:5000/inference", file));
+        env.ret(str.wrap());
+    }
+    public static void run(CLRtEnvironment env) throws Exception {
+        Class clazz = CLStdAudio.class;
+        CLObject obj = new CLObject();
+        CLRtScope scope = env.getCurrentScope();
+
+        for (Method method : clazz.getMethods()) {
+            if (method.getName().startsWith("__")) {
+                CLBuiltinFuncAnnotation annotation = method.getAnnotation(CLBuiltinFuncAnnotation.class);
+                String[] params = annotation.value();
+                String name = annotation.name();
+
+                CLBuiltinFunction func = new CLBuiltinFunction(method, scope, params);
+                obj.addStringRefer(name, func.wrap());
+            }
+        }
+
+        env.addVariable("Audio", obj.wrap());
+    }
+}
+
