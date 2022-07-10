@@ -1,6 +1,7 @@
 package cloudladder.core.runtime.data;
 import lombok.Getter;
 import okhttp3.*;
+import javazoom.spi.mpeg.sampled.file.MpegAudioFileReader;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -24,7 +25,47 @@ public class CLAudio extends CLData {
         this.typeName = "audio";
         this.path = path;
         this.fromFile = true;
-        this.audio=AudioSystem.getAudioInputStream(path.toFile());
+        String tmpType=TypeChecking(path.toString());
+        if(tmpType.equals(".wav"))
+        {
+            this.audio=AudioSystem.getAudioInputStream(path.toFile());
+            if(audio==null)
+            {
+                System.out.println("文件不存在");
+            }
+        }else if(tmpType.equals(".mp3"))
+        {
+            String newPath=mp3ToWav(path.toString());
+            File wavFile = new File(newPath);
+            this.audio=AudioSystem.getAudioInputStream(wavFile);
+            if(audio==null)
+            {
+                System.out.println("文件不存在");
+            }
+            wavFile.delete();
+        }else{
+            System.out.println("不支持的文件格式，请使用wav或mp3文件");
+        }
+
+    }
+    private String TypeChecking(String path)
+    {
+        int p=path.lastIndexOf('.');
+        return path.substring(p).toLowerCase();
+    }
+    private String mp3ToWav(String path) throws IOException, UnsupportedAudioFileException {
+        int p=path.lastIndexOf('.');
+        String newPath = path.substring(0,p)+".mp3";
+        String retPath = path.substring(0,p)+".wav";
+        File mp3File = new File(newPath);
+        MpegAudioFileReader mp = new MpegAudioFileReader();
+        AudioInputStream mp3Data = mp.getAudioInputStream(mp3File);
+        AudioFormat baseFormat = mp3Data.getFormat();
+        AudioFormat targetFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
+                baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
+        AudioInputStream pcmData = AudioSystem.getAudioInputStream(targetFormat, mp3Data);
+        AudioSystem.write(pcmData, AudioFileFormat.Type.WAVE, new File(retPath));
+        return retPath;
     }
     private void playAudio() throws IOException, InterruptedException {
         synchronized(this){
@@ -58,10 +99,14 @@ public class CLAudio extends CLData {
         }
     }
     public void play() throws LineUnavailableException {
-        if(sourceDataLine == null)
+        if(audio==null)
         {
-            DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class,audio.getFormat(),AudioSystem.NOT_SPECIFIED);
-            sourceDataLine = (SourceDataLine)AudioSystem.getLine(dataLineInfo);
+            System.out.println("无音频可播放");
+            return;
+        }
+        if(sourceDataLine == null) {
+            DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audio.getFormat(), AudioSystem.NOT_SPECIFIED);
+            sourceDataLine = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
         }
         sourceDataLine.open(audio.getFormat());
         sourceDataLine.start();
