@@ -23,11 +23,11 @@ public class CLAudio extends CLData {
     }
     public CLAudio(Path path) throws UnsupportedAudioFileException, IOException{
         this.typeName = "audio";
-        this.path = path;
         this.fromFile = true;
         String tmpType=TypeChecking(path.toString());
         if(tmpType.equals(".wav"))
         {
+            this.path = path;
             this.audio=AudioSystem.getAudioInputStream(path.toFile());
             if(audio==null)
             {
@@ -35,15 +35,17 @@ public class CLAudio extends CLData {
             }
         }else if(tmpType.equals(".mp3"))
         {
+
             String newPath=mp3ToWav(path.toString());
             File wavFile = new File(newPath);
+            this.path = Paths.get(newPath);
             this.audio=AudioSystem.getAudioInputStream(wavFile);
             if(audio==null)
             {
                 System.out.println("文件不存在");
             }
-            wavFile.delete();
         }else{
+            this.path=null;
             System.out.println("不支持的文件格式，请使用wav或mp3文件");
         }
 
