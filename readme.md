@@ -8,7 +8,7 @@
 [![](https://badgen.net/github/open-issues/BIT-SYS/cloud-ladder)]()
 [![](https://flat.badgen.net/github/license/BIT-SYS/cloud-ladder?color=purple)]()
 
-Cloud Ladder 是一门面向云计算的教学语言。
+Cloud Ladder 是一门让人工智能、大数据更容易上手的编程语言。
 
 </div>
 
