@@ -1,13 +1,15 @@
 package cloudladder.std.global;
-import java.io.File;
+
 import cloudladder.core.runtime.data.*;
 import cloudladder.core.runtime.env.CLRtEnvironment;
 import cloudladder.core.runtime.env.CLRtScope;
 import cloudladder.std.CLBuiltinFuncAnnotation;
+import it.sauronsoftware.jave.EncoderException;
+import okhttp3.Response;
+import okio.BufferedSource;
 
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.IOException;
+import javax.sound.sampled.*;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -82,7 +84,7 @@ public class CLStdAudio {
         self.continues();
         env.ret(self.wrap());
     }
-   @CLBuiltinFuncAnnotation(value={"self","lang"}, name="toSpeechRecognition")
+    @CLBuiltinFuncAnnotation(value={"self","lang"}, name="toSpeechRecognition")
     public static void __toSpeechRecognition__(CLRtEnvironment env) throws IOException {
         CLAudio audio = (CLAudio) env.getVariable("self").getReferee();
         CLString language = (CLString)env.getVariable("lang").getReferee();
@@ -95,8 +97,37 @@ public class CLStdAudio {
             file = File.createTempFile(UUID.randomUUID().toString(), ".wav");
             audio.save(Path.of(file.getPath()));
         }
-        CLString str = new CLString(audio.postToUrl("http://127.0.0.1:5000/speech_recognition", file, language.toString()));
+        Response response = audio.postToUrl("http://39.103.135.92:5000/speech_recognition", file, language.toString());
+        CLString str = new CLString(response.body().toString());
         env.ret(str.wrap());
+    }
+    @CLBuiltinFuncAnnotation(value={"self","type"}, name="toVoiceConversion")
+    public static void __toVoiceConversion__(CLRtEnvironment env) throws IOException, UnsupportedAudioFileException {
+        CLAudio audio = (CLAudio) env.getVariable("self").getReferee();
+        CLString type = (CLString)env.getVariable("type").getReferee();
+        File file = null;
+        if (audio.isFromFile()) {
+            Path path = audio.getPath();
+            file = new File(path.toString());
+        }
+        else {
+            file = File.createTempFile(UUID.randomUUID().toString(), ".wav");
+            audio.save(Path.of(file.getPath()));
+        }
+        Response response = audio.postToUrl("http://39.103.135.92:5000/voice_conversion", file, type.toString());
+        byte[] allBytes = response.body().byteStream().readAllBytes();
+        ByteArrayInputStream bis = new ByteArrayInputStream(allBytes);
+        AudioFormat format = new AudioFormat(16000, 16, 1, true, false);
+        AudioInputStream ais = new AudioInputStream(bis,format, allBytes.length/ format.getFrameSize());
+        CLAudio ret = new CLAudio(ais);
+        env.ret(ret.wrap());
+    }
+    @CLBuiltinFuncAnnotation(value={"self","path"}, name="wavToMp3")
+    public static void __wavToMp3__(CLRtEnvironment env) throws IOException, EncoderException {
+        CLAudio audio = (CLAudio) env.getVariable("self").getReferee();
+        CLString path = (CLString)env.getVariable("path").getReferee();
+        audio.wavToMp3(path.toString());
+        env.ret(audio.wrap());
     }
     public static void run(CLRtEnvironment env) throws Exception {
         Class clazz = CLStdAudio.class;
