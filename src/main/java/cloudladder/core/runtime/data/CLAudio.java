@@ -1,12 +1,18 @@
 package cloudladder.core.runtime.data;
+
+import cloudladder.core.runtime.env.CLRtEnvironment;
+import it.sauronsoftware.jave.EncoderException;
 import lombok.Getter;
 import okhttp3.*;
-import javazoom.spi.mpeg.sampled.file.MpegAudioFileReader;
 
+import javax.sound.sampled.*;
 import java.io.*;
 import java.nio.file.Path;
-import javax.sound.sampled.*;
-
+import java.nio.file.Paths;
+import it.sauronsoftware.jave.AudioAttributes;
+import it.sauronsoftware.jave.Encoder;
+import it.sauronsoftware.jave.EncodingAttributes;
+import javazoom.spi.mpeg.sampled.file.*;
 @Getter
 public class CLAudio extends CLData {
     private AudioInputStream audio;
@@ -46,7 +52,7 @@ public class CLAudio extends CLData {
             }
         }else{
             this.path=null;
-            System.out.println("不支持的文件格式，请使用wav或mp3文件");
+            System.out.println("不支持的文件格式，请使用wav,pcm或mp3文件");
         }
 
     }
@@ -68,6 +74,21 @@ public class CLAudio extends CLData {
         AudioInputStream pcmData = AudioSystem.getAudioInputStream(targetFormat, mp3Data);
         AudioSystem.write(pcmData, AudioFileFormat.Type.WAVE, new File(retPath));
         return retPath;
+    }
+    public void wavToMp3(String newPath) throws EncoderException, IOException {
+        File mp3File = new File("cloudladder/"+newPath);
+        File wavFile = new File(this.path.toString());
+        AudioAttributes A_attr = new AudioAttributes();
+        A_attr.setCodec("libmp3lame");
+        A_attr.setBitRate(36000); //音频比率 MP3默认是1280000
+        A_attr.setChannels(2);
+        A_attr.setSamplingRate(44100);
+        EncodingAttributes E_attr = new EncodingAttributes();
+        E_attr.setFormat("mp3");
+        E_attr.setAudioAttributes(A_attr);
+        Encoder encoder = new Encoder();
+        encoder.encode(wavFile,mp3File,E_attr);
+        mp3File.getAbsoluteFile().createNewFile();
     }
     private void playAudio() throws IOException, InterruptedException {
         synchronized(this){
@@ -162,11 +183,11 @@ public class CLAudio extends CLData {
         return "";
     }
 
-    public String postToUrl(String url,File file,String language) throws IOException {
+    public Response postToUrl(String url,File file,String aParam) throws IOException {
         final OkHttpClient client = new OkHttpClient();
         RequestBody reqBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("lang", language)
+                .addFormDataPart("aParam", aParam)
                 .addFormDataPart("audio", "audio.wav",
                         RequestBody.create(file,MediaType.parse("application/octet-stream")))
                 .build();
@@ -176,7 +197,7 @@ public class CLAudio extends CLData {
                 .post(reqBody)
                 .build();
         Response response = client.newCall(request).execute();
-        return response.body().string();
+        return response;
     }
     //剪切出音频的start到end的部分
     public CLAudio cutAudio(int start,int end) throws UnsupportedAudioFileException, IOException{
