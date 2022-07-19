@@ -34,6 +34,14 @@ public class CLStdText {
         env.ret(str.wrap());
     }
 
+    @CLBuiltinFuncAnnotation(value={"self", "path"}, name="createWordCloud")
+    public static void __createWordCloud__(CLRtEnvironment env) {
+        CLText self = (CLText) env.getVariable("self").getReferee();
+        String  p = env.getVariable("path").getReferee().toString();
+        self.createWordCloud(p);
+        env.ret(self.wrap());
+    }
+
     public static void run(CLRtEnvironment env) throws Exception {
         Class clazz = CLStdText.class;
         CLObject obj = new CLObject();
