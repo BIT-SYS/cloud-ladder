@@ -7,7 +7,7 @@ let cltext = text("audio/ctext.pdf");
 let content = Text.getContent(cltext);
 Text.createWordCloud(cltext, "D:\\ciyun.png");
 print(content);
-aud.t2a(content ,"zh")
+aud.t2a(content)
     | save("audio/111.mp3")
     ;
 
