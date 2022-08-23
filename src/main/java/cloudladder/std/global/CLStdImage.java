@@ -42,7 +42,8 @@ public class CLStdImage {
             file = File.createTempFile(UUID.randomUUID().toString(), ".png");
             img.save(Path.of(file.getPath()));
         }
-        CLString str = new CLString(img.postToUrl("http://127.0.0.1:5000/inference", file));
+//        CLString str = new CLString(img.postToUrl("http://127.0.0.1:5000/inference", file));
+        CLString str = new CLString(img.postToUrl("http://39.103.135.92:5000/inference", file));
         env.ret(str.wrap());
     }
 
