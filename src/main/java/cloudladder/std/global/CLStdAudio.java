@@ -97,8 +97,11 @@ public class CLStdAudio {
             file = File.createTempFile(UUID.randomUUID().toString(), ".wav");
             audio.save(Path.of(file.getPath()));
         }
+//        Response response = audio.postToUrl("http://localhost:5000/speech_recognition", file, language.toString());
         Response response = audio.postToUrl("http://39.103.135.92:5000/speech_recognition", file, language.toString());
-        CLString str = new CLString(response.body().toString());
+//        System.out.println(response.toString());
+        CLString str = new CLString(response.body().string());
+//        System.out.println(str);
         env.ret(str.wrap());
     }
     @CLBuiltinFuncAnnotation(value={"self","type"}, name="toVoiceConversion")
