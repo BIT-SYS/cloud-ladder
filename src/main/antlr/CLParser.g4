@@ -68,6 +68,14 @@ statement
     | expressionStatement Semi
     ;
 
+importStatement
+    : Import path=StringLiteral (As as=Identifier)? Semi
+    ;
+
+exportStatement
+    : Export Identifier Assign expression
+    ;
+
 expressionStatement
     : expression
     ;
@@ -93,7 +101,7 @@ dataStatementItemList
     ;
 
 dataStatementItem
-    : Identifier (Assign expression)?
+    : Identifier Assign expression
     ;
 
 compoundStatement
@@ -141,14 +149,6 @@ functionDefinition
 
 paramList
     : item+=Identifier (Comma item+=Identifier)*
-    ;
-
-importStatement
-    : Import path=StringLiteral (As as=Identifier)? Semi
-    ;
-
-exportStatement
-    : Export Identifier Assign expression
     ;
 
 program

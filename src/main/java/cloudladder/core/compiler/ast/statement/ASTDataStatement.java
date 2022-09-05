@@ -1,6 +1,5 @@
 package cloudladder.core.compiler.ast.statement;
 
-import cloudladder.core.compiler.ast.type.ASTType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

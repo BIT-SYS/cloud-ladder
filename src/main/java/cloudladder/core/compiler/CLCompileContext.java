@@ -1,165 +1,108 @@
 package cloudladder.core.compiler;
 
-import cloudladder.core.ir.*;
-import cloudladder.core.misc.CLUtilIRList;
-import lombok.Getter;
+import cloudladder.core.ir.CLIR;
+import cloudladder.core.object.CLCodeObject;
+import cloudladder.core.object.CLNumber;
+import cloudladder.core.object.CLObject;
+import cloudladder.core.object.CLString;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class CLCompileContext {
-    private final CLUtilIRList ir;
-
-    private int tempVarCount = 0;
-
-    // label => ir index
-    private final HashMap<String, Integer> labels;
-    // ir index => label
-    private final HashMap<Integer, String> zip;
-
-    // iteration name stack
-    private final ArrayList<String> iterName;
-    private int iterCount = 0;
-
-    // if name stack
-    private final ArrayList<String> ifName;
-    private int ifCount = 0;
-
-    public String nextLabel = "";
-    public boolean setNextLabel = false;
-
-    // and/or iter
-    private int andOrCount = 0;
-
-    public int iterAndOr() {
-        andOrCount++;
-        return andOrCount - 1;
-    }
-
-    private void unzip(int irIndex, int offset) {
-        CLIR ir = this.ir.getList().get(irIndex);
-
-        if (ir instanceof CLIRJump) {
-            ((CLIRJump) ir).setOffset(offset);
-        } else if (ir instanceof CLIRBf) {
-            ((CLIRBf) ir).setOffset(offset);
-        } else if (ir instanceof CLIRBt) {
-            ((CLIRBt) ir).setOffset(offset);
-        }
-    }
-
-
-    public String tempString(String value) {
-        String name = "$" + iterTempVar();
-        CLIRDefString defString = new CLIRDefString(name, value);
-        addIr(defString);
-        return name;
-    }
-
-    public void endFunction() {
-        if (!endsWithRet()) {
-            addIr(new CLIRRet(""));
-        }
-    }
-
-    public boolean endsWithRet() {
-        CLIR last = ir.get(ir.size() - 1);
-        return last instanceof CLIRRet;
-    }
-
-    public void addNop() {
-        CLIRNop nop = new CLIRNop();
-        addIr(nop);
-    }
+    private final ArrayList<CLIR> ir;
+    private final HashMap<String, Integer> stringLiterals;
+    private final HashMap<Integer, Integer> intLiteral;
+    private final HashMap<Double, Integer> doubleLiteral;
+    private final ArrayList<CLObject> constants;
+    private final HashMap<String, Integer> namesMap;
+    private final ArrayList<String> names;
+    private final HashSet<String> localNames;
 
     public CLCompileContext() {
-        ir = new CLUtilIRList();
-        labels = new HashMap<>();
-        zip = new HashMap<>();
-        iterName = new ArrayList<>();
-        ifName = new ArrayList<>();
-    }
-
-    public void pushIterName(String name) {
-        this.iterName.add(name);
-    }
-
-    public void popIterName() {
-        this.iterName.remove(iterName.size() - 1);
-    }
-
-    public void pushIfName(String name) {
-        this.ifName.add(name);
-    }
-
-    public void popIfName() {
-        this.ifName.remove(ifName.size() - 1);
-    }
-
-    public int iterIfCount() {
-        this.ifCount++;
-        return ifCount - 1;
-    }
-
-    public int iterTempVar() {
-        tempVarCount++;
-        return tempVarCount - 1;
-    }
-
-    public int iterIterCount() {
-        iterCount++;
-        return iterCount - 1;
+        this.ir = new ArrayList<>();
+        this.stringLiterals = new HashMap<>();
+        this.intLiteral = new HashMap<>();
+        this.doubleLiteral = new HashMap<>();
+        this.constants = new ArrayList<>();
+        this.namesMap = new HashMap<>();
+        this.names = new ArrayList<>();
+        this.localNames = new HashSet<>();
     }
 
     public void addIr(CLIR ir) {
-        if (setNextLabel) {
-            ir.setLabel(nextLabel);
-            setNextLabel = false;
-            int index = this.ir.size();
-            this.labels.put(nextLabel, index);
-
-            ArrayList<Integer> del = new ArrayList<>();
-            for (int i : zip.keySet()) {
-                if (zip.get(i).equals(nextLabel)) {
-                    unzip(i, index - i);
-                    del.add(i);
-                }
-            }
-            for (int i : del) {
-                zip.remove(i);
-            }
-        }
         this.ir.add(ir);
     }
 
-    public void nextLabel(String label) {
-        if (this.setNextLabel) {
-            this.addNop();
+    public void addLocalName(String name) {
+        this.localNames.add(name);
+    }
+
+    public int addName(String name) {
+        if (this.namesMap.containsKey(name)) {
+            return this.namesMap.get(name);
+        } else {
+            this.names.add(name);
+            int index = this.names.size() - 1;
+            this.namesMap.put(name, index);
+            return index;
         }
-        this.nextLabel = label;
-        this.setNextLabel = true;
     }
 
-    public String getCurIterName() {
-        if (this.iterName.size() > 0) {
-            return iterName.get(iterName.size() - 1);
+    public int addStringLiteral(String literal) {
+        if (this.stringLiterals.containsKey(literal)) {
+            return this.stringLiterals.get(literal);
+        } else {
+            CLString object = new CLString(literal);
+            this.constants.add(object);
+            int index = this.constants.size() - 1;
+            this.stringLiterals.put(literal, index);
+            return index;
         }
-        return null;
     }
 
-    public void addZip(String listen, CLIR ir) {
-        int index = this.ir.size();
-//        this.ir.add(ir);
-        addIr(ir);
-        zip.put(index, listen);
+    public int addIntegerLiteral(int value) {
+        if (this.intLiteral.containsKey(value)) {
+            return this.intLiteral.get(value);
+        } else {
+            CLNumber object = new CLNumber((double) value);
+            this.constants.add(object);
+            int index = this.constants.size() - 1;
+            this.intLiteral.put(value, index);
+            return index;
+        }
     }
 
-    public int getLabelOffset(String label) {
-        int index = labels.get(label);
-        return index - ir.size();
+    public int addDoubleLiteral(double value) {
+        if (this.doubleLiteral.containsKey(value)) {
+            return this.doubleLiteral.get(value);
+        } else {
+            CLNumber object = new CLNumber(value);
+            this.constants.add(object);
+            int index = this.constants.size() - 1;
+            this.doubleLiteral.put(value, index);
+            return index;
+        }
     }
 
-    public CLUtilIRList getIrList() {
-        return ir;
+    public CLCodeObject getCodeObject() {
+        CLCodeObject code = new CLCodeObject();
+
+        code.instructions = this.ir;
+        code.constants = this.constants;
+        code.localNames = this.localNames;
+        code.names = this.names;
+
+        HashSet<String> nonLocalNames = new HashSet<>();
+        for (String name : this.names) {
+            if (!this.localNames.contains(name)) {
+                nonLocalNames.add(name);
+            }
+        }
+
+        code.nonLocalNames = nonLocalNames;
+
+        return code;
     }
 }
