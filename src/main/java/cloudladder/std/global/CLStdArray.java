@@ -1,4 +1,4 @@
-//package cloudladder.std.global;
+package cloudladder.std.global;
 //
 //import cloudladder.core.runtime.data.*;
 //import cloudladder.core.runtime.env.CLRtEnvironment;
@@ -151,3 +151,178 @@
 //        env.addVariable("Array", obj.wrap());
 //    }
 //}
+
+import cloudladder.core.error.CLRuntimeError;
+import cloudladder.core.error.CLRuntimeErrorType;
+import cloudladder.core.ir.CLIR;
+import cloudladder.core.ir.CLIRCall;
+import cloudladder.core.object.*;
+import cloudladder.core.runtime.CLRtFrame;
+import cloudladder.core.runtime.CLRtScope;
+import cloudladder.std.CLBuiltinFuncAnnotation;
+import cloudladder.std.CLStdLibAnnotation;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+
+@CLStdLibAnnotation(name = "Array")
+public class CLStdArray {
+    @CLBuiltinFuncAnnotation(params = {"array", "function"}, name = "each")
+    public static CLObject __forEach__(CLRtFrame frame) throws CLRuntimeError {
+        CLIR call = new CLIRCall(2);
+
+        CLObject array = frame.scope.getOwnVariable("array");
+        CLObject function = frame.scope.getOwnVariable("function");
+
+        if (!(array instanceof CLArray arr)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting array");
+        }
+        if (!(function instanceof CLFunction)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting function");
+        }
+
+        for (int i = 0; i < arr.items.size(); i++) {
+            CLObject item = arr.items.get(i);
+            CLNumber index = CLNumber.getNumberObject(i);
+
+            frame.vm.stack.push(index);
+            frame.vm.stack.push(item);
+            frame.vm.stack.push(function);
+
+            call.execute(frame);
+
+            frame.vm.stack.pop();
+        }
+
+        return frame.vm.unitObject;
+    }
+
+    @CLBuiltinFuncAnnotation(params = {"array", "filter"}, name = "filter")
+    public static CLObject __filter__(CLRtFrame frame) throws CLRuntimeError {
+        CLIR call = new CLIRCall(2);
+
+        CLObject filter = frame.scope.getOwnVariable("filter");
+        CLObject array = frame.scope.getOwnVariable("array");
+
+        if (!(filter instanceof CLFunction)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting function");
+        }
+        if (!(array instanceof CLArray arr)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting array");
+        }
+
+        CLArray result = new CLArray();
+
+        for (int i = 0; i < arr.items.size(); i++) {
+            CLObject item = arr.items.get(i);
+            CLNumber index = CLNumber.getNumberObject(i);
+
+            frame.vm.stack.push(index);
+            frame.vm.stack.push(item);
+            frame.vm.stack.push(filter);
+
+            call.execute(frame);
+
+            CLObject value = frame.vm.stack.pop();
+            if (!(value instanceof CLBoolean)) {
+                throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "return value of predicate must be a boolean");
+            }
+            if (((CLBoolean) value).value) {
+                result.addItem(item);
+            }
+        }
+
+        return result;
+    }
+
+    @CLBuiltinFuncAnnotation(params = {"array", "function"}, name = "map")
+    public static CLObject __map__(CLRtFrame frame) throws CLRuntimeError {
+        CLIR call = new CLIRCall(2);
+
+        CLObject function = frame.scope.getOwnVariable("function");
+        CLObject array = frame.scope.getOwnVariable("array");
+
+        if (!(function instanceof CLFunction f)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting function");
+        }
+        if (!(array instanceof CLArray arr)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting array");
+        }
+
+        CLArray result = new CLArray();
+
+        for (int i = 0; i < arr.items.size(); i++) {
+            CLObject item = arr.items.get(i);
+            CLNumber index = CLNumber.getNumberObject(i);
+
+            frame.vm.stack.push(index);
+            frame.vm.stack.push(item);
+            frame.vm.stack.push(function);
+
+            call.execute(frame);
+            result.addItem(frame.vm.stack.pop());
+        }
+
+        return result;
+    }
+
+    @CLBuiltinFuncAnnotation(params={"builder", "count"}, catchAll = false, name="build")
+    public static CLObject __build__(CLRtFrame frame) throws CLRuntimeError {
+        CLIR call = new CLIRCall(1);
+
+        CLObject function = frame.scope.getOwnVariable("builder");
+        CLObject count = frame.scope.getOwnVariable("count");
+
+        if (!(function instanceof CLFunction f)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting function");
+        }
+
+        if (!(count instanceof CLNumber n)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting number");
+        }
+        if (!n.isInteger()) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting integer, got float");
+        }
+
+        CLArray returnValue = new CLArray();
+
+        for (int i = 0; i < (int) n.value; i++) {
+            frame.vm.stack.push(CLNumber.getNumberObject(i));
+            frame.vm.stack.push(f);
+            try {
+                call.execute(frame);
+            } catch (cloudladder.core.error.CLRuntimeError clRuntimeError) {
+                clRuntimeError.printStackTrace();
+            }
+            returnValue.addItem(frame.vm.stack.pop());
+        }
+
+        return returnValue;
+    }
+
+//    public static CLDict getArrayDict() {
+//        CLDict dict = new CLDict();
+//
+//        for (Method method : CLStdArray.class.getMethods()) {
+//            if (method.isAnnotationPresent(CLBuiltinFuncAnnotation.class)) {
+//                CLBuiltinFuncAnnotation annotation = method.getAnnotation(CLBuiltinFuncAnnotation.class);
+//
+//                ArrayList<String> params = new ArrayList<>();
+//                Collections.addAll(params, annotation.params());
+//                boolean catchAll = annotation.catchAll();
+//                String name = annotation.name();
+//
+//                CLBuiltinFunction function = new CLBuiltinFunction(method, params, catchAll);
+//                dict.contents.put(name, function);
+//            }
+//        }
+//
+//        return dict;
+//    }
+
+//    public static void injectScope(CLRtScope scope) {
+//        CLDict arr = CLStdArray.getArrayDict();
+//        scope.addVariable("Array", arr);
+//    }
+}

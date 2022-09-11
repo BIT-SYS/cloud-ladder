@@ -1,4 +1,4 @@
-//package cloudladder.std.global;
+package cloudladder.std.global;
 //
 //import cloudladder.core.runtime.data.*;
 //import cloudladder.core.runtime.env.CLRtEnvironment;
@@ -57,13 +57,6 @@
 //        env.ret(str.wrap());
 //    }
 //
-//    @CLBuiltinFuncAnnotation(value={"self"}, name="show")
-//    public static void __show__(CLRtEnvironment env) {
-//        CLImage self = (CLImage) env.getVariable("self").getReferee();
-//        self.show();
-//
-//        env.ret(self.wrap());
-//    }
 //
 //    @CLBuiltinFuncAnnotation(value={"base64"}, name="fromBase64")
 //    public static void __fromBase64__(CLRtEnvironment env) {
@@ -76,22 +69,52 @@
 //        env.ret(image.wrap());
 //    }
 //
-//    public static void run(CLRtEnvironment env) throws Exception {
-//        Class clazz = CLStdImage.class;
-//        CLObject obj = new CLObject();
-//        CLRtScope scope = env.getCurrentScope();
-//
-//        for (Method method : clazz.getMethods()) {
-//            if (method.getName().startsWith("__")) {
-//                CLBuiltinFuncAnnotation annotation = method.getAnnotation(CLBuiltinFuncAnnotation.class);
-//                String[] params = annotation.value();
-//                String name = annotation.name();
-//
-//                CLBuiltinFunction func = new CLBuiltinFunction(method, scope, params);
-//                obj.addStringRefer(name, func.wrap());
-//            }
-//        }
-//
-//        env.addVariable("Image", obj.wrap());
-//    }
 //}
+
+import cloudladder.core.error.CLRuntimeError;
+import cloudladder.core.error.CLRuntimeErrorType;
+import cloudladder.core.object.CLImage;
+import cloudladder.core.object.CLObject;
+import cloudladder.core.object.CLString;
+import cloudladder.core.runtime.CLRtFrame;
+import cloudladder.std.CLBuiltinFuncAnnotation;
+import cloudladder.std.CLStdLibAnnotation;
+
+import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.Base64;
+
+@CLStdLibAnnotation(name = "Image")
+public class CLStdImage {
+    @CLBuiltinFuncAnnotation(params = {"img"}, name = "show")
+    public static CLObject __show__(CLRtFrame frame) throws CLRuntimeError {
+        CLObject img = frame.scope.getOwnVariable("img");
+        if (!(img instanceof CLImage image)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting image");
+        }
+
+        image.image.show();
+        return frame.vm.unitObject;
+    }
+
+    @CLBuiltinFuncAnnotation(params = {"img"}, name = "base64")
+    public static CLObject __base64__(CLRtFrame frame) throws CLRuntimeError {
+        CLObject img = frame.scope.getOwnVariable("img");
+        if (!(img instanceof CLImage image)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting image");
+        }
+
+        try {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ImageIO.write(image.image.getBufferedImage(), "png", stream);
+
+            String temp = Base64.getEncoder().encodeToString(stream.toByteArray());
+            String result = URLEncoder.encode(temp, "GBK");
+            return new CLString(result);
+        } catch (IOException e) {
+            throw new CLRuntimeError(CLRuntimeErrorType.Unexpected, "convert to base64 error");
+        }
+    }
+}

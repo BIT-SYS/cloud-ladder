@@ -73,7 +73,7 @@ importStatement
     ;
 
 exportStatement
-    : Export Identifier Assign expression
+    : Export Identifier Assign expression Semi
     ;
 
 expressionStatement

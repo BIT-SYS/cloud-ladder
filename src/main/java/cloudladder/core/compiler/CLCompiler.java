@@ -5,10 +5,10 @@ import cloudladder.core.compiler.ast.ASTToken;
 import cloudladder.core.compiler.ast.expression.*;
 import cloudladder.core.compiler.ast.program.*;
 import cloudladder.core.compiler.ast.statement.*;
+import cloudladder.core.error.CLCompileError;
+import cloudladder.core.error.CLCompileErrorType;
 import cloudladder.core.ir.*;
-import cloudladder.core.object.CLNumber;
-import cloudladder.core.object.CLObject;
-import cloudladder.core.object.CLString;
+import cloudladder.core.object.*;
 import grammar.CLLexer;
 import grammar.CLParser;
 import org.antlr.v4.runtime.CharStreams;
@@ -23,7 +23,7 @@ public class CLCompiler {
     public CLCompiler() {
     }
 
-    public void compileExpression(ASTExpression tree, CLCompileContext context) {
+    public void compileExpression(ASTExpression tree, CLCompileContext context) throws CLCompileError {
         if (tree instanceof ASTBinaryExpression) {
             compileBinaryExpression((ASTBinaryExpression) tree, context);
         } else if (tree instanceof ASTUnaryExpression) {
@@ -55,7 +55,7 @@ public class CLCompiler {
         }
     }
 
-    public void compileArrowExpression(ASTArrowExpression tree, CLCompileContext context) {
+    public void compileArrowExpression(ASTArrowExpression tree, CLCompileContext context) throws CLCompileError {
 //        ASTExpression rightExpression = tree.getRight();
 //        ExpressionSpecific left = compileExpression(tree.getLeft(), context);
 ////        ExpressionSpecific right = compileExpression(tree.getRight(), context);
@@ -92,109 +92,93 @@ public class CLCompiler {
 //        return null;
     }
 
-    public void compilePipeExpression(ASTPipeExpression tree, CLCompileContext context) {
-//        ASTExpression leftExpression = tree.getLeft();
-//        ASTExpression rightExpression = tree.getRight();
-//
-//        ExpressionSpecific left = compileExpression(leftExpression, context);
-//        if (rightExpression instanceof ASTFunctionCall) {
-//            ArrayList<ASTExpression> args = ((ASTFunctionCall) rightExpression).getArgs();
-//
-//            ASTExpression func = ((ASTFunctionCall) rightExpression).getFunc();
-//            ExpressionSpecific funcSpec = compileExpression(func, context);
-//
-//            int t = context.iterTempVar();
-//            CLIRCall callIr = new CLIRCall(funcSpec.varName, "$" + t);
-//            callIr.addParam(left.varName);
-//            for (int i = 0; i < args.size(); i++) {
-//                ExpressionSpecific arg = compileExpression(args.get(i), context);
-//
-//                callIr.addParam(arg.varName);
-//            }
-//
-//            context.addIr(callIr);
-//
-//            return new ExpressionSpecific("$" + t);
-//        } else {
-//            ExpressionSpecific right = compileExpression(rightExpression, context);
-//
-//            int t = context.iterTempVar();
-//            CLIRCall callIr = new CLIRCall(right.varName, "$" + t);
-//            callIr.addParam(left.varName);
-//            context.addIr(callIr);
-//
-//            return new ExpressionSpecific("$" + t);
-//        }
+    public void compilePipeExpression(ASTPipeExpression tree, CLCompileContext context) throws CLCompileError {
+        ASTExpression left = tree.getLeft();
+        ASTExpression right = tree.getRight();
+
+        if (right instanceof ASTFunctionCall functionCall) {
+            ArrayList<ASTExpression> args = functionCall.getArgs();
+            for (int i = args.size() - 1; i >= 0; i--) {
+                this.compileExpression(args.get(i), context);
+            }
+
+            this.compileExpression(left, context);
+            this.compileExpression(functionCall.getFunc(), context);
+
+            context.addIr(new CLIRCall(args.size() + 1));
+        } else {
+            this.compileExpression(left, context);
+            this.compileExpression(right, context);
+            context.addIr(new CLIRCall(1));
+        }
     }
 
-    public void compileFunctionExpression(ASTFunctionExpression tree, CLCompileContext context) {
-//        String name = "$" + context.iterTempVar();
-//        ArrayList<String> params = new ArrayList<>();
-//        for (ASTToken token : tree.getParams()) {
-//            params.add(token.getText());
-//        }
-//        CLIRDefFunction def = new CLIRDefFunction(name, params, tree.getAst());
-//        context.addIr(def);
-//
-//        return new ExpressionSpecific(name);
+    public void compileFunctionExpression(ASTFunctionExpression tree, CLCompileContext context) throws CLCompileError {
+        CLCompileContext functionContext = new CLCompileContext();
+        ArrayList<String> params = new ArrayList<>();
+        for (ASTToken name : tree.getParams()) {
+            functionContext.addLocalName(name.getText());
+            params.add(name.getText());
+        }
+
+        this.compileStatement(tree.getAst(), functionContext);
+
+        // if the last ir is not return, manually add one
+        if (!(functionContext.ir.get(functionContext.ir.size() - 1) instanceof CLIRReturn)) {
+            functionContext.addIr(new CLIRPushUnit());
+            functionContext.addIr(new CLIRReturn());
+        }
+
+        CLCodeObject codeObject = functionContext.getCodeObject();
+
+        CLFunctionDefinition function = new CLFunctionDefinition(codeObject, params, false);
+        int index = context.addConstant(function);
+
+        context.addIr(new CLIRLoadConst(index));
+        context.addIr(new CLIRBuildFunction());
     }
 
-    public void compileObjLiteral(ASTObjLiteral tree, CLCompileContext context) {
-//        String name = "$" + context.iterTempVar();
-//        CLIRDefObj def = new CLIRDefObj(name);
-//
-//        for (ASTObjItem item : tree.getItems()) {
-//            if (item.isSingle()) {
-//                String keyName = "$" + context.iterTempVar();
-//                CLIRDefString defString = new CLIRDefString(keyName, item.getKey().getText());
-//                context.addIr(defString);
-//
-//                def.addItem(keyName, item.getKey().getText());
-//            } else if (item.isDynamic()) {
-//                ExpressionSpecific key = compileExpression(item.getDyKey(), context);
-//                ExpressionSpecific value = compileExpression(item.getValue(), context);
-//                def.addItem(key.getVarName(), value.getVarName());
-//            } else if (item.isString()) {
-//                String keyName = "$" + context.iterTempVar();
-//                String key = item.getKey().getText();
-//                key = key.substring(1, key.length() - 1);
-//                CLIRDefString defString = new CLIRDefString(keyName, key);
-//                context.addIr(defString);
-//
-//                ExpressionSpecific value = compileExpression(item.getValue(), context);
-//
-//                def.addItem(keyName, value.getVarName());
-//            } else {
-//                String keyName = "$" + context.iterTempVar();
-//                CLIRDefString defString = new CLIRDefString(keyName, item.getKey().getText());
-//                context.addIr(defString);
-//
-//                ExpressionSpecific value = compileExpression(item.getValue(), context);
-//
-//                def.addItem(keyName, value.getVarName());
-//            }
-//        }
-//
-//        context.addIr(def);
-//        return new ExpressionSpecific(name);
+    public void compileObjLiteral(ASTObjLiteral tree, CLCompileContext context) throws CLCompileError {
+        for (ASTObjItem item : tree.getItems()) {
+            if (item.isSingle()) {
+                String key = item.getKey().getText();
+                int keyIndex = context.addStringLiteral(key);
+
+                context.addIr(new CLIRLoadName(context.addName(key)));
+                context.addIr(new CLIRLoadConst(keyIndex));
+            } else if (item.isDynamic()) {
+                this.compileExpression(item.getValue(), context);
+                this.compileExpression(item.getDyKey(), context);
+            } else if (item.isString()) {
+                String key = item.getKey().getText();
+                key = key.substring(1, key.length() - 1);
+                int keyIndex = context.addStringLiteral(key);
+
+                this.compileExpression(item.getValue(), context);
+                context.addIr(new CLIRLoadConst(keyIndex));
+            } else {
+                String key = item.getKey().getText();
+                int keyIndex = context.addStringLiteral(key);
+
+                this.compileExpression(item.getValue(), context);
+                context.addIr(new CLIRLoadConst(keyIndex));
+            }
+        }
+
+        context.addIr(new CLIRBuildDict(tree.getItems().size()));
     }
 
-    public void compileArrayLiteral(ASTArrayLiteral tree, CLCompileContext context) {
-//        int i = context.iterTempVar();
-//        String name = "$" + i;
-//        CLIRDefArray def = new CLIRDefArray(name);
-//
-//        for (ASTExpression exp : tree.getItems()) {
-//            ExpressionSpecific e = compileExpression(exp, context);
-//            def.addValue(e.getVarName());
-//        }
-//
-//        context.addIr(def);
-//
-//        return new ExpressionSpecific(name);
+    public void compileArrayLiteral(ASTArrayLiteral tree, CLCompileContext context) throws CLCompileError {
+        ArrayList<ASTExpression> items = tree.getItems();
+        for (int i = items.size() - 1; i >= 0; i--) {
+            this.compileExpression(items.get(i), context);
+        }
+
+        CLIR ir = new CLIRBuildArray(items.size());
+        context.addIr(ir);
     }
 
-    public void compileStringLiteral(ASTStringLiteral tree, CLCompileContext context) {
+    public void compileStringLiteral(ASTStringLiteral tree, CLCompileContext context) throws CLCompileError {
         String str = tree.getToken().getText();
         str = str.substring(1, str.length() - 1);
         str = StringEscapeUtils.unescapeJava(str);
@@ -204,7 +188,7 @@ public class CLCompiler {
         context.addIr(ir);
     }
 
-    public void compileNumberLiteral(ASTNumberLiteral tree, CLCompileContext context) {
+    public void compileNumberLiteral(ASTNumberLiteral tree, CLCompileContext context) throws CLCompileError {
         double value = Double.parseDouble(tree.getToken().getText());
         int index = 0;
         if (value % 1 == 0) {
@@ -218,12 +202,15 @@ public class CLCompiler {
         context.addIr(ir);
     }
 
-    public void compileIndexing(ASTIndexing tree, CLCompileContext context) {
+    public void compileIndexing(ASTIndexing tree, CLCompileContext context) throws CLCompileError {
+        this.compileExpression(tree.getIndex(), context);
+        this.compileExpression(tree.getIndexer(), context);
 
+        CLIR ir = new CLIRIndex();
+        context.addIr(ir);
     }
 
-    public void compileIdentifierExpression(ASTIdentifierExpression tree, CLCompileContext context) {
-//        return new ExpressionSpecific(tree.getToken().getText());
+    public void compileIdentifierExpression(ASTIdentifierExpression tree, CLCompileContext context) throws CLCompileError {
         String identifier = tree.getToken().getText();
         int index = context.addName(identifier);
 
@@ -231,111 +218,41 @@ public class CLCompiler {
         context.addIr(ir);
     }
 
-    public void compileFunctionCall(ASTFunctionCall tree, CLCompileContext context) {
-////        String funcName = "";
-////        String self = "";
-//
-////        if (tree.getFunc() instanceof ASTFieldAccess) {
-////            ASTFieldAccess fa = (ASTFieldAccess) tree.getFunc();
-////            ExpressionSpecific e = compileExpression(fa.getLeft(), context);
-////            self = e.getVarName();
-////
-////            String faTemp = "$" + context.iterTempVar();
-////            CLIRIndexingLiteral clirIndexingLiteral = new CLIRIndexingLiteral(
-////                    e.varName,
-////                    0,
-////                    fa.getRight().getText(),
-////                    "string",
-////                    faTemp
-////            );
-////            context.addIr(clirIndexingLiteral);
-////
-////            funcName = faTemp;
-////        } else if (tree.getFunc() instanceof ASTIndexing) {
-////            ASTIndexing indexing = (ASTIndexing) tree.getFunc();
-////
-////            // a[b]()
-////            // compile a
-////            ExpressionSpecific indexer = compileExpression(indexing.getIndexer(), context);
-////            // compile b
-////            ExpressionSpecific index = compileExpression(indexing.getIndex(), context);
-////
-////            self = indexer.getVarName();
-////
-////            CLIRCall ir1 = new CLIRCall("[[access]]");
-////            ir1.addParam(index.getVarName());
-////            context.addIr(ir1);
-////
-////            int t = context.iterTempVar();
-////            CLIRRef ir2 = new CLIRRef("$" + t, "$r0");
-////            context.addIr(ir2);
-////
-////            funcName = "$" + t;
-////        } else {
-////            ExpressionSpecific e1 = compileExpression(tree.getFunc(), context);
-////            funcName = e1.getVarName();
-////            self = "null";
-////        }
-//
-//        ExpressionSpecific e1 = compileExpression(tree.getFunc(), context);
-//        String funcName = e1.getVarName();
-////        self = "null";
-//
-//        String dest = "$" + context.iterTempVar();
-//        CLIRCall ir = new CLIRCall(funcName, dest);
-////        ir.addParam(self);
-//        for (int i = 0; i < tree.getArgs().size(); i++) {
-//            ASTExpression arg = tree.getArgs().get(i);
-//            ExpressionSpecific es = compileExpression(arg, context);
-//
-//            ir.addParam(es.getVarName());
-//        }
-//        context.addIr(ir);
-//
-//        return new ExpressionSpecific(dest);
+    public void compileFunctionCall(ASTFunctionCall tree, CLCompileContext context) throws CLCompileError {
+        ArrayList<ASTExpression> args = tree.getArgs();
+        for (int i = args.size() - 1; i >= 0; i--) {
+            this.compileExpression(args.get(i), context);
+        }
+        this.compileExpression(tree.getFunc(), context);
+
+        CLIRCall ir = new CLIRCall(args.size());
+        context.addIr(ir);
     }
 
-    public void compileFieldAccess(ASTFieldAccess tree, CLCompileContext context) {
-//        ExpressionSpecific e1 = compileExpression(tree.getLeft(), context);
-//
-//        String fieldName = tree.getRight().getText();
-//        int t = context.iterTempVar();
-//        CLIRIndexingLiteral irIndexing = new CLIRIndexingLiteral(
-//                e1.varName,
-//                0,
-//                fieldName,
-//                "string",
-//                "$" + t
-//        );
-//
-//        context.addIr(irIndexing);
-//
-//        return new ExpressionSpecific("$" + t);
+    public void compileFieldAccess(ASTFieldAccess tree, CLCompileContext context) throws CLCompileError {
+        String fieldName = tree.getRight().getText();
+        int nameIndex = context.addStringLiteral(fieldName);
+
+        context.addIr(new CLIRLoadConst(nameIndex));
+        this.compileExpression(tree.getLeft(), context);
+        context.addIr(new CLIRIndex());
     }
 
-    public void compileBooleanLiteral(ASTBooleanLiteral tree, CLCompileContext context) {
-//        String value = tree.getToken().getText();
-//        return new ExpressionSpecific("$" + value);
+    public void compileBooleanLiteral(ASTBooleanLiteral tree, CLCompileContext context) throws CLCompileError {
+        String value = tree.getToken().getText();
+        boolean b = value.equals("true");
+        context.addIr(new CLIRLoadBool(b));
     }
 
-    public void compileUnaryExpression(ASTUnaryExpression tree, CLCompileContext context) {
-//        ExpressionSpecific e1 = compileExpression(tree.getExpression(), context);
-//
-//        String op = tree.getOp().getText();
-//
-//        String methodToBeCalled = "error";
-//        if (op.equals("-")) {
-//            methodToBeCalled = "[[neg]]";
-//        } else if (op.equals("!")) {
-//            methodToBeCalled = "[[not]]";
-//        }
-//
-//        String dest = "$" + context.iterTempVar();
-//        CLIRCall ir1 = new CLIRCall(methodToBeCalled, dest);
-//        ir1.addParam(e1.getVarName());
-//        context.addIr(ir1);
-//
-//        return new ExpressionSpecific(dest);
+    public void compileUnaryExpression(ASTUnaryExpression tree, CLCompileContext context) throws CLCompileError {
+        this.compileExpression(tree.getExpression(), context);
+
+        CLIR ir = switch (tree.getOp().getText()) {
+            case "-" -> new CLIRNeg();
+            case "!" -> new CLIRNot();
+            default -> throw new CLCompileError(CLCompileErrorType.Unexpected, "operator `" + tree.getOp().getText() + "` not implemented");
+        };
+        context.addIr(ir);
     }
 
     /**
@@ -353,64 +270,35 @@ public class CLCompiler {
      * @param context
      * @return
      */
-    private void compileAndExpression(ASTBinaryExpression tree, CLCompileContext context) {
-//        String name = "and" + context.iterAndOr();
-//        String endName = name + "_end";
-//        String secondName = name + "_right";
-//
-//        ExpressionSpecific e1 = compileExpression(tree.getLeft(), context);
-//        CLIRBt bt = new CLIRBt(e1.getVarName(), secondName, 0);
-//        context.addZip(secondName, bt);
-//
-//        String dest = "$" + context.iterTempVar();
-//        CLIRRef ref1 = new CLIRRef(dest, "$false");
-//        context.addIr(ref1);
-//        CLIRJump jump = new CLIRJump(0, endName);
-//        context.addZip(endName, jump);
-//
-//        context.nextLabel(secondName);
-//
-////        String dest = "$" + context.iterTempVar();
-//        ExpressionSpecific e2 = compileExpression(tree.getRight(), context);
-//        CLIRCall call = new CLIRCall("[[and]]", dest);
-//        call.addParam(e1.getVarName());
-//        call.addParam(e2.getVarName());
-//        context.addIr(call);
-//
-//        context.nextLabel(endName);
-//        return new ExpressionSpecific(dest);
+    private void compileAndExpression(ASTBinaryExpression tree, CLCompileContext context) throws CLCompileError {
+        this.compileExpression(tree.getLeft(), context);
+
+        context.addIr(new CLIRDup());
+        CLIRJumpFalse j1 = new CLIRJumpFalse(0);
+        context.addIr(j1);
+        int j1Position = context.ir.size() - 1;
+
+        this.compileExpression(tree.getRight(), context);
+        context.addIr(new CLIRAnd());
+
+        j1.step = context.ir.size() - j1Position - 1;
     }
 
-    private void compileOrExpression(ASTBinaryExpression tree, CLCompileContext context) {
-//        String name = "or" + context.iterAndOr();
-//        String endName = name + "_end";
-//        String secondName = name + "_right";
-//
-//        ExpressionSpecific e1 = compileExpression(tree.getLeft(), context);
-//        CLIRBf bf = new CLIRBf(e1.getVarName(), secondName, 0);
-//        context.addZip(secondName, bf);
-//
-//        String dest = "$" + context.iterTempVar();
-//        CLIRRef ref1 = new CLIRRef(dest, "$true");
-//        context.addIr(ref1);
-//        CLIRJump jump = new CLIRJump(0, endName);
-//        context.addZip(endName, jump);
-//
-//        context.nextLabel(secondName);
-//
-////        String dest = "$" + context.iterTempVar();
-//        ExpressionSpecific e2 = compileExpression(tree.getRight(), context);
-//        CLIRCall call = new CLIRCall("[[or]]", dest);
-//        call.addParam(e1.getVarName());
-//        call.addParam(e2.getVarName());
-//        context.addIr(call);
-//
-//
-//        context.nextLabel(endName);
-//        return new ExpressionSpecific(dest);
+    private void compileOrExpression(ASTBinaryExpression tree, CLCompileContext context) throws CLCompileError {
+        this.compileExpression(tree.getLeft(), context);
+
+        context.addIr(new CLIRDup());
+        CLIRJumpTrue j1 = new CLIRJumpTrue(0);
+        context.addIr(j1);
+        int j1Position = context.ir.size() - 1;
+
+        this.compileExpression(tree.getRight(), context);
+        context.addIr(new CLIROr());
+
+        j1.step = context.ir.size() - j1Position - 1;
     }
 
-    public void compileBinaryExpression(ASTBinaryExpression tree, CLCompileContext context) {
+    public void compileBinaryExpression(ASTBinaryExpression tree, CLCompileContext context) throws CLCompileError {
         String op = tree.getOp().getText();
         if (op.equals("&&")) {
             compileAndExpression(tree, context);
@@ -425,28 +313,23 @@ public class CLCompiler {
 
         CLIR ir = switch (op) {
             case "+" -> new CLIRAdd();
-            default -> new CLIRAdd();
+            case "-" -> new CLIRSub();
+            case "*" -> new CLIRMul();
+            case "/" -> new CLIRDiv();
+            case "%" -> new CLIRMod();
+            case "==" -> new CLIREq();
+            case ">" -> new CLIRGt();
+            case ">=" -> new CLIRGe();
+            case "<" -> new CLIRLt();
+            case "<=" -> new CLIRLe();
+            case "!=" -> new CLIRNe();
+            default -> throw new CLCompileError(CLCompileErrorType.Unexpected, "cannot recognize operator `" + op + "`");
         };
-
-//        String methodToBeCalled = switch (op) {
-//            case "+" -> "[[add]]";
-//            case "-" -> "[[sub]]";
-//            case "*" -> "[[mul]]";
-//            case "/" -> "[[div]]";
-//            case "%" -> "[[mod]]";
-//            case "==" -> "[[eql]]";
-//            case ">" -> "[[gt]]";
-//            case "<" -> "[[lt]]";
-//            case "!=" -> "[[neq]]";
-//            case ">=" -> "[[ge]]";
-//            case "<=" -> "[[le]]";
-//            default -> "error";
-//        };
 
         context.addIr(ir);
     }
 
-    public void compileStatement(ASTStatement tree, CLCompileContext context) {
+    public void compileStatement(ASTStatement tree, CLCompileContext context) throws CLCompileError {
         if (tree instanceof ASTBreakStatement) {
             compileBreakStatement((ASTBreakStatement) tree, context);
         } else if (tree instanceof ASTCompoundStatement) {
@@ -472,108 +355,93 @@ public class CLCompiler {
         }
     }
 
-    public void compileExpressionStatement(ASTExpressionStatement tree, CLCompileContext context) {
+    public void compileExpressionStatement(ASTExpressionStatement tree, CLCompileContext context) throws CLCompileError {
         compileExpression(tree.getExpression(), context);
         context.addIr(new CLIRPop());
     }
 
-    public void compileWhileStatement(ASTWhileStatement tree, CLCompileContext context) {
-//        context.addIr(new CLIRNewBlock());
-//
-//        String iterName;
-//        if (tree.getLabel() != null) {
-//            iterName = tree.getLabel().getText();
-//        } else {
-//            iterName = "while" + context.iterIterCount();
-//        }
-//        context.pushIterName(iterName);
-//
-//        // cond
-//        context.nextLabel(iterName + "_cond");
-//        ExpressionSpecific e = compileExpression(tree.getCondition(), context);
-//        CLIRBf bf = new CLIRBf(e.getVarName(), iterName + "_end", 0);
-//        context.addZip(iterName + "_end", bf);
-//
-//        // body
-//        compileStatement(tree.getStatement(), context);
-//        int offset = context.getLabelOffset(iterName + "_cond");
-//        CLIRJump jump = new CLIRJump(offset, iterName + "_cond");
-//        context.addIr(jump);
-//
-//        context.nextLabel(iterName + "_end");
-//
-//        context.popIterName();
-//        context.addIr(new CLIREndBlock());
+    public void compileWhileStatement(ASTWhileStatement tree, CLCompileContext context) throws CLCompileError {
+        int startPosition = context.ir.size();
+
+        // push loop context
+        String loopName;
+        if (tree.getLabel() == null) {
+            loopName = context.pushLoopContext(null);
+        } else {
+            loopName = context.pushLoopContext(tree.getLabel().getText());
+        }
+
+        this.compileExpression(tree.getCondition(), context);
+
+        CLIRJumpFalse jf = new CLIRJumpFalse(0);
+        context.addIr(jf);
+        int jfPosition = context.ir.size() - 1;
+
+        this.compileStatement(tree.getStatement(), context);
+
+        CLIRJump j = new CLIRJump(startPosition - context.ir.size() - 1);
+        context.addIr(j);
+
+        jf.step = context.ir.size() - jfPosition - 1;
+
+        // process continues and breaks
+        context.signalJump(loopName + "end", context.ir.size());
+        context.signalJump(loopName + "start", startPosition);
+        context.popLoopContext();
     }
 
-    public void compileAssignStatement(ASTAssignmentStatement tree, CLCompileContext context) {
-//        ExpressionSpecific right = compileExpression(tree.getRight(), context);
-//
-//        if (tree.getLeft() instanceof ASTIdentifierExpression) {
-//            String name = ((ASTIdentifierExpression) tree.getLeft()).getToken().getText();
-//            CLIRRef ref = new CLIRRef(name, right.getVarName());
-//            context.addIr(ref);
-//        } else if (tree.getLeft() instanceof ASTIndexing) {
-//            ASTIndexing indexing = (ASTIndexing) tree.getLeft();
-//            ExpressionSpecific indexer = compileExpression(indexing.getIndexer(), context);
-//            ExpressionSpecific index = compileExpression(indexing.getIndex(), context);
-//
-//            CLIRSet set = new CLIRSet(indexer.getVarName(), index.getVarName(), right.getVarName());
-//            context.addIr(set);
-//        } else if (tree.getLeft() instanceof ASTFieldAccess) {
-//            ASTFieldAccess access = (ASTFieldAccess) tree.getLeft();
-//            ExpressionSpecific indexer = compileExpression(access.getLeft(), context);
-//            String index = context.tempString(access.getRight().getText());
-//            CLIRSet set = new CLIRSet(indexer.getVarName(), index, right.getVarName());
-//            context.addIr(set);
-//        }
+    public void compileAssignStatement(ASTAssignmentStatement tree, CLCompileContext context) throws CLCompileError {
+        this.compileExpression(tree.getRight(), context);
+
+        if (tree.getLeft() instanceof ASTIdentifierExpression) {
+            String name = ((ASTIdentifierExpression) tree.getLeft()).getToken().getText();
+            int nameIndex = context.addName(name);
+//            CLIR ir = new CLIRStoreNameExist(nameIndex);
+            CLIR ir = new CLIRStoreName(nameIndex);
+            context.addIr(ir);
+        } else if (tree.getLeft() instanceof ASTIndexing indexing) {
+            this.compileExpression(indexing.getIndex(), context);
+            this.compileExpression(indexing.getIndexer(), context);
+            context.addIr(new CLIRSet());
+        } else if (tree.getLeft() instanceof ASTFieldAccess fieldAccess) {
+            String fieldName = fieldAccess.getRight().getText();
+            int nameIndex = context.addStringLiteral(fieldName);
+            context.addIr(new CLIRLoadConst(nameIndex));
+            this.compileExpression(fieldAccess.getLeft(), context);
+            context.addIr(new CLIRSet());
+        }
     }
 
-    public void compileSelectionStatement(ASTSelectionStatement tree, CLCompileContext context) {
-//        String ifName = "if" + context.iterIfCount();
-//        context.pushIfName(ifName);
-//
-//        boolean hasElse = tree.getStatementFalse() != null;
-//
-//        // cond
-//        ExpressionSpecific e = compileExpression(tree.getCondition(), context);
-//        CLIRBf bf = new CLIRBf(e.getVarName(), ifName + "_end", 0);
-//        if (hasElse) {
-//            context.addZip(ifName + "_false", bf);
-//        } else {
-//            context.addZip(ifName + "_end", bf);
-//        }
-//
-//        // true
-//        context.addIr(new CLIRNewBlock());
-//        compileStatement(tree.getStatementTrue(), context);
-//        context.addIr(new CLIREndBlock());
-//        CLIRJump jump = new CLIRJump(0, ifName + "_end");
-//        if (hasElse) {
-//            context.addZip(ifName + "_end", jump);
-//        }
-//
-//        // false
-//        if (tree.getStatementFalse() != null) {
-//            context.nextLabel(ifName + "_false");
-//            context.addIr(new CLIRNewBlock());
-//            compileStatement(tree.getStatementFalse(), context);
-//            context.addIr(new CLIREndBlock());
-//        }
-//
-//        context.popIfName();
-//        if (!hasElse) {
-//            context.nextLabel(ifName + "_end");
-//        }
+    public void compileSelectionStatement(ASTSelectionStatement tree, CLCompileContext context) throws CLCompileError {
+        this.compileExpression(tree.getCondition(), context);
+
+        CLIRJumpFalse jump1 = new CLIRJumpFalse(0);
+        context.addIr(jump1);
+        int jump1Position = context.ir.size() - 1;
+
+        this.compileStatement(tree.getStatementTrue(), context);
+
+        if (tree.getStatementFalse() != null) {
+            CLIRJump jump2 = new CLIRJump(0);
+            context.addIr(jump2);
+            int jump2Position = context.ir.size() - 1;
+
+            this.compileStatement(tree.getStatementFalse(), context);
+
+            jump1.step = jump2Position - jump1Position;
+            jump2.step = context.ir.size() - 1 - jump2Position;
+        } else {
+            jump1.step = context.ir.size() - 1 - jump1Position;
+        }
     }
 
-    public void compileReturnStatement(ASTReturnStatement tree, CLCompileContext context) {
+    public void compileReturnStatement(ASTReturnStatement tree, CLCompileContext context) throws CLCompileError {
         this.compileExpression(tree.getValue(), context);
         CLIRReturn ir = new CLIRReturn();
         context.addIr(ir);
     }
 
-    public void compileForStatement(ASTForStatement tree, CLCompileContext context) {
+    public void compileForStatement(ASTForStatement tree, CLCompileContext context) throws CLCompileError {
 //        context.addIr(new CLIRNewBlock());
 //
 //
@@ -611,7 +479,7 @@ public class CLCompiler {
 //        context.addIr(new CLIREndBlock());
     }
 
-    public void compileForDeclStatement(ASTForDeclStatement tree, CLCompileContext context) {
+    public void compileForDeclStatement(ASTForDeclStatement tree, CLCompileContext context) throws CLCompileError {
 //        context.addIr(new CLIRNewBlock());
 //
 //        String iterName;
@@ -647,7 +515,7 @@ public class CLCompiler {
 //        context.addIr(new CLIREndBlock());
     }
 
-    public void compileDataStatement(ASTDataStatement tree, CLCompileContext context) {
+    public void compileDataStatement(ASTDataStatement tree, CLCompileContext context) throws CLCompileError {
         for (ASTDataStatementItem item : tree.getItems()) {
             String name = item.getName().getText();
             context.addLocalName(name);
@@ -661,44 +529,36 @@ public class CLCompiler {
         }
     }
 
-    public void compileContinueStatement(ASTContinueStatement tree, CLCompileContext context) {
-//        if (tree.getLabel() == null) {
-//            String cur = context.getCurIterName();
-//            CLIRJump jump = new CLIRJump(0, cur + "_step");
-//            context.addZip(cur + "_step", jump);
-//        } else {
-//            String target = tree.getLabel().getText();
-//            CLIRJump jump = new CLIRJump(0, target + "_step");
-//            context.addZip(target + "_step", jump);
-//        }
+    public void compileContinueStatement(ASTContinueStatement tree, CLCompileContext context) throws CLCompileError {
+        if (tree.getLabel() == null) {
+            context.addContinue(null);
+        } else {
+            context.addContinue(tree.getLabel().getText());
+        }
     }
 
-    public void compileCompoundStatement(ASTCompoundStatement tree, CLCompileContext context) {
+    public void compileCompoundStatement(ASTCompoundStatement tree, CLCompileContext context) throws CLCompileError {
         for (ASTStatement stat : tree.getItems()) {
             compileStatement(stat, context);
         }
     }
 
-    public void compileBreakStatement(ASTBreakStatement tree, CLCompileContext context) {
-//        if (tree.getLabel() == null) {
-//            String cur = context.getCurIterName();
-//            CLIRJump jump = new CLIRJump(0, cur + "_end");
-//            context.addZip(cur + "_end", jump);
-//        } else {
-//            String target = tree.getLabel().getText();
-//            CLIRJump jump = new CLIRJump(0, target + "_end");
-//            context.addZip(target + "_end", jump);
-//        }
+    public void compileBreakStatement(ASTBreakStatement tree, CLCompileContext context) throws CLCompileError {
+        if (tree.getLabel() == null) {
+            context.addBreak(null);
+        } else {
+            context.addBreak(tree.getLabel().getText());
+        }
     }
 
     // program unit
-    public void compileProgram(ASTProgram tree, CLCompileContext context) {
+    public void compileProgram(ASTProgram tree, CLCompileContext context) throws CLCompileError {
         for (ASTProgramUnit u : tree.getProgramUnits()) {
             compileProgramUnit(u, context);
         }
     }
 
-    public void compileProgramUnit(ASTProgramUnit tree, CLCompileContext context) {
+    public void compileProgramUnit(ASTProgramUnit tree, CLCompileContext context) throws CLCompileError {
         if (tree instanceof ASTFunctionDefinition) {
             compileFunctionDefinition((ASTFunctionDefinition) tree, context);
         } else if (tree instanceof ASTRootStatement) {
@@ -710,23 +570,44 @@ public class CLCompiler {
         }
     }
 
-    public void compileImport(ASTImport tree, CLCompileContext context) {
-//        String path = tree.fullPath();
-//        String as = tree.getAsString();
-//
-//        CLIRImport ir = new CLIRImport(path, as);
-//        context.addIr(ir);
+    public void compileImport(ASTImport tree, CLCompileContext context) throws CLCompileError {
+        String file = tree.getPath().getText();
+        file = file.substring(1, file.length() - 1);
+        int index = context.addStringLiteral(file);
+
+        context.addIr(new CLIRLoadConst(index));
+        context.addIr(new CLIRCallFile());
+
+        if (tree.getAs() == null) {
+            String[] temp = file.split("[/:]");
+            String defaultName = temp[temp.length - 1];
+            temp = defaultName.split("\\.");
+            defaultName = temp[0];
+            int defaultNameIndex = context.addName(defaultName);
+            context.addIr(new CLIRStoreName(defaultNameIndex));
+
+            context.addLocalName(defaultName);
+        } else {
+            String name = tree.getAs().getText();
+            int nameIndex = context.addStringLiteral(name);
+            context.addIr(new CLIRStoreName(nameIndex));
+
+            context.addLocalName(name);
+        }
     }
 
-    public void compileExport(ASTExport tree, CLCompileContext context) {
-//        String name = tree.getName().getText();
-//
-//        ExpressionSpecific e = compileExpression(tree.getExpression(), context);
-//        CLIRExport ir = new CLIRExport(name, e.varName);
-//        context.addIr(ir);
+    public void compileExport(ASTExport tree, CLCompileContext context) throws CLCompileError {
+        String name = tree.getName().getText();
+        int nameIndex = context.addStringLiteral(name);
+
+        context.addIr(new CLIRLoadConst(nameIndex));
+
+        this.compileExpression(tree.getExpression(), context);
+
+        context.addIr(new CLIRExport());
     }
 
-    public void compileFunctionDefinition(ASTFunctionDefinition tree, CLCompileContext context) {
+    public void compileFunctionDefinition(ASTFunctionDefinition tree, CLCompileContext context) throws CLCompileError {
 //        String name = tree.getName().getText();
 //        ArrayList<String> params = new ArrayList<>();
 //        for (ASTToken token : tree.getParams()) {
@@ -734,6 +615,7 @@ public class CLCompiler {
 //        }
 //        CLIRDefFunction def = new CLIRDefFunction(name, params, tree.getBody());
 //        context.addIr(def);
+
     }
 
     public void compileFile(String program, CLCompileContext context) {

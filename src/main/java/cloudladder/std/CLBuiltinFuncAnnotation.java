@@ -10,5 +10,7 @@ import java.lang.annotation.Target;
 public @interface CLBuiltinFuncAnnotation {
     String[] value() default {};
     String name() default "";
+    String[] params() default {};
+    boolean catchAll() default false;
     String tag() default "";
 }

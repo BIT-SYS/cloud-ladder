@@ -1,5 +1,6 @@
 package cloudladder.core.ir;
 
+import cloudladder.core.error.CLRuntimeError;
 import cloudladder.core.object.CLObject;
 import cloudladder.core.runtime.CLRtFrame;
 import lombok.AllArgsConstructor;
@@ -9,7 +10,7 @@ public class CLIRLoadConst extends CLIR {
     public int index;
 
     @Override
-    public void execute(CLRtFrame frame) {
+    public void execute(CLRtFrame frame) throws CLRuntimeError {
         CLObject constant = frame.codeObject.getConstant(this.index);
 
         frame.vm.stack.push(constant);

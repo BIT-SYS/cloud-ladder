@@ -1,9 +1,12 @@
 package cloudladder.core.object;
 
+import cloudladder.core.error.CLRuntimeError;
+import cloudladder.core.error.CLRuntimeErrorType;
+
 import java.util.ArrayList;
 
 public class CLNumber extends CLObject {
-    private double value;
+    public double value;
     private static CLNumberPool pool = new CLNumberPool();
 
     public static class CLNumberPool {
@@ -40,14 +43,124 @@ public class CLNumber extends CLObject {
         }
     }
 
+    public boolean isInteger() {
+        return this.value % 1 == 0;
+    }
+
     @Override
-    public CLObject add(CLObject other) {
+    public CLObject add(CLObject other) throws CLRuntimeError {
         if (other instanceof CLNumber) {
             double result = this.value + ((CLNumber) other).value;
             return CLNumber.getNumberObject(result);
         }
 
-        // todo
-        return null;
+        throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting number");
+    }
+
+    @Override
+    public CLObject sub(CLObject other) throws CLRuntimeError {
+        if (other instanceof CLNumber) {
+            double result = this.value - ((CLNumber) other).value;
+            return CLNumber.getNumberObject(result);
+        }
+
+        throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting number");
+    }
+
+    @Override
+    public CLObject mul(CLObject other) throws CLRuntimeError {
+        if (other instanceof CLNumber) {
+            double result = this.value * ((CLNumber) other).value;
+            return CLNumber.getNumberObject(result);
+        }
+
+        throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting number");
+    }
+
+    @Override
+    public CLObject div(CLObject other) throws CLRuntimeError {
+        if (other instanceof CLNumber) {
+            double result = this.value / ((CLNumber) other).value;
+            return CLNumber.getNumberObject(result);
+        }
+
+        throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting number");
+    }
+
+    @Override
+    public CLObject mod(CLObject other) throws CLRuntimeError {
+        if (other instanceof CLNumber) {
+            double result = this.value % ((CLNumber) other).value;
+            return CLNumber.getNumberObject(result);
+        }
+
+        throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting number");
+    }
+
+    @Override
+    public CLObject ne(CLObject other) throws CLRuntimeError {
+        if (other instanceof CLNumber) {
+            return CLBoolean.get(this.value == ((CLNumber) other).value);
+        }
+        return CLBoolean.boolTrue;
+    }
+
+    @Override
+    public CLObject eq(CLObject other) throws CLRuntimeError {
+        if (other instanceof CLNumber) {
+            boolean result = this.value == ((CLNumber) other).value;
+            return CLBoolean.get(result);
+        }
+        return CLBoolean.boolFalse;
+    }
+
+    @Override
+    public CLObject gt(CLObject other) throws CLRuntimeError {
+        if (other instanceof CLNumber) {
+            return CLBoolean.get(this.value > ((CLNumber) other).value);
+        }
+
+        throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting number");
+    }
+
+    @Override
+    public CLObject ge(CLObject other) throws CLRuntimeError {
+        if (other instanceof CLNumber) {
+            return CLBoolean.get(this.value >= ((CLNumber) other).value);
+        }
+
+        throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting number");
+    }
+
+    @Override
+    public CLObject lt(CLObject other) throws CLRuntimeError {
+        if (other instanceof CLNumber) {
+            return CLBoolean.get(this.value < ((CLNumber) other).value);
+        }
+
+        throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting number");
+    }
+
+    @Override
+    public CLObject le(CLObject other) throws CLRuntimeError {
+        if (other instanceof CLNumber) {
+            return CLBoolean.get(this.value <= ((CLNumber) other).value);
+        }
+
+        throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting number");
+    }
+
+    @Override
+    public CLObject neg() throws CLRuntimeError {
+        return CLNumber.getNumberObject(-this.value);
+    }
+
+    @Override
+    public String toString() {
+        if (this.value % 1 == 0) {
+            return Integer.toString(((int) this.value));
+        } else {
+            return Double.toString(this.value);
+        }
     }
 }

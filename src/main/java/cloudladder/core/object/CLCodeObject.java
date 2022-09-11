@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class CLCodeObject extends CLObject {
-    public  ArrayList<CLIR> instructions;
+    public ArrayList<CLIR> instructions;
     public ArrayList<String> names;
     public HashSet<String> localNames;
     public HashSet<String> nonLocalNames;
@@ -23,4 +23,22 @@ public class CLCodeObject extends CLObject {
     public CLObject getConstant(int index) {
         return this.constants.get(index);
     }
+
+    public String beautify() {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < this.instructions.size(); i++) {
+            String s = this.instructions.get(i).toString();
+            sb.append(i).append(": ").append(s).append("\n");
+        }
+
+        return new String(sb);
+    }
+
+//    public String getCodes() {
+//        StringBuilder sb = new StringBuilder();
+//        for (CLIR ir : this.instructions) {
+//
+//        }
+//    }
 }
