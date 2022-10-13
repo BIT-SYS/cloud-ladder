@@ -23,4 +23,14 @@ public class CLBoolean extends CLObject {
     public CLObject not() {
         return CLBoolean.get(!this.value);
     }
+
+    @Override
+    public String getTypeIdentifier() {
+        return "boolean";
+    }
+
+    @Override
+    public String defaultStringify() {
+        return Boolean.toString(this.value);
+    }
 }

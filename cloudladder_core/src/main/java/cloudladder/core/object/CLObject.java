@@ -17,6 +17,10 @@ public abstract class CLObject {
         CLObject.NEXT_ID += 1;
     }
 
+    public abstract String getTypeIdentifier();
+
+    public abstract String defaultStringify();
+
     public CLObject neg() throws CLRuntimeError {
         throw new CLRuntimeError(CLRuntimeErrorType.Unimplemented, "neg not implemented");
     }

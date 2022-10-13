@@ -24,4 +24,14 @@ public class CLBuiltinFunction extends CLFunction {
             throw new CLRuntimeError(CLRuntimeErrorType.Unexpected, "method invocation error");
         }
     }
+
+    @Override
+    public String getTypeIdentifier() {
+        return "function";
+    }
+
+    @Override
+    public String defaultStringify() {
+        return "builtin_function@" + this.id;
+    }
 }

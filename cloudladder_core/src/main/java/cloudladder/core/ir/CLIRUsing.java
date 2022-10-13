@@ -3,7 +3,9 @@ package cloudladder.core.ir;
 import cloudladder.core.error.CLRuntimeError;
 import cloudladder.core.knowledge.implementation.MethodImplementation;
 import cloudladder.core.knowledge.implementation.MethodImplementationUtil;
+import cloudladder.core.object.CLDict;
 import cloudladder.core.object.CLFunction;
+import cloudladder.core.object.CLObject;
 import cloudladder.core.object.CLString;
 import cloudladder.core.runtime.CLRtFrame;
 import lombok.AllArgsConstructor;
@@ -35,7 +37,17 @@ public class CLIRUsing extends CLIR {
         if (alias != null) {
             finalName = alias;
         }
-        frame.scope.addVariable(finalName, function);
+
+        if (scope == null) {
+            // add to current scope
+            frame.scope.addVariable(finalName, function);
+        } else {
+            // add to scope
+            CLObject scopeObject = frame.loadName(scope);
+            if (scopeObject instanceof CLDict d) {
+                d.put(name, function);
+            }
+        }
     }
 
     @Override

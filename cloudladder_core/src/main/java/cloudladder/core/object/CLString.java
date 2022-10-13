@@ -6,4 +6,14 @@ import lombok.AllArgsConstructor;
 @CLObjectAnnotation(typeIdentifier = "string")
 public class CLString extends CLObject {
     public String value;
+
+    @Override
+    public String getTypeIdentifier() {
+        return "string";
+    }
+
+    @Override
+    public String defaultStringify() {
+        return this.value;
+    }
 }

@@ -73,7 +73,8 @@ public class CLStdGlobalFunction {
         CLObject items = frame.scope.getOwnVariable("items");
         if (items instanceof CLArray) {
             for (CLObject item : ((CLArray) items).items) {
-                System.out.println(CLStdGlobalFunction.toString(item));
+//                System.out.println(CLStdGlobalFunction.toString(item));
+                System.out.println(item.defaultStringify());
             }
         }
 
@@ -118,6 +119,12 @@ public class CLStdGlobalFunction {
         CLObject object = frame.scope.getOwnVariable("object");
 
         return new CLRef(object);
+    }
+
+    @CLBuiltinFuncAnnotation(name = "map_array")
+    public static CLObject __map_array__(CLRtFrame frame) throws CLRuntimeError {
+        CLMapArray ma = new CLMapArray();
+        return ma;
     }
 
     public static void injectScope(CLRtScope scope) {

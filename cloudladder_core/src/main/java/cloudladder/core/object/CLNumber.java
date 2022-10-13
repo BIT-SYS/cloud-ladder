@@ -25,6 +25,20 @@ public class CLNumber extends CLObject {
         }
     }
 
+    @Override
+    public String getTypeIdentifier() {
+        return "number";
+    }
+
+    @Override
+    public String defaultStringify() {
+        if (this.value % 1 == 0) {
+            return Integer.toString((int) this.value);
+        } else {
+            return Double.toString(this.value);
+        }
+    }
+
     public CLNumber(double value) {
         this.value = value;
     }

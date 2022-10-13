@@ -24,4 +24,14 @@ public class CLUserFunction extends CLFunction {
         CLObject retValue = frame.vm.stack.pop();
         return retValue;
     }
+
+    @Override
+    public String getTypeIdentifier() {
+        return "function";
+    }
+
+    @Override
+    public String defaultStringify() {
+        return "user_function@" + this.id;
+    }
 }

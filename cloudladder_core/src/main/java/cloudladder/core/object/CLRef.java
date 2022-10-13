@@ -21,4 +21,14 @@ public class CLRef extends CLObject {
     public void setValue(CLObject index, CLObject value) {
         this.value = value;
     }
+
+    @Override
+    public String getTypeIdentifier() {
+        return "ref";
+    }
+
+    @Override
+    public String defaultStringify() {
+        return "ref(" + this.value.defaultStringify() + ")";
+    }
 }

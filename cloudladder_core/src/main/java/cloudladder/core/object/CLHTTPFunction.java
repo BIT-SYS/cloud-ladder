@@ -63,4 +63,14 @@ public class CLHTTPFunction extends CLFunction {
             throw new CLRuntimeError(CLRuntimeErrorType.NetworkError, "cannot send request to `" + this.url + "`");
         }
     }
+
+    @Override
+    public String getTypeIdentifier() {
+        return "http_function";
+    }
+
+    @Override
+    public String defaultStringify() {
+        return "http_function@" + this.id;
+    }
 }

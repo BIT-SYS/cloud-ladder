@@ -70,4 +70,14 @@ public class CLJarFunction extends CLFunction {
             throw new CLRuntimeError(CLRuntimeErrorType.Unexpected, "illegal access");
         }
     }
+
+    @Override
+    public String getTypeIdentifier() {
+        return "function";
+    }
+
+    @Override
+    public String defaultStringify() {
+        return "jar_function@" + this.id;
+    }
 }

@@ -36,6 +36,16 @@ public class CLCodeObject extends CLObject {
         return new String(sb);
     }
 
+    @Override
+    public String getTypeIdentifier() {
+        return "code_object";
+    }
+
+    @Override
+    public String defaultStringify() {
+        return "code_object@" + this.id;
+    }
+
     //    public String getCodes() {
 //        StringBuilder sb = new StringBuilder();
 //        for (CLIR ir : this.instructions) {
