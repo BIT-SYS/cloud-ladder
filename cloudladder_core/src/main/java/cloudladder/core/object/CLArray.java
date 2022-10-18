@@ -17,6 +17,10 @@ public class CLArray extends CLObject {
         this.items.add(item);
     }
 
+    public int size() {
+        return this.items.size();
+    }
+
     @Override
     public String getTypeIdentifier() {
         return "array";

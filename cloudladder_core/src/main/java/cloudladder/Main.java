@@ -42,7 +42,7 @@ public class Main {
 //        System.out.println(codeObject.beautify());
 
         CLVM vm = new CLVM(Paths.get("E:/cloudladder/cloud-ladder/cloudladder_core/cloudladder"));
-        vm.runFile("test.cl");
+        vm.runFile("test2.cl");
 //        CLRtFrame frame = vm.runCodeObject(codeObject);
 //        System.out.println(frame.scope.getNameMapping());
     }

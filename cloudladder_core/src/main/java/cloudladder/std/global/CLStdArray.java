@@ -168,6 +168,54 @@ import java.util.Collections;
 
 @CLStdLibAnnotation(name = "Array")
 public class CLStdArray {
+    @CLBuiltinFuncAnnotation(params = {"a1", "a2"}, name = "interleave")
+    public static CLArray __interleave__(CLRtFrame frame) throws CLRuntimeError {
+        CLObject a1 = frame.scope.getOwnVariable("a1");
+        CLObject a2 = frame.scope.getOwnVariable("a2");
+        if (!(a1 instanceof CLArray arr1) || !(a2 instanceof CLArray arr2)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting array");
+        }
+
+        CLArray ret = new CLArray();
+        if (arr1.size() > arr2.size()) {
+            CLArray temp = arr1;
+            arr1 = arr2;
+            arr2 = temp;
+        }
+
+        for (int i = 0; i < arr1.size(); i++) {
+            CLObject item1 = arr1.items.get(i);
+            CLObject item2 = arr2.items.get(i);
+            ret.addItem(item1);
+            ret.addItem(item2);
+        }
+        for (int i = arr1.size(); i < arr2.size(); i++) {
+            CLObject item = arr2.items.get(i);
+            ret.addItem(item);
+        }
+
+        return ret;
+    }
+
+    @CLBuiltinFuncAnnotation(params = {"a1", "a2"}, name = "append")
+    public static CLArray __append__(CLRtFrame frame) throws CLRuntimeError {
+        CLObject a1 = frame.scope.getOwnVariable("a1");
+        CLObject a2 = frame.scope.getOwnVariable("a2");
+        if (!(a1 instanceof CLArray arr1) || !(a2 instanceof CLArray arr2)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting array");
+        }
+
+        CLArray ret = new CLArray();
+        for (int i = 0; i < arr1.size(); i++) {
+            ret.addItem(arr1.items.get(i));
+        }
+        for (int i = 0; i < arr2.size(); i++) {
+            ret.addItem(arr2.items.get(i));
+        }
+
+        return ret;
+    }
+
     @CLBuiltinFuncAnnotation(params = {"array"}, name = "length")
     public static CLObject __length__(CLRtFrame frame) throws CLRuntimeError {
         CLObject array = frame.scope.getOwnVariable("array");

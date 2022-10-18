@@ -14,4 +14,7 @@ public enum CLRuntimeErrorType {
     ClassNotFound,
     MethodNotFound,
     WrongReturnType,
+    UnsupportedAudioFile,
+    IOError,
+    ParamsError,
 }

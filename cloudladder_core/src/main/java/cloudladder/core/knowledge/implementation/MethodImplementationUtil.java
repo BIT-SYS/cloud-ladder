@@ -1,6 +1,7 @@
 package cloudladder.core.knowledge.implementation;
 
 import com.google.gson.Gson;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -10,11 +11,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MethodImplementationUtil {
-    public static MethodImplementation getImplementation(String serverBase) {
+    public static MethodImplementation getImplementation(String serverBase, String scope, String name, String from) {
         OkHttpClient client = new OkHttpClient();
 
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(serverBase + "/method-implementation/get-method").newBuilder();
+        if (scope != null) {
+            urlBuilder.addQueryParameter("scope", scope);
+        }
+        urlBuilder.addQueryParameter("name", name);
+        urlBuilder.addQueryParameter("from", from);
+
         Request request = new Request.Builder()
-                .url(serverBase + "/method-implementation/get-method")
+                .url(urlBuilder.build())
                 .build();
         try {
             Response response = client.newCall(request).execute();

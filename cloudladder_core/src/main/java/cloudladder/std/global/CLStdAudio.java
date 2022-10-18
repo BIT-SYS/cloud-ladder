@@ -1,53 +1,81 @@
-//package cloudladder.std.global;
-//
-//import cloudladder.core.runtime.data.*;
-//import cloudladder.core.runtime.env.CLRtEnvironment;
-//import cloudladder.core.runtime.env.CLRtScope;
-//import cloudladder.std.CLBuiltinFuncAnnotation;
-//import it.sauronsoftware.jave.EncoderException;
-//import okhttp3.Response;
-//import okio.BufferedSource;
-//
-//import javax.sound.sampled.*;
-//import java.io.*;
-//import java.lang.reflect.Method;
-//import java.nio.file.Path;
-//import java.util.UUID;
-//
-//public class CLStdAudio {
-//    @CLBuiltinFuncAnnotation(value = {"path"}, name = "new")
-//    public static void __new__(CLRtEnvironment env) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
-//        CLData path = env.getVariable("path").getReferee();
-//        if (!(path instanceof CLString)) {
-//            // todo err
-//        }
-//
-//        String str = ((CLString) path).getValue();
-//        Path p = env.getWd().resolve(str);
-//        CLAudio audio = new CLAudio(p);
-//        audio.setExts(env.getVariable("Audio"));
-//        env.ret(audio.wrap());
-//    }
-//    @CLBuiltinFuncAnnotation(value={"self"}, name="binary")
-//    public static void __binary__(CLRtEnvironment env) {
-//        CLAudio self = (CLAudio) env.getVariable("self").getReferee();
-//        String s = self.binary();
-//
-//        CLString str = new CLString(s);
-//        str.setExts(env.getVariable("String"));
-//        env.ret(str.wrap());
-//    }
-//    @CLBuiltinFuncAnnotation(value={"self","start","end"},name="cutAudio")
-//    public static void __cutAudio__(CLRtEnvironment env) throws UnsupportedAudioFileException, IOException{
-//        CLData p1 = env.getVariable("start").getReferee();
-//        CLData p2 = env.getVariable("end").getReferee();
-//        int start = Integer.parseInt(((CLString)p1).getValue());
-//        int end = Integer.parseInt(((CLString)p2).getValue());
-//        CLAudio self = (CLAudio) env.getVariable("self").getReferee();
-//        CLAudio ret = self.cutAudio(start,end);
-//        ret.setExts(env.getVariable("Audio"));
-//        env.ret(ret.wrap());
-//    }
+package cloudladder.std.global;
+
+import cloudladder.core.error.CLRuntimeError;
+import cloudladder.core.error.CLRuntimeErrorType;
+import cloudladder.core.object.CLAudio;
+import cloudladder.core.object.CLNumber;
+import cloudladder.core.object.CLObject;
+import cloudladder.core.object.CLString;
+import cloudladder.core.runtime.CLRtFrame;
+import cloudladder.std.CLBuiltinFuncAnnotation;
+
+import javax.sound.sampled.*;
+import java.io.*;
+import java.nio.file.Path;
+
+public class CLStdAudio {
+    @CLBuiltinFuncAnnotation(params = {"path"}, name = "new")
+    public static CLAudio __new__(CLRtFrame frame) throws CLRuntimeError {
+        CLObject path = frame.scope.getOwnVariable("path");
+        if (!(path instanceof CLString)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting string, got `" + path.getTypeIdentifier() + "`");
+        }
+
+        String str = ((CLString) path).value;
+        Path p = frame.vm.cwd.resolve(str);
+        CLAudio audio;
+        try {
+            audio = new CLAudio(p);
+        } catch (Exception e) {
+            throw new CLRuntimeError(CLRuntimeErrorType.Unexpected, "create audio error");
+        }
+
+        return audio;
+    }
+
+    @CLBuiltinFuncAnnotation(value={"audio"}, name="binary")
+    public static CLString __binary__(CLRtFrame frame) throws CLRuntimeError {
+        CLObject maybeAudio = frame.scope.getOwnVariable("audio");
+        if (!(maybeAudio instanceof CLAudio audio)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting audio, got `" + maybeAudio.getTypeIdentifier() + "`");
+        }
+        String s = audio.binary();
+
+        return new CLString(s);
+    }
+
+    @CLBuiltinFuncAnnotation(value={"audio", "start", "end"}, name="cutAudio")
+    public static CLAudio __cutAudio__(CLRtFrame frame) throws CLRuntimeError {
+        CLObject p1 = frame.scope.getOwnVariable("start");
+        CLObject p2 = frame.scope.getOwnVariable("end");
+
+        if (!(p1 instanceof CLNumber number1)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting number, got `" + p1.getTypeIdentifier() + "`");
+        }
+        if (!(p2 instanceof CLNumber number2)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting number, got `" + p2.getTypeIdentifier() + "`");
+        }
+
+        if (!number1.isInteger() || !number2.isInteger()) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting integer, got float");
+        }
+
+        int start = (int) number1.value;
+        int end = (int) number2.value;
+
+        CLObject maybeAudio = frame.scope.getOwnVariable("audio");
+        if (!(maybeAudio instanceof CLAudio audio)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting audio, got `" + maybeAudio.getTypeIdentifier() + "`");
+        }
+
+        try {
+            return audio.cutAudio(start, end);
+        } catch (UnsupportedAudioFileException e) {
+            throw new CLRuntimeError(CLRuntimeErrorType.UnsupportedAudioFile, "unsupported audio file");
+        } catch (IOException e) {
+            throw new CLRuntimeError(CLRuntimeErrorType.IOError, "io exception");
+        }
+    }
 //    @CLBuiltinFuncAnnotation(value={"audio1","audio2"},name="mergeAudio")
 //    public static void __mergeAudio__(CLRtEnvironment env) throws IOException {
 //        CLAudio audio1 = (CLAudio) env.getVariable("audio1").getReferee();
@@ -150,5 +178,5 @@
 //
 //        env.addVariable("Audio", obj.wrap());
 //    }
-//}
-//
+}
+

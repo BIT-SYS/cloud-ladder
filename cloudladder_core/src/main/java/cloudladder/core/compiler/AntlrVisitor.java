@@ -38,6 +38,19 @@ public class AntlrVisitor extends CLParserBaseVisitor<AST> {
 //    }
 
     @Override
+    public AST visitExpLambdaExpression(CLParser.ExpLambdaExpressionContext ctx) {
+        ArrayList<ASTToken> args = new ArrayList<>();
+        ASTExpression expression = (ASTExpression) visit(ctx.lambdaExpression().expression());
+
+        for (int i = 0; i < ctx.lambdaExpression().args.size(); i++) {
+            ASTToken arg = new ASTToken(ctx.lambdaExpression().args.get(i));
+            args.add(arg);
+        }
+
+        return new ASTLambdaExpression(args, expression);
+    }
+
+    @Override
     public AST visitExpPipeAndArrow(CLParser.ExpPipeAndArrowContext ctx) {
         ASTExpression left = (ASTExpression) visit(ctx.expression(0));
         ASTExpression right = (ASTExpression) visit(ctx.expression(1));

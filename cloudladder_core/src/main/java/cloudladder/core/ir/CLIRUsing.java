@@ -30,7 +30,9 @@ public class CLIRUsing extends CLIR {
             alias = frame.codeObject.getName(this.aliasIndex);
         }
 
-        MethodImplementation implementation = MethodImplementationUtil.getImplementation(frame.vm.serverBase);
+        MethodImplementation implementation = MethodImplementationUtil.getImplementation(
+                frame.vm.serverBase, scope, name, path
+        );
         CLFunction function = implementation.buildFunction();
 
         String finalName = name;

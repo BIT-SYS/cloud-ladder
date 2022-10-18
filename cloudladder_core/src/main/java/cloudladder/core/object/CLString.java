@@ -1,5 +1,7 @@
 package cloudladder.core.object;
 
+import cloudladder.core.error.CLRuntimeError;
+import cloudladder.core.error.CLRuntimeErrorType;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -15,5 +17,13 @@ public class CLString extends CLObject {
     @Override
     public String defaultStringify() {
         return this.value;
+    }
+
+    @Override
+    public CLObject eq(CLObject other) throws CLRuntimeError {
+        if (!(other instanceof CLString s)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting string, got `" + other.getTypeIdentifier() + "`");
+        }
+        return CLBoolean.get(this.value.equals(s.value));
     }
 }

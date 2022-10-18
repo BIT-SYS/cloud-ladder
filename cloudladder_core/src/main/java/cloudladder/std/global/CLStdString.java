@@ -1,85 +1,87 @@
-//package cloudladder.std.global;
-//
-//import cloudladder.core.runtime.data.*;
-//import cloudladder.core.runtime.env.CLRtEnvironment;
-//import cloudladder.core.runtime.env.CLRtScope;
-//import cloudladder.std.CLBuiltinFuncAnnotation;
+package cloudladder.std.global;
+
+import cloudladder.core.error.CLRuntimeError;
+import cloudladder.core.error.CLRuntimeErrorType;
+import cloudladder.core.object.CLNumber;
+import cloudladder.core.object.CLObject;
+import cloudladder.core.object.CLString;
+import cloudladder.core.runtime.CLRtFrame;
+import cloudladder.std.CLBuiltinFuncAnnotation;
+import cloudladder.std.CLStdLibAnnotation;
 //import org.apache.commons.lang3.StringUtils;
+
+@CLStdLibAnnotation(name = "String")
+public class CLStdString {
+    @CLBuiltinFuncAnnotation(value={"s"}, name="length")
+    public static CLNumber __length__(CLRtFrame frame) throws CLRuntimeError {
+        CLObject maybeString = frame.scope.getOwnVariable("s");
+        if (!(maybeString instanceof CLString s)) {
+            throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting string, found `" + maybeString.getTypeIdentifier() + "`");
+        }
+        int length = s.value.length();
+        return CLNumber.getNumberObject((double) length);
+    }
+
+//    @CLBuiltinFuncAnnotation(value={"str"}, name="trim")
+//    public static void __trim__(CLRtEnvironment env) {
+//        CLString self = (CLString) env.getVariable("this").getReferee();
+//        String str = self.getValue();
+//        String result;
 //
-//import java.lang.reflect.Method;
-//import java.util.List;
-//import java.util.stream.Collectors;
+//        if (env.hasOwnVariable("str")) {
+//            CLString p1 = (CLString) env.getVariable("str").getReferee();
+//            String trim = p1.getValue();
+//            result = "";
+//        } else {
+//            result = str.trim();
+//        }
 //
-//public class CLStdString {
-//    @CLBuiltinFuncAnnotation(value={"self"}, name="length")
-//    public static void __length__(CLRtEnvironment env) {
-//        CLString self = (CLString) env.getVariable("self").getReferee();
-//        int length = self.getValue().length();
-//
-//        CLNumber ret = env.newNumber(length);
+//        CLString ret = new CLString(result);
 //        env.ret(ret.wrap());
 //    }
 //
-////    @CLBuiltinFuncAnnotation(value={"str"}, name="trim")
-////    public static void __trim__(CLRtEnvironment env) {
-////        CLString self = (CLString) env.getVariable("this").getReferee();
-////        String str = self.getValue();
-////        String result;
-////
-////        if (env.hasOwnVariable("str")) {
-////            CLString p1 = (CLString) env.getVariable("str").getReferee();
-////            String trim = p1.getValue();
-////            result = "";
-////        } else {
-////            result = str.trim();
-////        }
-////
-////        CLString ret = new CLString(result);
-////        env.ret(ret.wrap());
-////    }
-////
-////    @CLBuiltinFuncAnnotation(value={"str"}, name="trimStart")
-////    public static void __trimStart__(CLRtEnvironment env) {
-////        CLString self = (CLString) env.getVariable("this").getReferee();
-////        String str = self.getValue();
-////
-////        String result;
-////        if (!env.checkParamType("str", CLString.class)) {
-////            result = str.replaceFirst("\\s+", "");
-////        } else {
-////            CLString p1 = (CLString) env.getVariable("str").getReferee();
-////            String s = p1.getValue();
-////            result = str;
-////            while (result.startsWith(s)) {
-////                result = result.replaceFirst(s, "");
-////            }
-////        }
-////
-////        CLString ret = env.newString(result);
-////        env.ret(ret.wrap());
-////    }
-////
-////    @CLBuiltinFuncAnnotation(value={"str"}, name="trimEnd")
-////    public static void __trimEnd__(CLRtEnvironment env) {
-////        CLString self = (CLString) env.getVariable("this").getReferee();
-////        String str = self.getValue();
-////
-////        String result;
-////        if (!env.checkParamType("str", CLString.class)) {
-////            result = str.replaceFirst("\\s+$", "");
-////        } else {
-////            CLString p1 = (CLString) env.getVariable("str").getReferee();
-////            String s = p1.getValue();
-////            result = str;
-////            while (result.endsWith(s)) {
-////                result = result.replaceFirst(s + "$", "");
-////            }
-////        }
-////
-////        CLString ret = env.newString(result);
-////        env.ret(ret.wrap());
-////    }
+//    @CLBuiltinFuncAnnotation(value={"str"}, name="trimStart")
+//    public static void __trimStart__(CLRtEnvironment env) {
+//        CLString self = (CLString) env.getVariable("this").getReferee();
+//        String str = self.getValue();
 //
+//        String result;
+//        if (!env.checkParamType("str", CLString.class)) {
+//            result = str.replaceFirst("\\s+", "");
+//        } else {
+//            CLString p1 = (CLString) env.getVariable("str").getReferee();
+//            String s = p1.getValue();
+//            result = str;
+//            while (result.startsWith(s)) {
+//                result = result.replaceFirst(s, "");
+//            }
+//        }
+//
+//        CLString ret = env.newString(result);
+//        env.ret(ret.wrap());
+//    }
+//
+//    @CLBuiltinFuncAnnotation(value={"str"}, name="trimEnd")
+//    public static void __trimEnd__(CLRtEnvironment env) {
+//        CLString self = (CLString) env.getVariable("this").getReferee();
+//        String str = self.getValue();
+//
+//        String result;
+//        if (!env.checkParamType("str", CLString.class)) {
+//            result = str.replaceFirst("\\s+$", "");
+//        } else {
+//            CLString p1 = (CLString) env.getVariable("str").getReferee();
+//            String s = p1.getValue();
+//            result = str;
+//            while (result.endsWith(s)) {
+//                result = result.replaceFirst(s + "$", "");
+//            }
+//        }
+//
+//        CLString ret = env.newString(result);
+//        env.ret(ret.wrap());
+//    }
+
 //    @CLBuiltinFuncAnnotation(value={"self", "sep"}, name="split")
 //    public static void __split__(CLRtEnvironment env) {
 //        CLString self = (CLString) env.getVariable("self").getReferee();
@@ -198,23 +200,4 @@
 //        CLString ret = env.newString(str + p1.getValue());
 //        env.ret(ret.wrap());
 //    }
-//
-//    public static void run(CLRtEnvironment env) throws Exception {
-//        Class clazz = CLStdString.class;
-//        CLObject obj = new CLObject();
-//        CLRtScope scope = env.getCurrentScope();
-//
-//        for (Method method : clazz.getMethods()) {
-//            if (method.isAnnotationPresent(CLBuiltinFuncAnnotation.class)) {
-//                CLBuiltinFuncAnnotation annotation = method.getAnnotation(CLBuiltinFuncAnnotation.class);
-//                String[] params = annotation.value();
-//                String name = annotation.name();
-//
-//                CLBuiltinFunction func = new CLBuiltinFunction(method, scope, params);
-//                obj.addStringRefer(name, func.wrap());
-//            }
-//        }
-//
-//        env.addVariable("String", obj.wrap());
-//    }
-//}
+}

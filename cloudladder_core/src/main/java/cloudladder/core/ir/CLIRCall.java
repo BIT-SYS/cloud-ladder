@@ -1,6 +1,7 @@
 package cloudladder.core.ir;
 
 import cloudladder.core.error.CLRuntimeError;
+import cloudladder.core.error.CLRuntimeErrorType;
 import cloudladder.core.object.*;
 import cloudladder.core.runtime.CLRtFrame;
 import lombok.AllArgsConstructor;
@@ -37,6 +38,9 @@ public class CLIRCall extends CLIR {
         // collect params
         ArrayList<String> paramNames = ((CLFunction) function).paramsNames;
         if (((CLFunction) function).catchAllParam) {
+            if (params.size() < paramNames.size() - 1) {
+                throw new CLRuntimeError(CLRuntimeErrorType.ParamsError, "param count not correct");
+            }
             for (int i = 0; i < paramNames.size() - 1; i++) {
                 newFrame.scope.addVariable(paramNames.get(i), params.get(i));
             }
@@ -48,6 +52,9 @@ public class CLIRCall extends CLIR {
                 newFrame.scope.addVariable(paramNames.get(paramNames.size() - 1), arr);
             }
         } else {
+            if (params.size() < paramNames.size()) {
+                throw new CLRuntimeError(CLRuntimeErrorType.ParamsError, "param count not correct");
+            }
             for (int i = 0; i < paramNames.size(); i++) {
                 newFrame.scope.addVariable(paramNames.get(i), params.get(i));
             }

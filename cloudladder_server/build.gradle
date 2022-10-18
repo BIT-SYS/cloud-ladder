@@ -27,6 +27,11 @@ dependencies {
     implementation("com.google.guava:guava:31.1-jre")
     implementation project(':cloudladder_core')
     implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2'
+    implementation 'com.alibaba:druid-spring-boot-starter:1.2.13'
+    implementation 'org.flywaydb:flyway-core:9.4.0'
+    implementation 'org.postgresql:postgresql:42.5.0'
+    implementation 'com.google.code.gson:gson:2.9.1'
 }
 
 tasks.named('test') {

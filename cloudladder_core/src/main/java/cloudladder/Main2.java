@@ -32,7 +32,7 @@ public class Main2 {
 //        System.out.println(dict);
 
         String serverBase = "http://localhost:8080";
-        MethodImplementation implementation = MethodImplementationUtil.getImplementation(serverBase);
+        MethodImplementation implementation = MethodImplementationUtil.getImplementation(serverBase, null, "hello", "cloudladder");
         CLHTTPFunction function = (CLHTTPFunction) implementation.buildFunction();
         System.out.println(function);
     }

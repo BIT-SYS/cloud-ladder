@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.cloudladder.cloudladderserver.mapper.MethodImplementationMapper">
+    <select id="getMethodImplementation" resultType="io.cloudladder.cloudladderserver.model.ModelMethodImplementation">
+        select * from method_implementation where "scope"=#{scope} and "name"=#{name} and "from"=#{from}
+    </select>
+    <select id="getMethodImplementationWithoutScope" resultType="io.cloudladder.cloudladderserver.model.ModelMethodImplementation">
+        select * from method_implementation where "name"='${name}' and "from"='${from}'
+    </select>
+    <insert id="createMethodImplementation">
+        insert into method_implementation("scope", "name", "from", "type", "data") values (#{scope}, #{name}, #{from}, #{type}, #{data})
+    </insert>
+</mapper>

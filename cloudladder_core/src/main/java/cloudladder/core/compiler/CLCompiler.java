@@ -52,7 +52,29 @@ public class CLCompiler {
             compileArrowExpression((ASTArrowExpression) tree, context);
         } else if (tree instanceof ASTPipeExpression) {
             compilePipeExpression((ASTPipeExpression) tree, context);
+        } else if (tree instanceof ASTLambdaExpression) {
+            compileLambdaExpression((ASTLambdaExpression) tree, context);
         }
+    }
+
+    public void compileLambdaExpression(ASTLambdaExpression tree, CLCompileContext context) throws CLCompileError {
+        CLCompileContext functionContext = new CLCompileContext();
+        ArrayList<String> params = new ArrayList<>();
+        for (ASTToken name : tree.getArgs()) {
+            functionContext.addLocalName(name.getText());
+            params.add(name.getText());
+        }
+
+        ASTReturnStatement returnStatement = new ASTReturnStatement(tree.getExpression());
+        this.compileStatement(returnStatement, functionContext);
+
+        CLCodeObject codeObject = functionContext.getCodeObject();
+
+        CLFunctionDefinition function = new CLFunctionDefinition(codeObject, params, false);
+        int index = context.addConstant(function);
+
+        context.addIr(new CLIRLoadConst(index));
+        context.addIr(new CLIRBuildFunction());
     }
 
     public void compileArrowExpression(ASTArrowExpression tree, CLCompileContext context) throws CLCompileError {

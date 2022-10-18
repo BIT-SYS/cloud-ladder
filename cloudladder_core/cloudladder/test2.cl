@@ -1,7 +1,11 @@
-import "test3.cl";
+//using hello from "cloudladder";
 
-export f1 = function(x) {
-    return x * x;
-};
+//print(hello());
 
-export f2 = test3.deriv(f1);
+//x = [1, 3];
+//y = ["asd", "zxc", 123, 100];
+//Array.interleave(x, y) | Array.map((x): type(x)) | print;
+
+using String.toAudio from "baidu";
+let x = "1 + 1 = 2";
+print(x | String.toAudio("token", "cuid"));

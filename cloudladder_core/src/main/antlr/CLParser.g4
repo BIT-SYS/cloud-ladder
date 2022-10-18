@@ -9,6 +9,7 @@ options {
 expression
     : primaryExpression                             # expPrimaryExpression
     | Function LParen paramList? RParen compoundStatement   # expFunctionExpression
+    | lambdaExpression                              # expLambdaExpression
     | expression LBrack expression RBrack           # expArrayAccess
     | expression LParen argumentList? RParen        # expFunctionCall
     | expression Dot Identifier                     # expFieldAccess
@@ -21,6 +22,10 @@ expression
     | expression op=Or expression                   # expBinaryExpression
     | expression op=(Pipe | Arrow) expression                    # expPipeAndArrow
 //    | expression Arrow expression                   # expArrow
+    ;
+
+lambdaExpression
+    : LParen (args+=Identifier? (Comma args+=Identifier)* Comma?) RParen Colon expression
     ;
 
 argumentList
