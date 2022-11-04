@@ -34,6 +34,8 @@ dependencies {
 //    implementation 'it.sauronsoftware:jave:1.0.2'
     implementation files('libs/jave-1.0.2.jar')
     implementation group: 'com.googlecode.soundlibs', name: 'mp3spi', version: '1.9.5-2'
+    implementation 'com.jakewharton.fliptables:fliptables:1.1.0'
+
 
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'

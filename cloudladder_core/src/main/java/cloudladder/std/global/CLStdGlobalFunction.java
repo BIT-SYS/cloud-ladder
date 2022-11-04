@@ -127,6 +127,12 @@ public class CLStdGlobalFunction {
         return ma;
     }
 
+    @CLBuiltinFuncAnnotation(name = "array_map")
+    public static CLObject __array_map__(CLRtFrame frame) throws CLRuntimeError {
+        CLArrayMap am = new CLArrayMap();
+        return am;
+    }
+
     public static void injectScope(CLRtScope scope) {
         Class<CLStdGlobalFunction> c = CLStdGlobalFunction.class;
         for (Method method: c.getMethods()) {

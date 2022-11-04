@@ -4,6 +4,7 @@ import cloudladder.core.error.CLRuntimeError;
 import cloudladder.core.error.CLRuntimeErrorType;
 import cloudladder.core.runtime.CLRtFrame;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
@@ -20,7 +21,7 @@ public class CLBuiltinFunction extends CLFunction {
     public CLObject execute(CLRtFrame frame) throws CLRuntimeError {
         try {
             return (CLObject) this.method.invoke(null, frame);
-        } catch (Exception e) {
+        } catch (InvocationTargetException | IllegalAccessException e) {
             throw new CLRuntimeError(CLRuntimeErrorType.Unexpected, "method invocation error");
         }
     }

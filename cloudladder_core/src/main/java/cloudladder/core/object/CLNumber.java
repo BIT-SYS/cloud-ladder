@@ -25,6 +25,10 @@ public class CLNumber extends CLObject {
         }
     }
 
+    public int getAsInt() {
+        return (int) this.value;
+    }
+
     @Override
     public String getTypeIdentifier() {
         return "number";
@@ -41,6 +45,10 @@ public class CLNumber extends CLObject {
 
     public CLNumber(double value) {
         this.value = value;
+    }
+
+    public CLNumber() {
+        this.value = 0;
     }
 
     public static CLNumber getNumberObject(double value) {

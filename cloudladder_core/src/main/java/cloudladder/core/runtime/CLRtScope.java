@@ -4,6 +4,9 @@ import cloudladder.core.error.CLRuntimeError;
 import cloudladder.core.error.CLRuntimeErrorType;
 import cloudladder.core.object.CLObject;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 public class CLRtScope {
@@ -15,6 +18,23 @@ public class CLRtScope {
 //            throw new CLRuntimeError(CLRuntimeErrorType.VariableNotFound, "name `" + name + "` not found");
 //        }
         return this.objects.get(name);
+    }
+
+    public <T extends CLObject> T requireOwnVariableWithType(String name, Class<T> type) throws CLRuntimeError {
+        CLObject obj = this.getOwnVariable(name);
+        if (!type.isInstance(obj)) {
+            try {
+                Method method = type.getMethod("getTypeIdentifier");
+                Constructor constructor = type.getConstructor();
+                Object ins = constructor.newInstance();
+                String typeName = (String) method.invoke(ins);
+                throw new CLRuntimeError(CLRuntimeErrorType.TypeError, "expecting " + typeName + ", found `" + obj.getTypeIdentifier() + "`");
+            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+                throw new CLRuntimeError(CLRuntimeErrorType.Unexpected, "expecting in require own variable with type");
+            }
+        } else {
+            return (T) obj;
+        }
     }
 
     public boolean hasOwnVariable(String name) {

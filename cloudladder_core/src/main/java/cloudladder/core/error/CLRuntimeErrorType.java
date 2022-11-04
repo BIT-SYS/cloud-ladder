@@ -17,4 +17,5 @@ public enum CLRuntimeErrorType {
     UnsupportedAudioFile,
     IOError,
     ParamsError,
+    IndexError,
 }
